@@ -37,13 +37,13 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <div class="lg:col-span-2">
             <h2 class="text-2xl font-bold border-b border-slate-200 pb-2 mb-4">
-              O objektu
+              About the Property
             </h2>
             <p class="text-slate-600 leading-relaxed mb-8">
               {{ listingData.description }}
             </p>
 
-            <h3 class="text-xl font-bold mb-4">Sadržaji</h3>
+            <h3 class="text-xl font-bold mb-4">Amenities</h3>
             <ul class="grid grid-cols-2 gap-x-8 gap-y-2">
               <li v-for="amenity in listingData.amenities" :key="amenity" class="flex items-center">
                 <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-indigo-500 mr-3" />
@@ -55,12 +55,12 @@
           <div>
             <UCard class="bg-white shadow-lg border border-slate-200">
               <div class="text-center space-y-4">
-                <p class="text-lg text-slate-500">Cijena po noćenju</p>
+                <p class="text-lg text-slate-500">Price per night</p>
                 <p class="text-4xl font-bold text-slate-900">
                   €{{ listingData.pricePerNight }}
                 </p>
                 <UButton 
-                  label="Rezerviraj sada"
+                  label="Book now"
                   size="xl" 
                   block
                   class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
@@ -72,7 +72,7 @@
         
         <div class="mt-16">
           <h2 class="text-2xl font-bold border-b border-slate-200 pb-2 mb-6">
-            Recenzije i komentari ({{ listingData.comments.length }})
+            Reviews and Comments ({{ listingData.comments.length }})
           </h2>
           <div class="space-y-6">
             <div v-for="(comment, index) in listingData.comments" :key="index"
@@ -93,7 +93,7 @@
 
       </div>
       <div v-else>
-        <p>Učitavanje podataka o listingu...</p>
+        <p>Loading listing data...</p>
       </div>
     </UContainer>
   </div>
@@ -106,7 +106,7 @@ const id = route.params.id;
 
 const listingData = {
   id: id,
-  title: 'Hotel Ambasador',
+  title: 'Hotel Ambassador',
   location: 'Trumbićeva obala 18, 21000 Split, Croatia',
   rating: 5,
   pricePerNight: 250,
@@ -116,27 +116,26 @@ const listingData = {
     'https://picsum.photos/id/106/1280/720',
     'https://picsum.photos/id/108/1280/720',
   ],
-  description: 'Hotel Ambasador u Splitu nudi krovni bazen, spa sadržaje, saunu, fitness centar, sunčanu terasu, restoran, bar i besplatan WiFi. Gosti mogu uživati u modernom restoranu koji poslužuje mediteransku kuhinju s vegetarijanskim, veganskim, bezglutenskim i bezmliječnim opcijama.',
+  description: 'Hotel Ambassador in Split offers a rooftop pool, spa facilities, sauna, fitness center, sun terrace, restaurant, bar, and free WiFi. Guests can enjoy a modern restaurant serving Mediterranean cuisine with vegetarian, vegan, gluten-free, and dairy-free options.',
   amenities: [
-    'Krovni bazen',
-    'Spa i wellness centar',
-    'Besplatan WiFi',
-    'Restoran i bar',
-    'Fitness centar',
-    'Pogled na more',
-    'Klimatizacija',
-    'Privatna kupaonica'
+    'Rooftop pool',
+    'Spa & wellness center',
+    'Free WiFi',
+    'Restaurant & bar',
+    'Fitness center',
+    'Sea view',
+    'Air conditioning',
+    'Private bathroom'
   ],
   comments: [
-    { author: 'Ana Kovačić', rating: 5, date: '25. rujna 2025.', text: 'Apsolutno savršeno! Pogled je nevjerojatan, a osoblje izuzetno ljubazno. Bazen na krovu je highlight boravka.' },
-    { author: 'Marko Jurić', rating: 4, date: '15. rujna 2025.', text: 'Vrlo dobar hotel na odličnoj lokaciji. Soba je bila prostrana i čista. Jedina zamjerka je što je doručak mogao biti malo raznovrsniji.' },
-    { author: 'Ivana Babić', rating: 5, date: '02. rujna 2025.', text: 'Preporučujem svima! Moderno uređen, čist, s fantastičnim spa centrom. Vraćamo se sigurno.' }
+    { author: 'Ana Kovačić', rating: 5, date: 'September 25, 2025', text: 'Absolutely perfect! The view is incredible and the staff extremely friendly. The rooftop pool is the highlight of the stay.' },
+    { author: 'Marko Jurić', rating: 4, date: 'September 15, 2025', text: 'Very good hotel in an excellent location. The room was spacious and clean. Only downside was that breakfast could have been more varied.' },
+    { author: 'Ivana Babić', rating: 5, date: 'September 2, 2025', text: 'Highly recommended! Modern, clean, with a fantastic spa center. We will definitely come back.' }
   ]
 };
 
-
 useHead({
-  title: `${listingData.title} | Detalji`
+  title: `${listingData.title} | Details`
 })
 </script>
 

@@ -9,7 +9,7 @@
             <UIcon name="i-lucide-user-plus" class="w-8 h-8 text-indigo-600" />
           </div>
           <h1 class="text-2xl font-bold text-slate-900">Create an account</h1>
-          <p class="text-sm text-slate-500">Please enter your details to sign up.</p>
+          <p class="text-sm text-slate-500">Enter your details to sign up.</p>
         </div>
 
         <UForm :state="state" @submit="onSubmit" class="space-y-4">
@@ -20,8 +20,8 @@
             </UFormField>
 
             <UFormField name="surname">
-              <template #label><span class="sr-only">Surname</span></template>
-              <UInput v-model="state.surname" placeholder="Surname" size="lg" class="w-full" />
+              <template #label><span class="sr-only">Last name</span></template>
+              <UInput v-model="state.surname" placeholder="Last name" size="lg" class="w-full" />
             </UFormField>
           </div>
 
@@ -64,7 +64,7 @@
         <p class="text-sm text-center text-slate-500">
           Already have an account?
           <ULink to="/auth/signin" class="font-semibold text-indigo-600 hover:text-indigo-700">
-            Sign In
+            Sign in
           </ULink>
         </p>
       </div>

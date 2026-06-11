@@ -26,11 +26,12 @@
               {{ listing.rating }}
             </div>
           </div>
+
           <div class="flex items-center justify-between">
             <div v-if="listing.oldPrice" class="text-sm text-slate-400 line-through">
               € {{ listing.oldPrice }}
             </div>
-            <div velse></div>
+
             <div class="text-xl font-bold text-slate-900">
               € {{ listing.price }}
             </div>
@@ -41,16 +42,16 @@
       <div class="relative w-1/2 h-auto hidden sm:block">
         <img
           :src="listing.images[currentImage]"
-          alt="Listing photo"
+          alt="Listing image"
           class="w-full h-full object-cover"
         />
-        </div>
+      </div>
     </div>
   </NuxtLink>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue"
+import { ref, onUnmounted } from "vue"
 
 const props = defineProps({
   listing: {
@@ -63,9 +64,10 @@ const currentImage = ref(0)
 let interval: number | null = null;
 
 function startSlideshow() {
-  stopSlideshow(); 
+  stopSlideshow();
   interval = setInterval(() => {
-    currentImage.value = (currentImage.value + 1) % props.listing.images.length;
+    currentImage.value =
+      (currentImage.value + 1) % props.listing.images.length;
   }, 3000);
 }
 

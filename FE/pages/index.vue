@@ -10,7 +10,7 @@
             Find your next stay
           </h1>
           <p class="text-lg text-indigo-100 mt-4">
-            Search deals on hotels, homes, and much more...
+            Search deals on hotels, homes, and more...
           </p>
         </div>
       </div>
@@ -19,9 +19,7 @@
     <!-- Search bar overlapping the hero -->
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 -mt-14">
       <form @submit.prevent="handleSearch" class="max-w-5xl mx-auto">
-        <div
-          class="bg-white shadow-2xl rounded-2xl p-4 border border-slate-100"
-        >
+        <div class="bg-white shadow-2xl rounded-2xl p-4 border border-slate-100">
           <div class="grid grid-cols-1 md:grid-cols-10 gap-3 items-center">
             <div class="md:col-span-3">
               <UInput
@@ -97,21 +95,17 @@ const searchQuery = reactive({
 
 function handleSearch() {
   console.log('Searching with:', searchQuery)
-
 }
-
-
-
 
 const listings = [
   {
     id: 123,
-    title: "Prostrani stan starog kova na Maksimiru",
+    title: "Spacious Vintage Apartment in Maksimir",
     location: "Maksimir, Zagreb",
-    distance: "2.1 km od centra",
-    details: "Cijeli apartman · 1 spavaća soba · 1 kupaonica",
+    distance: "2.1 km from city center",
+    details: "Entire apartment · 1 bedroom · 1 bathroom",
     rating: 7.8,
-    ratingLabel: "Dobro",
+    ratingLabel: "Good",
     reviews: 5,
     oldPrice: 129,
     price: 119,
@@ -123,12 +117,12 @@ const listings = [
   },
   {
     id: 456,
-    title: "Moderan studio apartman u centru grada",
+    title: "Modern Studio Apartment in City Center",
     location: "Donji grad, Zagreb",
-    distance: "300 m od centra",
-    details: "Studio apartman · 1 kupaonica · Čajna kuhinja",
+    distance: "300 m from city center",
+    details: "Studio apartment · 1 bathroom · Kitchenette",
     rating: 9.2,
-    ratingLabel: "Izvanredno",
+    ratingLabel: "Exceptional",
     reviews: 88,
     oldPrice: null,
     price: 95,
@@ -140,12 +134,12 @@ const listings = [
   },
   {
     id: 789,
-    title: "Obiteljska kuća s vrtom i roštiljem",
+    title: "Family House with Garden and BBQ",
     location: "Trešnjevka, Zagreb",
-    distance: "4.5 km od centra",
-    details: "Cijela kuća · 3 spavaće sobe · 2 kupaonice",
+    distance: "4.5 km from city center",
+    details: "Entire house · 3 bedrooms · 2 bathrooms",
     rating: 8.9,
-    ratingLabel: "Sjajno",
+    ratingLabel: "Great",
     reviews: 42,
     oldPrice: 250,
     price: 220,
@@ -156,5 +150,4 @@ const listings = [
     ]
   }
 ];
-
 </script>

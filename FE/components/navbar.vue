@@ -14,7 +14,7 @@
 
       <div v-if="!authStore.user" class="flex items-center space-x-3">
         <UButton
-          label="Register"
+          label="Sign up"
           variant="soft"
           color="neutral"
           size="sm"
@@ -85,7 +85,7 @@ const dropdownItems = ref<DropdownMenuItem[][]>([
   ],
   [
     {
-      label: 'Logout',
+      label: 'Log out',
       icon: 'i-lucide-log-out',
       color: 'error',
       onSelect: async () => {
