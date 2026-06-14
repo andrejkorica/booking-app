@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-slate-100 text-slate-900">
-    <navbar/>
 
     <!-- Hero banner with gradient -->
     <div class="bg-gradient-to-br from-indigo-600 via-indigo-500 to-blue-500 pb-24 pt-12 md:pt-16">
@@ -84,6 +83,10 @@
 import { reactive } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import ListingCard from '~/components/listingCard.vue'; 
+
+definePageMeta({
+  layout: 'default',
+})
 
 const authStore = useAuthStore()
 
