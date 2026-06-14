@@ -28,4 +28,15 @@ public interface UserService {
     );
     
     List<UserEntity> getAllUsers();
+
+     UserEntity updateUserByAdmin(
+            Long userId,
+            String name,
+            String surname,
+            String email,
+            String phoneNumber,
+            String role
+    );
+
+    void deleteUserByAdmin(Long userId);
 }

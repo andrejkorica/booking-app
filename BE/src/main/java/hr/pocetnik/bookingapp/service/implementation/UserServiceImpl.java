@@ -4,6 +4,7 @@ import hr.pocetnik.bookingapp.exception.InvalidCredentialException;
 import hr.pocetnik.bookingapp.exception.InvalidEmailFormatException;
 import hr.pocetnik.bookingapp.exception.UserAlreadyExistsException;
 import hr.pocetnik.bookingapp.exception.UserNotFoundException;
+import hr.pocetnik.bookingapp.model.Role;
 import hr.pocetnik.bookingapp.model.UserEntity;
 import hr.pocetnik.bookingapp.repository.UserRepository;
 import hr.pocetnik.bookingapp.service.UserService;
@@ -101,5 +102,57 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserEntity> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public UserEntity updateUserByAdmin(
+            Long userId,
+            String name,
+            String surname,
+            String email,
+            String phoneNumber,
+            String role) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User ID: " + userId));
+
+        if (name != null) {
+            user.setName(name);
+        }
+
+        if (surname != null) {
+            user.setSurname(surname);
+        }
+
+        if (email != null) {
+            String modifiedEmail = email.toLowerCase(Locale.ROOT);
+
+            if (!EMAIL_PATTERN.matcher(modifiedEmail).matches()) {
+                throw new InvalidEmailFormatException();
+            }
+
+            if (!modifiedEmail.equals(user.getEmail()) && userRepository.existsByEmail(modifiedEmail)) {
+                throw new UserAlreadyExistsException(email);
+            }
+
+            user.setEmail(modifiedEmail);
+        }
+
+        if (phoneNumber != null) {
+            user.setPhoneNumber(phoneNumber);
+        }
+
+        if (role != null) {
+            user.setRole(Role.valueOf(role));
+        }
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    public void deleteUserByAdmin(Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User ID: " + userId));
+
+        userRepository.delete(user);
     }
 }

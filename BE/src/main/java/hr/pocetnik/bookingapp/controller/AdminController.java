@@ -2,6 +2,7 @@ package hr.pocetnik.bookingapp.controller;
 
 import hr.pocetnik.bookingapp.model.UserEntity;
 import hr.pocetnik.bookingapp.repository.UserRepository;
+import hr.pocetnik.bookingapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,10 +15,12 @@ import java.util.Map;
 public class AdminController {
 
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public AdminController(UserRepository userRepository) {
+    public AdminController(UserRepository userRepository, UserService userService) {
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     @GetMapping("/users")
@@ -26,6 +29,28 @@ public class AdminController {
                 .stream()
                 .map(this::mapUser)
                 .toList();
+    }
+
+    @PostMapping("/users/{userId}")
+    public Map<String, String> updateUser(
+            @PathVariable("userId") Long userId,
+            @RequestBody Map<String, String> userMap
+    ) {
+        UserEntity updatedUser = userService.updateUserByAdmin(
+                userId,
+                userMap.get("name"),
+                userMap.get("surname"),
+                userMap.get("email"),
+                userMap.get("phoneNumber"),
+                userMap.get("role")
+        );
+
+        return mapUser(updatedUser);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public void deleteUser(@PathVariable("userId") Long userId) {
+        userService.deleteUserByAdmin(userId);
     }
 
     private Map<String, String> mapUser(UserEntity user) {

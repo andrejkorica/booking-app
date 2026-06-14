@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import editUserModal from '~/components/admin/editUserModal.vue'
+import deleteUserModal from '~/components/admin/deleteUserModal.vue'
+
 definePageMeta({
   layout: 'admin',
   middleware: 'admin-guard'
@@ -18,6 +21,11 @@ const toast = useToast()
 
 const users = ref<User[]>([])
 const isLoading = ref(false)
+
+const selectedUser = ref<User | null>(null)
+
+const editModalOpen = ref(false)
+const deleteModalOpen = ref(false)
 
 async function fetchUsers() {
   isLoading.value = true
@@ -39,29 +47,27 @@ async function fetchUsers() {
   }
 }
 
-async function deleteUser(userId: number) {
-  try {
-    await $fetch(`${config.public.apiBase}/admin/users/${userId}`, {
-      method: 'DELETE',
-      credentials: 'include'
-    })
+function openEditModal(user: User) {
+  selectedUser.value = user
+  editModalOpen.value = true
+}
 
-    users.value = users.value.filter(user => user.id !== userId)
+function openDeleteModal(user: User) {
+  selectedUser.value = user
+  deleteModalOpen.value = true
+}
 
-    toast.add({
-      title: 'Deleted',
-      description: 'User deleted successfully.',
-      color: 'success'
-    })
-  } catch (error) {
-    console.error(error)
+function handleUserUpdated(updatedUser: User) {
+  users.value = users.value.map(user =>
+    user.id === updatedUser.id ? updatedUser : user
+  )
 
-    toast.add({
-      title: 'Error',
-      description: 'Failed to delete user.',
-      color: 'error'
-    })
-  }
+  selectedUser.value = null
+}
+
+function handleUserDeleted(userId: number) {
+  users.value = users.value.filter(user => user.id !== userId)
+  selectedUser.value = null
 }
 
 onMounted(fetchUsers)
@@ -123,18 +129,30 @@ onMounted(fetchUsers)
               icon="i-lucide-pencil"
               variant="soft"
               color="neutral"
-              :to="`/admin/users/${user.id}/edit`"
+              @click="openEditModal(user)"
             />
 
             <UButton
               icon="i-lucide-trash-2"
               variant="soft"
               color="error"
-              @click="deleteUser(user.id)"
+              @click="openDeleteModal(user)"
             />
           </div>
         </div>
       </div>
     </UCard>
+
+    <editUserModal
+      v-model:open="editModalOpen"
+      :user="selectedUser"
+      @updated="handleUserUpdated"
+    />
+
+    <deleteUserModal
+      v-model:open="deleteModalOpen"
+      :user="selectedUser"
+      @deleted="handleUserDeleted"
+    />
   </div>
 </template>
