@@ -13,4 +13,6 @@ public interface ListingRepository extends JpaRepository<ListingEntity, Long> {
     List<ListingEntity> findByStatus(ListingStatus status);
 
     List<ListingEntity> findBySellerAndStatus(UserEntity seller, ListingStatus status);
+
+    List<ListingEntity> findAllByOrderByCreatedAtDesc();
 }

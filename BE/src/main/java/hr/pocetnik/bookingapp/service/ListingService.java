@@ -23,4 +23,6 @@ public interface ListingService {
     ListingResponse getListingById(
             Long id
     );
+
+    List<ListingResponse> getAllListings();
 }

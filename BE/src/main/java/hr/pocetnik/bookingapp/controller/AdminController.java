@@ -1,9 +1,11 @@
 package hr.pocetnik.bookingapp.controller;
 
+import hr.pocetnik.bookingapp.dto.listing.ListingResponse;
 import hr.pocetnik.bookingapp.model.SellerDataEntity;
 import hr.pocetnik.bookingapp.model.SellerRequestEntity;
 import hr.pocetnik.bookingapp.model.UserEntity;
 import hr.pocetnik.bookingapp.repository.UserRepository;
+import hr.pocetnik.bookingapp.service.ListingService;
 import hr.pocetnik.bookingapp.service.SellerRequestService;
 import hr.pocetnik.bookingapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +22,17 @@ public class AdminController {
     private final UserRepository userRepository;
     private final UserService userService;
     private final SellerRequestService sellerRequestService;
-
+    private final ListingService listingService;
     @Autowired
     public AdminController(
             UserRepository userRepository,
             UserService userService,
-            SellerRequestService sellerRequestService
-    ) {
+            SellerRequestService sellerRequestService,
+            ListingService listingService) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.sellerRequestService = sellerRequestService;
+        this.listingService = listingService;
     }
 
     @GetMapping("/users")
@@ -43,16 +46,14 @@ public class AdminController {
     @PostMapping("/users/{userId}")
     public Map<String, String> updateUser(
             @PathVariable("userId") Long userId,
-            @RequestBody Map<String, String> userMap
-    ) {
+            @RequestBody Map<String, String> userMap) {
         UserEntity updatedUser = userService.updateUserByAdmin(
                 userId,
                 userMap.get("name"),
                 userMap.get("surname"),
                 userMap.get("email"),
                 userMap.get("phoneNumber"),
-                userMap.get("role")
-        );
+                userMap.get("role"));
 
         return mapUser(updatedUser);
     }
@@ -72,16 +73,19 @@ public class AdminController {
 
     @PostMapping("/seller-requests/{requestId}/approve")
     public Map<String, String> approveSellerRequest(
-            @PathVariable("requestId") Long requestId
-    ) {
+            @PathVariable("requestId") Long requestId) {
         return mapSellerRequest(sellerRequestService.approveSellerRequest(requestId));
     }
 
     @PostMapping("/seller-requests/{requestId}/reject")
     public Map<String, String> rejectSellerRequest(
-            @PathVariable("requestId") Long requestId
-    ) {
+            @PathVariable("requestId") Long requestId) {
         return mapSellerRequest(sellerRequestService.rejectSellerRequest(requestId));
+    }
+
+    @GetMapping("/listings")
+    public List<ListingResponse> getAllListings() {
+        return listingService.getAllListings();
     }
 
     private Map<String, String> mapUser(UserEntity user) {
@@ -91,27 +95,25 @@ public class AdminController {
                 "surname", user.getSurname(),
                 "email", user.getEmail(),
                 "phoneNumber", user.getPhoneNumber(),
-                "role", user.getRole().name()
-        );
+                "role", user.getRole().name());
     }
 
     private Map<String, String> mapSellerRequest(SellerRequestEntity request) {
-    SellerDataEntity sellerData = request.getUser().getSellerData();
+        SellerDataEntity sellerData = request.getUser().getSellerData();
 
-    return Map.ofEntries(
-            Map.entry("id", request.getId().toString()),
-            Map.entry("requestText", request.getRequestText()),
-            Map.entry("status", request.getStatus().name()),
-            Map.entry("createdAt", request.getCreatedAt().toString()),
+        return Map.ofEntries(
+                Map.entry("id", request.getId().toString()),
+                Map.entry("requestText", request.getRequestText()),
+                Map.entry("status", request.getStatus().name()),
+                Map.entry("createdAt", request.getCreatedAt().toString()),
 
-            Map.entry("userName", request.getUser().getName()),
-            Map.entry("userSurname", request.getUser().getSurname()),
-            Map.entry("userEmail", request.getUser().getEmail()),
+                Map.entry("userName", request.getUser().getName()),
+                Map.entry("userSurname", request.getUser().getSurname()),
+                Map.entry("userEmail", request.getUser().getEmail()),
 
-            Map.entry("businessName", sellerData.getBusinessName()),
-            Map.entry("oib", sellerData.getOib()),
-            Map.entry("iban", sellerData.getIban()),
-            Map.entry("billingAddress", sellerData.getBillingAddress())
-    );
-}
+                Map.entry("businessName", sellerData.getBusinessName()),
+                Map.entry("oib", sellerData.getOib()),
+                Map.entry("iban", sellerData.getIban()),
+                Map.entry("billingAddress", sellerData.getBillingAddress()));
+    }
 }

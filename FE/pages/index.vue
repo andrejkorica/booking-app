@@ -1,13 +1,12 @@
 <template>
   <div class="min-h-screen bg-slate-100 text-slate-900">
-
-    <!-- Hero banner with gradient -->
     <div class="bg-gradient-to-br from-indigo-600 via-indigo-500 to-blue-500 pb-24 pt-12 md:pt-16">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="max-w-4xl mx-auto text-center">
           <h1 class="text-4xl md:text-5xl font-extrabold text-white">
             Find your next stay
           </h1>
+
           <p class="text-lg text-indigo-100 mt-4">
             Search deals on hotels, homes, and more...
           </p>
@@ -15,7 +14,6 @@
       </div>
     </div>
 
-    <!-- Search bar overlapping the hero -->
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 -mt-14">
       <form @submit.prevent="handleSearch" class="max-w-5xl mx-auto">
         <div class="bg-white shadow-2xl rounded-2xl p-4 border border-slate-100">
@@ -39,7 +37,7 @@
                 :ui="{ leadingIcon: 'text-indigo-400' }"
               />
             </div>
-            
+
             <div class="md:col-span-3">
               <UInput
                 v-model="searchQuery.occupancy"
@@ -64,11 +62,18 @@
       </form>
     </div>
 
-    <!-- Listings -->
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-10">
       <section class="pb-12">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <ListingCard 
+        <div v-if="isLoading" class="py-12 text-center text-slate-500">
+          Loading listings...
+        </div>
+
+        <div v-else-if="listings.length === 0" class="py-12 text-center text-slate-500">
+          No listings found.
+        </div>
+
+        <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <ListingCard
             v-for="listing in listings"
             :key="listing.id"
             :listing="listing"
@@ -80,15 +85,27 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
-import { useAuthStore } from '~/stores/auth'
-import ListingCard from '~/components/listingCard.vue'; 
+import ListingCard from '~/components/listingCard.vue'
 
 definePageMeta({
-  layout: 'default',
+  layout: 'default'
 })
 
-const authStore = useAuthStore()
+type Listing = {
+  id: number
+  title: string
+  location: string
+  description: string
+  pricePerNight: number
+  rating: number
+  images: string[]
+  amenities: string[]
+  status: string
+  sellerEmail: string
+  createdAt: string
+}
+
+const config = useRuntimeConfig()
 
 const searchQuery = reactive({
   destination: '',
@@ -96,61 +113,26 @@ const searchQuery = reactive({
   occupancy: ''
 })
 
+const listings = ref<Listing[]>([])
+const isLoading = ref(false)
+
+async function fetchListings() {
+  isLoading.value = true
+
+  try {
+    listings.value = await $fetch<Listing[]>(
+      `${config.public.apiBase}/seller/listings`
+    )
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
 function handleSearch() {
   console.log('Searching with:', searchQuery)
 }
 
-const listings = [
-  {
-    id: 123,
-    title: "Spacious Vintage Apartment in Maksimir",
-    location: "Maksimir, Zagreb",
-    distance: "2.1 km from city center",
-    details: "Entire apartment · 1 bedroom · 1 bathroom",
-    rating: 7.8,
-    ratingLabel: "Good",
-    reviews: 5,
-    oldPrice: 129,
-    price: 119,
-    images: [
-      "https://picsum.photos/id/10/800/600",
-      "https://picsum.photos/id/11/800/600",
-      "https://picsum.photos/id/12/800/600",
-    ]
-  },
-  {
-    id: 456,
-    title: "Modern Studio Apartment in City Center",
-    location: "Donji grad, Zagreb",
-    distance: "300 m from city center",
-    details: "Studio apartment · 1 bathroom · Kitchenette",
-    rating: 9.2,
-    ratingLabel: "Exceptional",
-    reviews: 88,
-    oldPrice: null,
-    price: 95,
-    images: [
-      "https://picsum.photos/id/20/800/600",
-      "https://picsum.photos/id/21/800/600",
-      "https://picsum.photos/id/22/800/600",
-    ]
-  },
-  {
-    id: 789,
-    title: "Family House with Garden and BBQ",
-    location: "Trešnjevka, Zagreb",
-    distance: "4.5 km from city center",
-    details: "Entire house · 3 bedrooms · 2 bathrooms",
-    rating: 8.9,
-    ratingLabel: "Great",
-    reviews: 42,
-    oldPrice: 250,
-    price: 220,
-    images: [
-      "https://picsum.photos/id/30/800/600",
-      "https://picsum.photos/id/31/800/600",
-      "https://picsum.photos/id/32/800/600",
-    ]
-  }
-];
+onMounted(fetchListings)
 </script>
