@@ -1,77 +1,98 @@
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth'
+import { useAuthStore } from "~/stores/auth";
+import defaultAvatar from "../../assets/images/default-avatar.png";
 
-const config = useRuntimeConfig()
-const toast = useToast()
-const authStore = useAuthStore()
+const config = useRuntimeConfig();
+const toast = useToast();
+const authStore = useAuthStore();
 
-const isSavingProfile = ref(false)
+const isSavingProfile = ref(false);
 
 const form = reactive({
-  name: '',
-  surname: '',
-  phoneNumber: '',
-  email: ''
-})
+  name: "",
+  surname: "",
+  phoneNumber: "",
+  email: "",
+});
+
+const selectedImage = ref<string>(defaultAvatar);
+const selectedFile = ref<File | null>(null);
+const fileInput = ref<HTMLInputElement | null>(null);
+
+function openFilePicker() {
+  fileInput.value?.click();
+}
+
+function onFileSelected(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+
+  if (!file) return;
+
+  selectedFile.value = file;
+  selectedImage.value = URL.createObjectURL(file);
+
+  console.log("Selected file:", file);
+}
 
 watch(
   () => authStore.user,
   (user) => {
-    if (!user) return
+    if (!user) return;
 
-    form.name = user.name
-    form.surname = user.surname
-    form.phoneNumber = user.phoneNumber
-    form.email = user.email
+    form.name = user.name;
+    form.surname = user.surname;
+    form.phoneNumber = user.phoneNumber;
+    form.email = user.email;
   },
-  { immediate: true }
-)
+  { immediate: true },
+);
 
 async function saveProfile() {
-  if (!authStore.user) return
+  if (!authStore.user) return;
 
-  isSavingProfile.value = true
+  isSavingProfile.value = true;
 
   try {
     const updatedUser = await $fetch<{
-      email: string
-      name: string
-      surname: string
-      phoneNumber: string
-      role: string
+      email: string;
+      name: string;
+      surname: string;
+      phoneNumber: string;
+      role: string;
     }>(`${config.public.apiBase}/users/update`, {
-      method: 'POST',
-      credentials: 'include',
+      method: "POST",
+      credentials: "include",
       body: {
         name: form.name,
         surname: form.surname,
         phoneNumber: form.phoneNumber,
-        email: form.email
-      }
-    })
+        email: form.email,
+      },
+    });
 
     authStore.user = {
       ...authStore.user,
-      ...updatedUser
-    }
+      ...updatedUser,
+    };
 
-    localStorage.setItem('auth_user', JSON.stringify(authStore.user))
+    localStorage.setItem("auth_user", JSON.stringify(authStore.user));
 
     toast.add({
-      title: 'Success',
-      description: 'Profile updated successfully!',
-      color: 'success'
-    })
+      title: "Success",
+      description: "Profile updated successfully!",
+      color: "success",
+    });
   } catch (error) {
-    console.error('Failed to update profile:', error)
+    console.error("Failed to update profile:", error);
 
     toast.add({
-      title: 'Error',
-      description: 'Failed to update profile.',
-      color: 'error'
-    })
+      title: "Error",
+      description: "Failed to update profile.",
+      color: "error",
+    });
   } finally {
-    isSavingProfile.value = false
+    isSavingProfile.value = false;
   }
 }
 </script>
@@ -79,9 +100,7 @@ async function saveProfile() {
 <template>
   <div class="space-y-6">
     <div class="text-center">
-      <h2 class="text-xl font-semibold">
-        Profile Settings
-      </h2>
+      <h2 class="text-xl font-semibold">Profile Settings</h2>
 
       <p class="mt-1 text-sm text-slate-500">
         Manage your account information.
@@ -89,15 +108,32 @@ async function saveProfile() {
     </div>
 
     <div class="flex flex-col items-center gap-4 text-center">
-      <img
-        src="https://i.pravatar.cc/150"
-        class="h-20 w-20 rounded-full border object-cover"
+      <div class="group relative cursor-pointer" @click="openFilePicker">
+        <img
+          :src="selectedImage"
+          class="h-24 w-24 rounded-full border object-cover transition group-hover:brightness-75"
+        />
+
+        <div
+          class="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition group-hover:opacity-100"
+        >
+          <UIcon name="i-heroicons-camera" class="h-6 w-6 text-white" />
+        </div>
+      </div>
+
+      <input
+        ref="fileInput"
+        type="file"
+        accept="image/*"
+        class="hidden"
+        @change="onFileSelected"
       />
+
 
       <div class="text-sm text-slate-600">
         <p>
           <span class="font-medium">Role:</span>
-          {{ authStore.user?.role || 'USER' }}
+          {{ authStore.user?.role || "USER" }}
         </p>
 
         <p>
@@ -110,24 +146,16 @@ async function saveProfile() {
     <div class="mx-auto max-w-lg">
       <UCard>
         <template #header>
-          <h3 class="font-semibold">
-            Personal Information
-          </h3>
+          <h3 class="font-semibold">Personal Information</h3>
         </template>
 
         <div class="space-y-4">
           <UFormField label="First Name">
-            <UInput
-              v-model="form.name"
-              placeholder="Enter your first name"
-            />
+            <UInput v-model="form.name" placeholder="Enter your first name" />
           </UFormField>
 
           <UFormField label="Last Name">
-            <UInput
-              v-model="form.surname"
-              placeholder="Enter your last name"
-            />
+            <UInput v-model="form.surname" placeholder="Enter your last name" />
           </UFormField>
 
           <UFormField label="Phone Number">
@@ -138,10 +166,7 @@ async function saveProfile() {
           </UFormField>
 
           <UFormField label="Email Address">
-            <UInput
-              v-model="form.email"
-              placeholder="Enter your email"
-            />
+            <UInput v-model="form.email" placeholder="Enter your email" />
           </UFormField>
 
           <div class="pt-2">

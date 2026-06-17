@@ -25,6 +25,9 @@ const items: TabsItem[] = [
     :ui="{
       content: 'max-w-3xl w-full max-h-[90vh] p-4 overflow-hidden'
     }"
+    title="Account settings"
+    description="Manage your profile, seller information, and booking history."
+
   >
     <template #content>
       <div class="flex max-h-[calc(90vh-2rem)] flex-col space-y-4">

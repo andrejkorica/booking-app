@@ -12,6 +12,7 @@
         </NuxtLink>
       </div>
 
+      <ClientOnly>
       <div v-if="!authStore.user" class="flex items-center space-x-3">
         <UButton
           label="Sign up"
@@ -47,7 +48,9 @@
           />
         </UDropdownMenu>
       </div>
+      </ClientOnly>
     </nav>
+    
 
     <OptionsModal
       v-model:open="optionsModalOpen"
