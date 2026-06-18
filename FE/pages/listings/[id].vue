@@ -1,34 +1,51 @@
 <template>
   <div class="bg-white text-slate-900 min-h-screen">
-    
     <UContainer class="py-12">
       <div v-if="isLoading">
         <p>Loading listing data...</p>
       </div>
 
-      
       <div v-else-if="listingData">
-        
         <header class="mb-8">
-          <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-2">
+          <h1
+            class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-2"
+          >
             {{ listingData.title }}
           </h1>
 
-          <div class="flex items-center space-x-4 text-slate-500">
-            <div class="flex items-center">
-              <UIcon
-                v-for="i in 5"
-                :key="i"
-                name="i-heroicons-star-solid"
-                :class="i <= listingData.rating ? 'text-yellow-400' : 'text-slate-200'"
-                class="w-5 h-5"
-              />
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex min-w-0 items-center space-x-4 text-slate-500">
+              <div class="flex shrink-0 items-center">
+                <UIcon
+                  v-for="i in 5"
+                  :key="i"
+                  name="i-heroicons-star-solid"
+                  :class="
+                    i <= listingData.rating
+                      ? 'text-yellow-400'
+                      : 'text-slate-200'
+                  "
+                  class="w-5 h-5"
+                />
+              </div>
+
+              <div class="flex min-w-0 items-center">
+                <UIcon
+                  name="i-heroicons-map-pin"
+                  class="w-5 h-5 mr-2 shrink-0"
+                />
+                <span class="truncate">{{ listingData.location }}</span>
+              </div>
             </div>
 
-            <div class="flex items-center">
-              <UIcon name="i-heroicons-map-pin" class="w-5 h-5 mr-2" />
-              <span>{{ listingData.location }}</span>
-            </div>
+            <UButton
+              label="Back"
+              icon="i-lucide-arrow-left"
+              variant="soft"
+              color="neutral"
+              class="shrink-0"
+              @click="router.back()"
+            />
           </div>
         </header>
 
@@ -48,7 +65,7 @@
               :src="item"
               class="w-full h-96 object-cover"
               draggable="false"
-            >
+            />
           </UCarousel>
 
           <div
@@ -69,9 +86,7 @@
               {{ listingData.description }}
             </p>
 
-            <h3 class="text-xl font-bold mb-4">
-              Amenities
-            </h3>
+            <h3 class="text-xl font-bold mb-4">Amenities</h3>
 
             <ul
               v-if="listingData.amenities?.length"
@@ -90,17 +105,13 @@
               </li>
             </ul>
 
-            <p v-else class="text-slate-500">
-              No amenities listed.
-            </p>
+            <p v-else class="text-slate-500">No amenities listed.</p>
           </div>
 
           <div>
             <UCard class="bg-white shadow-lg border border-slate-200">
               <div class="text-center space-y-4">
-                <p class="text-lg text-slate-500">
-                  Price per night
-                </p>
+                <p class="text-lg text-slate-500">Price per night</p>
 
                 <p class="text-4xl font-bold text-slate-900">
                   €{{ listingData.pricePerNight }}
@@ -111,14 +122,15 @@
                   size="xl"
                   block
                   class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
-                  :disabled="!authStore.user"
+                  :disabled="!authStore.user || isOwner"
                 />
 
-                <p
-                  v-if="!authStore.user"
-                  class="text-sm text-slate-500"
-                >
+                <p v-if="!authStore.user" class="text-sm text-slate-500">
                   You need to log in before booking this listing.
+                </p>
+
+                <p v-else-if="isOwner" class="text-sm text-slate-500">
+                  You cannot book your own listing.
                 </p>
               </div>
             </UCard>
@@ -130,7 +142,9 @@
             Reviews and Comments (0)
           </h2>
 
-          <div class="p-5 border border-slate-200 rounded-xl bg-slate-50 text-slate-500">
+          <div
+            class="p-5 border border-slate-200 rounded-xl bg-slate-50 text-slate-500"
+          >
             No reviews yet.
           </div>
         </div>
@@ -144,49 +158,58 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth'
+import { useAuthStore } from "~/stores/auth";
 
 type Listing = {
-  id: number
-  title: string
-  location: string
-  description: string
-  pricePerNight: number
-  rating: number
-  images: string[]
-  amenities: string[]
-  status: string
-  sellerEmail: string
-  createdAt: string
-}
+  id: number;
+  title: string;
+  location: string;
+  description: string;
+  pricePerNight: number;
+  rating: number;
+  images: string[];
+  amenities: string[];
+  status: string;
+  sellerEmail: string;
+  createdAt: string;
+};
 
-const route = useRoute()
-const config = useRuntimeConfig()
-const authStore = useAuthStore()
+const route = useRoute();
+const router = useRouter();
+const config = useRuntimeConfig();
+const authStore = useAuthStore();
 
-const listingData = ref<Listing | null>(null)
-const isLoading = ref(false)
+const listingData = ref<Listing | null>(null);
+const isLoading = ref(false);
+
+const isOwner = computed(() => {
+  if (!authStore.user || !listingData.value) {
+    return false;
+  }
+
+  return authStore.user.email === listingData.value.sellerEmail;
+});
 
 async function fetchListing() {
-  isLoading.value = true
+  isLoading.value = true;
 
   try {
     listingData.value = await $fetch<Listing>(
-      `${config.public.apiBase}/listings/${route.params.id}`
-    )
+      `${config.public.apiBase}/listings/${route.params.id}`,
+    );
   } catch (error) {
-    console.error(error)
-    listingData.value = null
+    console.error(error);
+    listingData.value = null;
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
-onMounted(fetchListing)
+onMounted(fetchListing);
 
 useHead(() => ({
   title: listingData.value
     ? `${listingData.value.title} | Details`
-    : 'Listing Details'
-}))
+    : "Listing Details",
+}));
 </script>

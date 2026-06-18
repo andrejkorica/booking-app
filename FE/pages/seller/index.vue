@@ -4,10 +4,15 @@ import { useAuthStore } from '~/stores/auth'
 definePageMeta({
   layout: 'default',
   middleware: 'seller-guard'
-  
 })
 
 const authStore = useAuthStore()
+
+const actionCardUi = {
+  root: 'flex h-full flex-col',
+  body: 'flex-1',
+  footer: 'shrink-0'
+}
 </script>
 
 <template>
@@ -27,67 +32,41 @@ const authStore = useAuthStore()
         <UCard>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-slate-500">
-                Total Earnings
-              </p>
-
-              <p class="mt-2 text-3xl font-bold text-slate-900">
-                €0.00
-              </p>
+              <p class="text-sm text-slate-500">Total Earnings</p>
+              <p class="mt-2 text-3xl font-bold text-slate-900">€0.00</p>
             </div>
 
-            <UIcon
-              name="i-lucide-euro"
-              class="size-8 text-slate-400"
-            />
+            <UIcon name="i-lucide-euro" class="size-8 text-slate-400" />
           </div>
         </UCard>
 
         <UCard>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-slate-500">
-                Total Listings
-              </p>
-
-              <p class="mt-2 text-3xl font-bold text-slate-900">
-                0
-              </p>
+              <p class="text-sm text-slate-500">Total Listings</p>
+              <p class="mt-2 text-3xl font-bold text-slate-900">0</p>
             </div>
 
-            <UIcon
-              name="i-lucide-building-2"
-              class="size-8 text-slate-400"
-            />
+            <UIcon name="i-lucide-building-2" class="size-8 text-slate-400" />
           </div>
         </UCard>
 
         <UCard>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-slate-500">
-                Active Bookings
-              </p>
-
-              <p class="mt-2 text-3xl font-bold text-slate-900">
-                0
-              </p>
+              <p class="text-sm text-slate-500">Active Bookings</p>
+              <p class="mt-2 text-3xl font-bold text-slate-900">0</p>
             </div>
 
-            <UIcon
-              name="i-lucide-calendar-check"
-              class="size-8 text-slate-400"
-            />
+            <UIcon name="i-lucide-calendar-check" class="size-8 text-slate-400" />
           </div>
         </UCard>
       </div>
 
-      <div class="grid gap-6 md:grid-cols-2">
-        <UCard>
+      <div class="grid items-stretch gap-6 md:grid-cols-3">
+        <UCard :ui="actionCardUi">
           <template #header>
-            <h2 class="font-semibold">
-              Create Listing
-            </h2>
+            <h2 class="font-semibold">Create Listing</h2>
           </template>
 
           <p class="text-sm text-slate-600">
@@ -105,20 +84,38 @@ const authStore = useAuthStore()
           </template>
         </UCard>
 
-        <UCard>
+        <UCard :ui="actionCardUi">
           <template #header>
-            <h2 class="font-semibold">
-              My Listing History
-            </h2>
+            <h2 class="font-semibold">Manage Listings</h2>
           </template>
 
           <p class="text-sm text-slate-600">
-            View and manage listings you have already created.
+            Edit listing details, update pricing, manage availability, and temporarily disable bookings during renovations or maintenance.
           </p>
 
           <template #footer>
             <UButton
-              label="View Listings"
+              label="Manage Listings"
+              icon="i-lucide-settings"
+              variant="soft"
+              color="neutral"
+              to="/seller/listings/manage"
+            />
+          </template>
+        </UCard>
+
+        <UCard :ui="actionCardUi">
+          <template #header>
+            <h2 class="font-semibold">My Listing History</h2>
+          </template>
+
+          <p class="text-sm text-slate-600">
+            View listings you have already created and check their approval status.
+          </p>
+
+          <template #footer>
+            <UButton
+              label="View History"
               icon="i-lucide-list"
               variant="soft"
               color="neutral"

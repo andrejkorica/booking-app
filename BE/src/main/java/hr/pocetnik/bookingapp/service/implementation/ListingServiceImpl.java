@@ -107,6 +107,20 @@ public class ListingServiceImpl implements ListingService {
                 return mapToResponse(listingRepository.save(listing));
         }
 
+        @Override
+        public void deleteListing(
+                        Long id,
+                        String sellerEmail) {
+                ListingEntity listing = listingRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Listing not found"));
+
+                if (!listing.getSeller().getEmail().equals(sellerEmail)) {
+                        throw new RuntimeException("You do not own this listing");
+                }
+
+                listingRepository.delete(listing);
+        }
+
         private ListingResponse mapToResponse(
                         ListingEntity listing) {
                 ListingResponse response = new ListingResponse();

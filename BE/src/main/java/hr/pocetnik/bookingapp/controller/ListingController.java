@@ -15,33 +15,28 @@ public class ListingController {
     private final ListingService listingService;
 
     public ListingController(
-            ListingService listingService
-    ) {
+            ListingService listingService) {
         this.listingService = listingService;
     }
 
     @PostMapping("/seller/listings")
     public ListingResponse createListing(
             @RequestBody ListingRequest request,
-            Authentication authentication
-    ) {
+            Authentication authentication) {
         String email = authentication.getName();
 
         return listingService.createListing(
                 email,
-                request
-        );
+                request);
     }
 
     @GetMapping("/seller/listings")
     public List<ListingResponse> getMyListings(
-            Authentication authentication
-    ) {
+            Authentication authentication) {
         String email = authentication.getName();
 
         return listingService.getMyListings(
-                email
-        );
+                email);
     }
 
     @GetMapping("/listings")
@@ -51,8 +46,16 @@ public class ListingController {
 
     @GetMapping("/listings/{id}")
     public ListingResponse getListingById(
-            @PathVariable("id") Long id
-    ) {
+            @PathVariable("id") Long id) {
         return listingService.getListingById(id);
+    }
+
+    @DeleteMapping("/seller/listings/{id}")
+    public void deleteListing(
+            @PathVariable("id") Long id,
+            Authentication authentication) {
+        String email = authentication.getName();
+
+        listingService.deleteListing(id, email);
     }
 }

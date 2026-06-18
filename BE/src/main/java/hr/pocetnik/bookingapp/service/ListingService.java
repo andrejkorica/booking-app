@@ -24,4 +24,6 @@ public interface ListingService {
         ListingResponse approveListing(Long listingId);
 
         ListingResponse rejectListing(Long listingId);
+
+        void deleteListing(Long id, String sellerEmail);
 }
