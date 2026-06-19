@@ -1,8 +1,7 @@
 <script setup lang="ts">
-type UnitOption = {
+type UnitType = {
   label: string
   value: string
-  multiplier: number
 }
 
 const selectedUnit = defineModel<string>({
@@ -10,8 +9,7 @@ const selectedUnit = defineModel<string>({
 })
 
 defineProps<{
-  unitOptions: UnitOption[]
-  basePricePerNight: number
+  unitOptions: UnitType[]
 }>()
 </script>
 
@@ -43,7 +41,7 @@ defineProps<{
             </p>
 
             <p class="mt-1 text-sm text-slate-500">
-              €{{ Math.round(basePricePerNight * unit.multiplier) }} / night before date changes
+              Select this unit type for your stay.
             </p>
           </div>
 

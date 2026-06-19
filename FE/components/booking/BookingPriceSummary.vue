@@ -25,7 +25,7 @@ const emit = defineEmits<{
 
       <div class="space-y-4 text-sm text-slate-600">
         <div class="flex justify-between">
-          <span>Selected room</span>
+          <span>Selected unit</span>
           <span class="font-medium text-slate-900">
             {{ selectedUnitLabel }}
           </span>
@@ -52,15 +52,8 @@ const emit = defineEmits<{
           </span>
         </div>
 
-        <div class="flex justify-between">
-          <span>Nightly price</span>
-          <span class="font-medium text-slate-900">
-            €{{ finalPricePerNight }}
-          </span>
-        </div>
-
         <div class="rounded-xl bg-slate-50 p-3 text-xs text-slate-500">
-          Prices may vary depending on season, demand, and selected room type.
+          Price will be calculated from the selected unit and dates once unit pricing is connected.
         </div>
 
         <div class="border-t border-slate-200 pt-4">
@@ -70,13 +63,9 @@ const emit = defineEmits<{
             </span>
 
             <span class="text-3xl font-bold text-slate-900">
-              €{{ totalPrice }}
+              To be calculated
             </span>
           </div>
-
-          <p class="mt-1 text-xs text-slate-500">
-            Includes {{ nights }} night<span v-if="nights !== 1">s</span>.
-          </p>
         </div>
 
         <UButton

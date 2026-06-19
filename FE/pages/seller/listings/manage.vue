@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import manageListingCard from '~/components/manageListingCard.vue' 
+import manageListingCard from '../../../components/listings/manageListingCard.vue'  
 
 definePageMeta({
   layout: 'default',

@@ -5,16 +5,11 @@ import BookingSteps from '~/components/booking/BookingSteps.vue'
 import BookingUnitSelector from '~/components/booking/BookingUnitSelector.vue'
 import BookingDateSelector from '~/components/booking/BookingDateSelector.vue'
 import BookingPriceSummary from '~/components/booking/BookingPriceSummary.vue'
+import { unitTypes } from '~/utils/unitTypes'
 
 definePageMeta({
   layout: 'default',
 })
-
-type UnitOption = {
-  label: string
-  value: string
-  multiplier: number
-}
 
 type DateRangeValue = {
   start: DateValue | undefined
@@ -24,22 +19,8 @@ type DateRangeValue = {
 const route = useRoute()
 
 const step = ref(1)
-const basePricePerNight = 100
 
-const unitOptions: UnitOption[] = [
-  { label: 'Single room', value: 'single_room', multiplier: 0.75 },
-  { label: 'Double room', value: 'double_room', multiplier: 1 },
-  { label: 'Twin room', value: 'twin_room', multiplier: 1 },
-  { label: 'Queen room', value: 'queen_room', multiplier: 1.15 },
-  { label: 'King room', value: 'king_room', multiplier: 1.25 },
-  { label: 'Studio apartment', value: 'studio_apartment', multiplier: 1.1 },
-  { label: 'One-bedroom apartment', value: 'one_bedroom_apartment', multiplier: 1.25 },
-  { label: 'Two-bedroom apartment', value: 'two_bedroom_apartment', multiplier: 1.6 },
-  { label: 'Three-bedroom apartment', value: 'three_bedroom_apartment', multiplier: 2 },
-  { label: 'Family apartment', value: 'family_apartment', multiplier: 1.8 },
-  { label: 'Penthouse apartment', value: 'penthouse_apartment', multiplier: 2.5 }
-]
-
+const unitOptions = unitTypes
 const selectedUnit = ref(unitOptions[1]?.value ?? 'double_room')
 
 const dateRange = shallowRef<DateRangeValue>({
@@ -63,29 +44,12 @@ const nights = computed(() => {
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
 })
 
-const unitPricePerNight = computed(() => {
-  return Math.round(basePricePerNight * selectedUnitData.value.multiplier)
-})
-
-const dateMultiplier = computed(() => {
-  if (!dateRange.value.start) {
-    return 1
-  }
-
-  const month = dateRange.value.start.month
-
-  if ([6, 7, 8].includes(month)) return 1.35
-  if ([12, 1].includes(month)) return 1.2
-
-  return 1
-})
-
 const finalPricePerNight = computed(() => {
-  return Math.round(unitPricePerNight.value * dateMultiplier.value)
+  return 0
 })
 
 const totalPrice = computed(() => {
-  return finalPricePerNight.value * nights.value
+  return 0
 })
 
 const canContinue = computed(() => {
@@ -135,7 +99,6 @@ function goNext() {
           <BookingUnitSelector
             v-model="selectedUnit"
             :unit-options="unitOptions"
-            :base-price-per-night="basePricePerNight"
           />
 
           <BookingDateSelector v-model="dateRange" />

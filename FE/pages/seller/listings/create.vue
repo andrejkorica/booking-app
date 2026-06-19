@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import type { DateValue } from '@internationalized/date'
+import { today, getLocalTimeZone } from '@internationalized/date'
+import { unitTypes } from '~/utils/unitTypes'
+import CreateListingUnits, { type ListingUnit } from '../../../components/listings/CreateListingUnits.vue'
+import CreateListingAvailability from '../../../components/listings/CreateListingAvailability.vue'
+
 definePageMeta({
   layout: 'default',
   middleware: 'seller-guard'
@@ -21,14 +27,45 @@ const form = reactive({
   title: '',
   location: '',
   rating: 5,
-  pricePerNight: 0,
   description: '',
   amenities: ['']
 })
 
 const images = ref<ListingImage[]>([])
 
-const previewImages = computed(() => images.value.map(image => image.previewUrl))
+const listingUnits = ref<ListingUnit[]>(
+  unitTypes.map(unit => ({
+    type: unit.value,
+    label: unit.label,
+    enabled: false,
+    quantity: 0,
+    pricePerNight: 0
+  }))
+)
+
+const availableFrom = shallowRef<DateValue>(today(getLocalTimeZone()))
+
+const previewImages = computed(() =>
+  images.value.map(image => image.previewUrl)
+)
+
+const selectedUnits = computed(() =>
+  listingUnits.value.filter(unit =>
+    unit.enabled &&
+    unit.quantity > 0 &&
+    unit.pricePerNight > 0
+  )
+)
+
+const lowestPrice = computed(() => {
+  if (!selectedUnits.value.length) return 0
+  return Math.min(...selectedUnits.value.map(unit => unit.pricePerNight))
+})
+
+const highestPrice = computed(() => {
+  if (!selectedUnits.value.length) return 0
+  return Math.max(...selectedUnits.value.map(unit => unit.pricePerNight))
+})
 
 function openFilePicker() {
   fileInput.value?.click()
@@ -50,6 +87,12 @@ function onImagesSelected(event: Event) {
 }
 
 function removeImage(index: number) {
+  const image = images.value[index]
+
+  if (image) {
+    URL.revokeObjectURL(image.previewUrl)
+  }
+
   images.value.splice(index, 1)
 }
 
@@ -98,10 +141,17 @@ async function createListing() {
         title: form.title,
         location: form.location,
         description: form.description,
-        pricePerNight: form.pricePerNight,
+        pricePerNight: lowestPrice.value,
         rating: form.rating,
         images: uploadedImageUrls,
-        amenities: form.amenities.filter(amenity => amenity.trim() !== '')
+        amenities: form.amenities.filter(amenity => amenity.trim() !== ''),
+        availableFrom: availableFrom.value.toString(),
+        units: selectedUnits.value.map(unit => ({
+          type: unit.type,
+          label: unit.label,
+          quantity: unit.quantity,
+          pricePerNight: unit.pricePerNight
+        }))
       }
     })
 
@@ -124,54 +174,56 @@ async function createListing() {
     isSubmitting.value = false
   }
 }
+
+onUnmounted(() => {
+  images.value.forEach(image => URL.revokeObjectURL(image.previewUrl))
+})
 </script>
 
 <template>
   <div class="min-h-screen bg-white text-slate-900">
     <UContainer class="py-12">
       <header class="mb-8">
-  <h1
-    class="mb-2 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl"
-  >
-    Create Listing
-  </h1>
+        <h1 class="mb-2 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
+          Create Listing
+        </h1>
 
-  <div class="mb-6 flex items-center justify-between gap-4">
-    <div class="flex min-w-0 flex-1 flex-col gap-4 md:flex-row md:items-center">
-      <UInput
-        v-model="form.location"
-        placeholder="Property location"
-        icon="i-heroicons-map-pin"
-        class="w-full md:max-w-xl"
-      />
+        <div class="mb-6 flex items-center justify-between gap-4">
+          <div class="flex min-w-0 flex-1 flex-col gap-4 md:flex-row md:items-center">
+            <UInput
+              v-model="form.location"
+              placeholder="Property location"
+              icon="i-heroicons-map-pin"
+              class="w-full md:max-w-xl"
+            />
 
-      <UInput
-        v-model.number="form.rating"
-        type="number"
-        min="1"
-        max="5"
-        placeholder="Rating"
-        icon="i-heroicons-star-solid"
-        class="w-full md:max-w-32"
-      />
-    </div>
+            <UInput
+              v-model.number="form.rating"
+              type="number"
+              min="1"
+              max="5"
+              placeholder="Rating"
+              icon="i-heroicons-star-solid"
+              class="w-full md:max-w-32"
+            />
+          </div>
 
-    <UButton
-      label="Back"
-      icon="i-lucide-arrow-left"
-      variant="soft"
-      color="neutral"
-      class="shrink-0"
-      @click="router.back()"
-    />
-  </div>
+          <UButton
+            label="Back"
+            icon="i-lucide-arrow-left"
+            variant="soft"
+            color="neutral"
+            class="shrink-0"
+            @click="router.back()"
+          />
+        </div>
 
-  <UInput
-    v-model="form.title"
-    placeholder="Property title"
-    size="xl"
-  />
-</header>
+        <UInput
+          v-model="form.title"
+          placeholder="Property title"
+          size="xl"
+        />
+      </header>
 
       <div class="mb-12">
         <UCarousel
@@ -185,7 +237,11 @@ async function createListing() {
           arrows
           indicators
         >
-          <img :src="item" class="h-96 w-full object-cover" draggable="false" />
+          <img
+            :src="item"
+            class="h-96 w-full object-cover"
+            draggable="false"
+          >
         </UCarousel>
 
         <UCard
@@ -193,8 +249,14 @@ async function createListing() {
           class="flex h-96 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50"
         >
           <div class="text-center text-slate-500">
-            <UIcon name="i-lucide-image-plus" class="mx-auto mb-3 size-10" />
-            <p class="font-medium">Upload photos to preview your listing.</p>
+            <UIcon
+              name="i-lucide-image-plus"
+              class="mx-auto mb-3 size-10"
+            />
+
+            <p class="font-medium">
+              Upload photos to preview your listing.
+            </p>
           </div>
         </UCard>
       </div>
@@ -212,7 +274,9 @@ async function createListing() {
             class="mb-8 w-full"
           />
 
-          <h3 class="mb-4 text-xl font-bold">Images</h3>
+          <h3 class="mb-4 text-xl font-bold">
+            Images
+          </h3>
 
           <input
             ref="fileInput"
@@ -221,7 +285,7 @@ async function createListing() {
             multiple
             class="hidden"
             @change="onImagesSelected"
-          />
+          >
 
           <div class="mb-8 space-y-4">
             <UButton
@@ -244,7 +308,7 @@ async function createListing() {
                 <img
                   :src="image.previewUrl"
                   class="h-32 w-full object-cover"
-                />
+                >
 
                 <div
                   v-if="image.isUploading"
@@ -269,7 +333,9 @@ async function createListing() {
             </div>
           </div>
 
-          <h3 class="mb-4 text-xl font-bold">Amenities</h3>
+          <h3 class="mb-4 text-xl font-bold">
+            Amenities
+          </h3>
 
           <div class="space-y-3">
             <div
@@ -301,24 +367,35 @@ async function createListing() {
               @click="addAmenity"
             />
           </div>
+
+          <div class="my-10 border-t border-slate-200" />
+
+          <CreateListingUnits v-model="listingUnits" />
+
+          <CreateListingAvailability v-model="availableFrom" />
         </div>
 
         <div>
           <UCard class="sticky top-6 bg-white shadow-lg ring-1 ring-slate-200">
             <div class="space-y-4">
               <div>
-                <label class="mb-2 block text-sm font-medium text-slate-700">
-                  Price per night
-                </label>
+                <p class="mb-2 text-sm font-medium text-slate-700">
+                  Price range
+                </p>
 
-                <UInput
-                  v-model.number="form.pricePerNight"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  icon="i-lucide-euro"
-                  size="xl"
-                />
+                <p
+                  v-if="selectedUnits.length"
+                  class="text-3xl font-bold text-slate-900"
+                >
+                  €{{ lowestPrice }} - €{{ highestPrice }}
+                </p>
+
+                <p
+                  v-else
+                  class="text-sm text-slate-500"
+                >
+                  Add at least one unit with quantity and price.
+                </p>
               </div>
 
               <UButton
@@ -328,7 +405,7 @@ async function createListing() {
                 block
                 class="bg-indigo-600 font-bold text-white hover:bg-indigo-700"
                 :loading="isSubmitting"
-                :disabled="isSubmitting"
+                :disabled="isSubmitting || selectedUnits.length === 0"
                 @click="createListing"
               />
             </div>

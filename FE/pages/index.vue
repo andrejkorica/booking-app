@@ -73,7 +73,7 @@
         </div>
 
         <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <ListingCard
+          <listingCard
             v-for="listing in listings"
             :key="listing.id"
             :listing="listing"
@@ -85,11 +85,12 @@
 </template>
 
 <script setup lang="ts">
-import ListingCard from '~/components/listingCard.vue'
 
 definePageMeta({
   layout: 'default'
 })
+
+import listingCard from '../components/listings/listingCard.vue'
 
 type Listing = {
   id: number
