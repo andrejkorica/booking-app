@@ -58,4 +58,14 @@ public class ListingController {
 
         listingService.deleteListing(id, email);
     }
+
+    @PostMapping("/seller/listings/{id}/update")
+    public ListingResponse updateListing(
+            @PathVariable("id") Long id,
+            @RequestBody ListingRequest request,
+            Authentication authentication) {
+        String email = authentication.getName();
+
+        return listingService.updateListing(id, email, request);
+    }
 }

@@ -26,4 +26,6 @@ public class ListingUnitEntity {
     @ManyToOne
     @JoinColumn(name = "listing_id", nullable = false)
     private ListingEntity listing;
+
+    
 }

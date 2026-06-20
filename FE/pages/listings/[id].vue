@@ -7,9 +7,7 @@
 
       <div v-else-if="listingData">
         <header class="mb-8">
-          <h1
-            class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-2"
-          >
+          <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-2">
             {{ listingData.title }}
           </h1>
 
@@ -20,20 +18,13 @@
                   v-for="i in 5"
                   :key="i"
                   name="i-heroicons-star-solid"
-                  :class="
-                    i <= listingData.rating
-                      ? 'text-yellow-400'
-                      : 'text-slate-200'
-                  "
+                  :class="i <= listingData.rating ? 'text-yellow-400' : 'text-slate-200'"
                   class="w-5 h-5"
                 />
               </div>
 
               <div class="flex min-w-0 items-center">
-                <UIcon
-                  name="i-heroicons-map-pin"
-                  class="w-5 h-5 mr-2 shrink-0"
-                />
+                <UIcon name="i-heroicons-map-pin" class="w-5 h-5 mr-2 shrink-0" />
                 <span class="truncate">{{ listingData.location }}</span>
               </div>
             </div>
@@ -65,7 +56,7 @@
               :src="item"
               class="w-full h-96 object-cover"
               draggable="false"
-            />
+            >
           </UCarousel>
 
           <div
@@ -86,7 +77,9 @@
               {{ listingData.description }}
             </p>
 
-            <h3 class="text-xl font-bold mb-4">Amenities</h3>
+            <h3 class="text-xl font-bold mb-4">
+              Amenities
+            </h3>
 
             <ul
               v-if="listingData.amenities?.length"
@@ -105,16 +98,55 @@
               </li>
             </ul>
 
-            <p v-else class="text-slate-500">No amenities listed.</p>
+            <p v-else class="text-slate-500">
+              No amenities listed.
+            </p>
+
+            <div class="mt-10">
+              <h3 class="text-xl font-bold mb-4">
+                Available units
+              </h3>
+
+              <div
+                v-if="listingData.units?.length"
+                class="space-y-3"
+              >
+                <div
+                  v-for="unit in listingData.units"
+                  :key="unit.type"
+                  class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <div>
+                    <p class="font-semibold text-slate-900">
+                      {{ unit.label }}
+                    </p>
+
+                    <p class="text-sm text-slate-500">
+                      {{ unit.quantity }} available
+                    </p>
+                  </div>
+
+                  <p class="text-lg font-bold text-slate-900">
+                    €{{ unit.pricePerNight }} / night
+                  </p>
+                </div>
+              </div>
+
+              <p v-else class="text-slate-500">
+                No units listed.
+              </p>
+            </div>
           </div>
 
           <div>
             <UCard class="bg-white shadow-lg border border-slate-200">
               <div class="text-center space-y-4">
-                <p class="text-lg text-slate-500">Price per night</p>
+                <p class="text-lg text-slate-500">
+                  Price per night
+                </p>
 
                 <p class="text-4xl font-bold text-slate-900">
-                  €{{ listingData.pricePerNight }}
+                  {{ priceLabel }}
                 </p>
 
                 <UButton
@@ -143,9 +175,7 @@
             Reviews and Comments (0)
           </h2>
 
-          <div
-            class="p-5 border border-slate-200 rounded-xl bg-slate-50 text-slate-500"
-          >
+          <div class="p-5 border border-slate-200 rounded-xl bg-slate-50 text-slate-500">
             No reviews yet.
           </div>
         </div>
@@ -159,58 +189,99 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
+import { useAuthStore } from '~/stores/auth'
+
+type ListingUnit = {
+  id?: number
+  type: string
+  label: string
+  quantity: number
+  pricePerNight: number
+}
 
 type Listing = {
-  id: number;
-  title: string;
-  location: string;
-  description: string;
-  pricePerNight: number;
-  rating: number;
-  images: string[];
-  amenities: string[];
-  status: string;
-  sellerEmail: string;
-  createdAt: string;
-};
+  id: number
+  title: string
+  location: string
+  description: string
+  lowestPrice: number
+  highestPrice: number
+  rating: number
+  images: string[]
+  amenities: string[]
+  availableFrom: string
+  units: ListingUnit[]
+  status: string
+  sellerEmail: string
+  createdAt: string
+}
 
-const route = useRoute();
-const router = useRouter();
-const config = useRuntimeConfig();
-const authStore = useAuthStore();
+const route = useRoute()
+const router = useRouter()
+const config = useRuntimeConfig()
+const authStore = useAuthStore()
 
-const listingData = ref<Listing | null>(null);
-const isLoading = ref(false);
+const listingData = ref<Listing | null>(null)
+const isLoading = ref(false)
+
+const isAvailableForBooking = computed(() => {
+  if (!listingData.value?.availableFrom) {
+    return true
+  }
+
+  const today = new Date()
+  const availableFrom = new Date(listingData.value.availableFrom)
+
+  today.setHours(0, 0, 0, 0)
+  availableFrom.setHours(0, 0, 0, 0)
+
+  return availableFrom <= today
+})
+
+const priceLabel = computed(() => {
+  if (!listingData.value) {
+    return 'Price not set'
+  }
+
+  if (!listingData.value.lowestPrice && !listingData.value.highestPrice) {
+    return 'Price not set'
+  }
+
+  if (listingData.value.lowestPrice === listingData.value.highestPrice) {
+    return `€${listingData.value.lowestPrice}`
+  }
+
+  return `€${listingData.value.lowestPrice} - €${listingData.value.highestPrice}`
+})
 
 const isOwner = computed(() => {
   if (!authStore.user || !listingData.value) {
-    return false;
+    return false
   }
 
-  return authStore.user.email === listingData.value.sellerEmail;
-});
+  return authStore.user.email === listingData.value.sellerEmail
+})
 
 async function fetchListing() {
-  isLoading.value = true;
+  isLoading.value = true
 
   try {
     listingData.value = await $fetch<Listing>(
-      `${config.public.apiBase}/listings/${route.params.id}`,
-    );
+      `${config.public.apiBase}/listings/${route.params.id}`
+    )
   } catch (error) {
-    console.error(error);
-    listingData.value = null;
+    console.error(error)
+    listingData.value = null
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
 
-onMounted(fetchListing);
+onMounted(fetchListing)
 
 useHead(() => ({
   title: listingData.value
     ? `${listingData.value.title} | Details`
-    : "Listing Details",
-}));
+    : 'Listing Details'
+}))
 </script>

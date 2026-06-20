@@ -26,4 +26,6 @@ public interface ListingService {
         ListingResponse rejectListing(Long listingId);
 
         void deleteListing(Long id, String sellerEmail);
+
+        ListingResponse updateListing(Long id, String sellerEmail, ListingRequest request);
 }

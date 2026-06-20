@@ -11,8 +11,12 @@ import hr.pocetnik.bookingapp.repository.UserRepository;
 import hr.pocetnik.bookingapp.service.ListingService;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ListingServiceImpl implements ListingService {
@@ -45,6 +49,8 @@ public class ListingServiceImpl implements ListingService {
                 listing.setAvailableFrom(request.getAvailableFrom());
                 listing.setSeller(seller);
                 listing.setStatus(ListingStatus.PENDING);
+                listing.setLowestPrice(request.getLowestPrice());
+                listing.setHighestPrice(request.getHighestPrice());
 
                 List<ListingUnitEntity> units = request.getUnits()
                                 .stream()
@@ -139,6 +145,54 @@ public class ListingServiceImpl implements ListingService {
                 listingRepository.delete(listing);
         }
 
+        @Override
+        public ListingResponse updateListing(
+                        Long id,
+                        String sellerEmail,
+                        ListingRequest request) {
+
+                ListingEntity listing = listingRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Listing not found"));
+
+                if (!listing.getSeller().getEmail().equals(sellerEmail)) {
+                        throw new RuntimeException("You do not own this listing");
+                }
+
+                listing.setTitle(request.getTitle());
+                listing.setLocation(request.getLocation());
+                listing.setDescription(request.getDescription());
+                listing.setRating(request.getRating());
+
+                listing.setLowestPrice(request.getLowestPrice());
+                listing.setHighestPrice(request.getHighestPrice());
+
+                listing.setImages(request.getImages());
+                listing.setAmenities(request.getAmenities());
+
+                listing.setAvailableFrom(request.getAvailableFrom());
+                List<ListingUnitEntity> units = request.getUnits()
+                                .stream()
+                                .map(unitRequest -> {
+                                        ListingUnitEntity unit = new ListingUnitEntity();
+
+                                        unit.setType(unitRequest.getType());
+                                        unit.setLabel(unitRequest.getLabel());
+                                        unit.setQuantity(unitRequest.getQuantity());
+                                        unit.setPricePerNight(unitRequest.getPricePerNight());
+                                        unit.setListing(listing);
+
+                                        return unit;
+                                })
+                                .collect(Collectors.toList());
+
+                listing.getUnits().clear();
+                listing.getUnits().addAll(units);
+
+                ListingEntity savedListing = listingRepository.save(listing);
+
+                return mapToResponse(savedListing);
+        }
+
         private ListingResponse mapToResponse(
                         ListingEntity listing) {
                 ListingResponse response = new ListingResponse();
@@ -153,6 +207,8 @@ public class ListingServiceImpl implements ListingService {
                 response.setAvailableFrom(listing.getAvailableFrom());
                 response.setStatus(listing.getStatus());
                 response.setCreatedAt(listing.getCreatedAt());
+                response.setLowestPrice(listing.getLowestPrice());
+                response.setHighestPrice(listing.getHighestPrice());
 
                 response.setUnits(
                                 listing.getUnits()

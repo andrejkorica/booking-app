@@ -39,10 +39,12 @@
           </div>
 
           <div class="flex items-center justify-between">
-            <div class="text-sm text-slate-500">Price per night</div>
+            <div class="text-sm text-slate-500">
+              Price per night
+            </div>
 
-            <div class="text-xl font-bold text-slate-900">
-              € {{ listing.pricePerNight }}
+            <div class="text-l font-bold text-slate-900">
+              {{ priceLabel }}
             </div>
           </div>
         </div>
@@ -54,7 +56,7 @@
           :src="listing.images[currentImage]"
           alt="Listing image"
           class="w-full h-full object-cover"
-        />
+        >
 
         <div
           v-else
@@ -68,54 +70,67 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 
 type Listing = {
-  id: number;
-  title: string;
-  location: string;
-  description: string;
-  pricePerNight: number;
-  rating: number;
-  images: string[];
-  amenities: string[];
-};
+  id: number
+  title: string
+  location: string
+  description: string
+  lowestPrice: number
+  highestPrice: number
+  rating: number
+  images: string[]
+  amenities: string[]
+}
 
 const props = defineProps<{
-  listing: Listing;
-}>();
+  listing: Listing
+}>()
 
-const currentImage = ref(0);
-let interval: ReturnType<typeof setInterval> | null = null;
+const currentImage = ref(0)
+let interval: ReturnType<typeof setInterval> | null = null
 
 const ratingLabel = computed(() => {
-  if (props.listing.rating >= 5) return "Exceptional";
-  if (props.listing.rating >= 4) return "Great";
-  if (props.listing.rating >= 3) return "Good";
-  return "New";
-});
+  if (props.listing.rating >= 5) return 'Exceptional'
+  if (props.listing.rating >= 4) return 'Great'
+  if (props.listing.rating >= 3) return 'Good'
+  return 'New'
+})
+
+const priceLabel = computed(() => {
+  if (!props.listing.lowestPrice && !props.listing.highestPrice) {
+    return 'Price not set'
+  }
+
+  if (props.listing.lowestPrice === props.listing.highestPrice) {
+    return `€ ${props.listing.lowestPrice}`
+  }
+
+  return `${props.listing.lowestPrice} - ${props.listing.highestPrice}€`
+})
 
 function startSlideshow() {
-  stopSlideshow();
+  stopSlideshow()
 
   if (!props.listing.images || props.listing.images.length <= 1) {
-    return;
+    return
   }
 
   interval = setInterval(() => {
-    currentImage.value = (currentImage.value + 1) % props.listing.images.length;
-  }, 3000);
+    currentImage.value = (currentImage.value + 1) % props.listing.images.length
+  }, 3000)
 }
 
 function stopSlideshow() {
   if (interval) {
-    clearInterval(interval);
-    interval = null;
+    clearInterval(interval)
+    interval = null
   }
 }
 
-onMounted(startSlideshow);
-onUnmounted(stopSlideshow);
+onMounted(startSlideshow)
+onUnmounted(stopSlideshow)
 </script>
 
 <style scoped>

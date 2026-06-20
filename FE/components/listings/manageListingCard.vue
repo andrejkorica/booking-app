@@ -4,7 +4,8 @@ type Listing = {
   title: string
   location: string
   description: string
-  pricePerNight: number
+  lowestPrice: number
+  highestPrice: number
   rating: number
   images: string[]
   amenities: string[]
@@ -13,7 +14,7 @@ type Listing = {
   createdAt?: string
 }
 
-defineProps<{
+const props = defineProps<{
   listing: Listing
 }>()
 
@@ -31,6 +32,18 @@ const cardUi = {
   body: 'flex-1',
   footer: 'shrink-0'
 }
+
+const priceLabel = computed(() => {
+  if (!props.listing.lowestPrice && !props.listing.highestPrice) {
+    return 'Price not set'
+  }
+
+  if (props.listing.lowestPrice === props.listing.highestPrice) {
+    return `€${props.listing.lowestPrice} / night`
+  }
+
+  return `€${props.listing.lowestPrice} - €${props.listing.highestPrice} / night`
+})
 
 function confirmDelete(id: number) {
   emit('delete', id)
@@ -59,7 +72,7 @@ function confirmDelete(id: number) {
           :src="listing.images[0]"
           alt="Listing image"
           class="h-full w-full object-cover"
-        />
+        >
 
         <div
           v-else
@@ -77,7 +90,7 @@ function confirmDelete(id: number) {
 
         <p>
           <span class="font-semibold text-slate-900">Price:</span>
-          €{{ listing.pricePerNight }} / night
+          {{ priceLabel }}
         </p>
 
         <p>

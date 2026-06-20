@@ -3,6 +3,7 @@ package hr.pocetnik.bookingapp.dto.listing;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -17,6 +18,10 @@ public class ListingRequest {
     private String description;
 
     private Integer rating;
+
+    private BigDecimal lowestPrice;
+
+    private BigDecimal highestPrice;
 
     private List<String> images;
 

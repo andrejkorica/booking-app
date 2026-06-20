@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,4 +55,9 @@ public class ListingEntity {
     public void onCreate() {
         createdAt = LocalDateTime.now();
     }
+
+    private BigDecimal lowestPrice;
+    private BigDecimal highestPrice;
+
+    
 }

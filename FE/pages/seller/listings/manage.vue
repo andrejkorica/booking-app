@@ -11,7 +11,8 @@ type Listing = {
   title: string
   location: string
   description: string
-  pricePerNight: number
+  lowestPrice: number
+  highestPrice: number
   rating: number
   images: string[]
   amenities: string[]

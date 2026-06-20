@@ -153,6 +153,8 @@ async function createListing() {
         images: uploadedImageUrls,
         amenities: form.amenities.filter(amenity => amenity.trim() !== ''),
         availableFrom: availableFrom.value.toString(),
+        lowestPrice: lowestPrice.value,
+        highestPrice: highestPrice.value,
         units: selectedUnits.value.map(unit => ({
           type: unit.type,
           label: unit.label,
