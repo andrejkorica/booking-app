@@ -30,4 +30,6 @@ public class ListingRequest {
     private LocalDate availableFrom;
 
     private List<ListingUnitRequest> units;
+
+    private List<ListingPriceAdjustmentRequest> priceAdjustments;
 }

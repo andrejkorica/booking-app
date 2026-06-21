@@ -40,4 +40,6 @@ public class ListingResponse {
     private LocalDateTime createdAt;
 
     private String sellerEmail;
+
+    private List<ListingPriceAdjustmentResponse> priceAdjustments;
 }

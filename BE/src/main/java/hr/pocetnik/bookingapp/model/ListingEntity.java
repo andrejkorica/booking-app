@@ -40,6 +40,9 @@ public class ListingEntity {
     private List<String> amenities;
 
     @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ListingPriceAdjustmentEntity> priceAdjustments;
+
+    @OneToMany(mappedBy = "listing", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ListingUnitEntity> units;
 
     @ManyToOne
@@ -59,5 +62,4 @@ public class ListingEntity {
     private BigDecimal lowestPrice;
     private BigDecimal highestPrice;
 
-    
 }
