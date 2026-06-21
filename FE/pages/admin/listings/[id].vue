@@ -4,15 +4,26 @@ definePageMeta({
   middleware: 'admin-guard'
 })
 
+type ListingUnit = {
+  id?: number
+  type: string
+  label: string
+  quantity: number
+  pricePerNight: number
+}
+
 type Listing = {
   id: number
   title: string
   location: string
   description: string
-  pricePerNight: number
+  lowestPrice: number
+  highestPrice: number
   rating: number
   images: string[]
   amenities: string[]
+  availableFrom: string
+  units: ListingUnit[]
   status: string
   sellerEmail: string
   createdAt: string
@@ -24,6 +35,22 @@ const toast = useToast()
 
 const listing = ref<Listing | null>(null)
 const isLoading = ref(false)
+
+const priceLabel = computed(() => {
+  if (!listing.value) {
+    return 'Price not set'
+  }
+
+  if (!listing.value.lowestPrice && !listing.value.highestPrice) {
+    return 'Price not set'
+  }
+
+  if (listing.value.lowestPrice === listing.value.highestPrice) {
+    return `€${listing.value.lowestPrice}`
+  }
+
+  return `€${listing.value.lowestPrice} - €${listing.value.highestPrice}`
+})
 
 async function fetchListing() {
   isLoading.value = true
@@ -163,7 +190,10 @@ onMounted(fetchListing)
             Amenities
           </h3>
 
-          <ul class="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2">
+          <ul
+            v-if="listing.amenities?.length"
+            class="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2"
+          >
             <li
               v-for="amenity in listing.amenities"
               :key="amenity"
@@ -179,6 +209,45 @@ onMounted(fetchListing)
               </span>
             </li>
           </ul>
+
+          <p v-else class="text-slate-500">
+            No amenities listed.
+          </p>
+
+          <div class="mt-10">
+            <h3 class="mb-4 text-xl font-bold">
+              Available units
+            </h3>
+
+            <div
+              v-if="listing.units?.length"
+              class="space-y-3"
+            >
+              <div
+                v-for="unit in listing.units"
+                :key="unit.type"
+                class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4"
+              >
+                <div>
+                  <p class="font-semibold text-slate-900">
+                    {{ unit.label }}
+                  </p>
+
+                  <p class="text-sm text-slate-500">
+                    {{ unit.quantity }} available
+                  </p>
+                </div>
+
+                <p class="text-lg font-bold text-slate-900">
+                  €{{ unit.pricePerNight }} / night
+                </p>
+              </div>
+            </div>
+
+            <p v-else class="text-slate-500">
+              No units listed.
+            </p>
+          </div>
         </div>
 
         <div>
@@ -189,11 +258,18 @@ onMounted(fetchListing)
               </p>
 
               <p class="text-4xl font-bold text-slate-900">
-                €{{ listing.pricePerNight }}
+                {{ priceLabel }}
+              </p>
+
+              <p
+                v-if="listing.availableFrom"
+                class="text-sm text-slate-500"
+              >
+                Available from {{ listing.availableFrom }}
               </p>
 
               <p class="text-sm text-slate-500">
-                Preview only. Guests cannot book pending listings.
+                Preview only.
               </p>
             </div>
           </UCard>

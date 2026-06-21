@@ -1,210 +1,234 @@
 <script setup lang="ts">
-import type { DateValue } from '@internationalized/date'
-import { today, getLocalTimeZone } from '@internationalized/date'
-import { unitTypes } from '~/utils/unitTypes'
-import CreateListingUnits, { type ListingUnit } from '../../../components/listings/CreateListingUnits.vue'
-import CreateListingAvailability from '../../../components/listings/CreateListingAvailability.vue'
+import type { DateValue } from "@internationalized/date";
+import { today, getLocalTimeZone } from "@internationalized/date";
+import { unitTypes } from "~/utils/unitTypes";
+import CreateListingUnits, {
+  type ListingUnit,
+} from "../../../components/listings/CreateListingUnits.vue";
+import CreateListingAvailability from "../../../components/listings/CreateListingAvailability.vue";
+import CreateListingPriceAdjustments, {
+  type PriceAdjustment,
+} from "../../../components/listings/CreateListingPriceAdjustments.vue";
 
 definePageMeta({
-  layout: 'default',
-  middleware: 'seller-guard'
-})
+  layout: "default",
+  middleware: "seller-guard",
+});
 
 type ListingImage = {
-  file: File
-  previewUrl: string
-  isUploading: boolean
-}
+  file: File;
+  previewUrl: string;
+  isUploading: boolean;
+};
 
-const config = useRuntimeConfig()
-const toast = useToast()
-const router = useRouter()
+const config = useRuntimeConfig();
+const toast = useToast();
+const router = useRouter();
 
-const isSubmitting = ref(false)
-const fileInput = ref<HTMLInputElement | null>(null)
+const isSubmitting = ref(false);
+const fileInput = ref<HTMLInputElement | null>(null);
 
 const form = reactive({
-  title: '',
-  location: '',
+  title: "",
+  location: "",
   rating: 5,
-  description: '',
-  amenities: ['']
-})
+  description: "",
+  amenities: [""],
+});
 
-const images = ref<ListingImage[]>([])
+const images = ref<ListingImage[]>([]);
 
 const listingUnits = ref<ListingUnit[]>(
-  unitTypes.map(unit => ({
+  unitTypes.map((unit) => ({
     type: unit.value,
     label: unit.label,
     quantity: 0,
-    pricePerNight: 0
-  }))
-)
+    pricePerNight: 0,
+  })),
+);
 
-const availableFrom = shallowRef<DateValue>(today(getLocalTimeZone()))
+const availableFrom = shallowRef<DateValue>(today(getLocalTimeZone()));
 
+const priceAdjustments = ref<PriceAdjustment[]>([
+  {
+    startDate: "",
+    endDate: "",
+    percent: 0,
+  },
+]);
 const previewImages = computed(() =>
-  images.value.map(image => image.previewUrl)
-)
+  images.value.map((image) => image.previewUrl),
+);
 
 const selectedUnits = computed(() =>
-  listingUnits.value.filter(unit =>
-    Number(unit.quantity) > 0 &&
-    Number(unit.pricePerNight) > 0
-  )
-)
+  listingUnits.value.filter(
+    (unit) => Number(unit.quantity) > 0 && Number(unit.pricePerNight) > 0,
+  ),
+);
 
 const lowestPrice = computed(() => {
   if (!selectedUnits.value.length) {
-    return 0
+    return 0;
   }
 
   return Math.min(
-    ...selectedUnits.value.map(unit => Number(unit.pricePerNight))
-  )
-})
+    ...selectedUnits.value.map((unit) => Number(unit.pricePerNight)),
+  );
+});
 
 const highestPrice = computed(() => {
   if (!selectedUnits.value.length) {
-    return 0
+    return 0;
   }
 
   return Math.max(
-    ...selectedUnits.value.map(unit => Number(unit.pricePerNight))
-  )
-})
+    ...selectedUnits.value.map((unit) => Number(unit.pricePerNight)),
+  );
+});
 
 function openFilePicker() {
-  fileInput.value?.click()
+  fileInput.value?.click();
 }
 
 function onImagesSelected(event: Event) {
-  const target = event.target as HTMLInputElement
-  const files = Array.from(target.files || [])
+  const target = event.target as HTMLInputElement;
+  const files = Array.from(target.files || []);
 
   files.forEach((file) => {
     images.value.push({
       file,
       previewUrl: URL.createObjectURL(file),
-      isUploading: false
-    })
-  })
+      isUploading: false,
+    });
+  });
 
-  target.value = ''
+  target.value = "";
 }
 
 function removeImage(index: number) {
-  const image = images.value[index]
+  const image = images.value[index];
 
   if (image) {
-    URL.revokeObjectURL(image.previewUrl)
+    URL.revokeObjectURL(image.previewUrl);
   }
 
-  images.value.splice(index, 1)
+  images.value.splice(index, 1);
 }
 
 function addAmenity() {
-  form.amenities.push('')
+  form.amenities.push("");
 }
 
 function removeAmenity(index: number) {
-  form.amenities.splice(index, 1)
+  form.amenities.splice(index, 1);
 }
 
 async function uploadImage(image: ListingImage) {
-  image.isUploading = true
+  image.isUploading = true;
 
   try {
-    const formData = new FormData()
-    formData.append('file', image.file)
+    const formData = new FormData();
+    formData.append("file", image.file);
 
     const response = await $fetch<{ imageUrl: string }>(
       `${config.public.apiBase}/images/upload`,
       {
-        method: 'POST',
-        credentials: 'include',
-        body: formData
-      }
-    )
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      },
+    );
 
-    return response.imageUrl
+    return response.imageUrl;
   } finally {
-    image.isUploading = false
+    image.isUploading = false;
   }
 }
 
 async function createListing() {
-  isSubmitting.value = true
+  isSubmitting.value = true;
 
   try {
     const uploadedImageUrls = await Promise.all(
-      images.value.map(image => uploadImage(image))
-    )
+      images.value.map((image) => uploadImage(image)),
+    );
 
     await $fetch(`${config.public.apiBase}/seller/listings`, {
-      method: 'POST',
-      credentials: 'include',
+      method: "POST",
+      credentials: "include",
       body: {
         title: form.title,
         location: form.location,
         description: form.description,
         rating: form.rating,
         images: uploadedImageUrls,
-        amenities: form.amenities.filter(amenity => amenity.trim() !== ''),
+        amenities: form.amenities.filter((amenity) => amenity.trim() !== ""),
         availableFrom: availableFrom.value.toString(),
         lowestPrice: lowestPrice.value,
         highestPrice: highestPrice.value,
-        units: selectedUnits.value.map(unit => ({
+        units: selectedUnits.value.map((unit) => ({
           type: unit.type,
           label: unit.label,
           quantity: Number(unit.quantity),
-          pricePerNight: Number(unit.pricePerNight)
-        }))
-      }
-    })
+          pricePerNight: Number(unit.pricePerNight),
+        })),
+        priceAdjustments: priceAdjustments.value
+          .filter(
+            (adjustment) =>
+              adjustment.startDate &&
+              adjustment.endDate &&
+              Number(adjustment.percent) !== 0,
+          )
+          .map((adjustment) => ({
+            startDate: adjustment.startDate,
+            endDate: adjustment.endDate,
+            percent: Number(adjustment.percent),
+          })),
+      },
+    });
 
     toast.add({
-      title: 'Listing created',
-      description: 'Your listing was submitted for approval.',
-      color: 'success'
-    })
+      title: "Listing created",
+      description: "Your listing was submitted for approval.",
+      color: "success",
+    });
 
-    await navigateTo('/seller')
+    await navigateTo("/seller");
   } catch (error) {
-    console.error(error)
+    console.error(error);
 
     toast.add({
-      title: 'Error',
-      description: 'Failed to create listing.',
-      color: 'error'
-    })
+      title: "Error",
+      description: "Failed to create listing.",
+      color: "error",
+    });
   } finally {
-    isSubmitting.value = false
+    isSubmitting.value = false;
   }
 }
 
 onUnmounted(() => {
-  images.value.forEach(image => URL.revokeObjectURL(image.previewUrl))
-})
+  images.value.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+});
 </script>
 
 <template>
   <div class="min-h-screen bg-white text-slate-900">
     <UContainer class="py-12">
       <header class="mb-8">
-        <h1 class="mb-6 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
+        <h1
+          class="mb-6 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
           Create Listing
         </h1>
 
         <div class="mb-6 flex items-center justify-between gap-4">
-          <div class="flex min-w-0 flex-1 flex-col gap-4 md:flex-row md:items-center">
+          <div
+            class="flex min-w-0 flex-1 flex-col gap-4 md:flex-row md:items-center">
             <UInput
               v-model="form.location"
               placeholder="Property location"
               icon="i-heroicons-map-pin"
-              class="w-full md:max-w-xl"
-            />
+              class="w-full md:max-w-xl" />
 
             <UInput
               v-model.number="form.rating"
@@ -213,8 +237,7 @@ onUnmounted(() => {
               max="5"
               placeholder="Rating"
               icon="i-heroicons-star-solid"
-              class="w-full md:max-w-32"
-            />
+              class="w-full md:max-w-32" />
           </div>
 
           <UButton
@@ -223,15 +246,10 @@ onUnmounted(() => {
             variant="soft"
             color="neutral"
             class="shrink-0"
-            @click="router.back()"
-          />
+            @click="router.back()" />
         </div>
 
-        <UInput
-          v-model="form.title"
-          placeholder="Property title"
-          size="xl"
-        />
+        <UInput v-model="form.title" placeholder="Property title" size="xl" />
       </header>
 
       <div class="mb-12">
@@ -244,28 +262,17 @@ onUnmounted(() => {
           :next="{ color: 'primary' }"
           class="overflow-hidden rounded-2xl shadow-lg"
           arrows
-          indicators
-        >
-          <img
-            :src="item"
-            class="h-96 w-full object-cover"
-            draggable="false"
-          >
+          indicators>
+          <img :src="item" class="h-96 w-full object-cover" draggable="false" />
         </UCarousel>
 
         <UCard
           v-else
-          class="flex h-96 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50"
-        >
+          class="flex h-96 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50">
           <div class="text-center text-slate-500">
-            <UIcon
-              name="i-lucide-image-plus"
-              class="mx-auto mb-3 size-10"
-            />
+            <UIcon name="i-lucide-image-plus" class="mx-auto mb-3 size-10" />
 
-            <p class="font-medium">
-              Upload photos to preview your listing.
-            </p>
+            <p class="font-medium">Upload photos to preview your listing.</p>
           </div>
         </UCard>
       </div>
@@ -280,12 +287,9 @@ onUnmounted(() => {
             v-model="form.description"
             :rows="8"
             placeholder="Describe your property..."
-            class="mb-8 w-full"
-          />
+            class="mb-8 w-full" />
 
-          <h3 class="mb-4 text-xl font-bold">
-            Images
-          </h3>
+          <h3 class="mb-4 text-xl font-bold">Images</h3>
 
           <input
             ref="fileInput"
@@ -293,8 +297,7 @@ onUnmounted(() => {
             accept="image/*"
             multiple
             class="hidden"
-            @change="onImagesSelected"
-          >
+            @change="onImagesSelected" />
 
           <div class="mb-8 space-y-4">
             <UButton
@@ -302,31 +305,23 @@ onUnmounted(() => {
               icon="i-lucide-upload"
               variant="soft"
               color="neutral"
-              @click="openFilePicker"
-            />
+              @click="openFilePicker" />
 
             <div
               v-if="images.length"
-              class="grid grid-cols-2 gap-4 md:grid-cols-3"
-            >
+              class="grid grid-cols-2 gap-4 md:grid-cols-3">
               <div
                 v-for="(image, index) in images"
                 :key="image.previewUrl"
-                class="relative overflow-hidden rounded-xl border bg-slate-50"
-              >
-                <img
-                  :src="image.previewUrl"
-                  class="h-32 w-full object-cover"
-                >
+                class="relative overflow-hidden rounded-xl border bg-slate-50">
+                <img :src="image.previewUrl" class="h-32 w-full object-cover" />
 
                 <div
                   v-if="image.isUploading"
-                  class="absolute inset-0 flex items-center justify-center bg-black/40"
-                >
+                  class="absolute inset-0 flex items-center justify-center bg-black/40">
                   <UIcon
                     name="i-lucide-loader-circle"
-                    class="h-7 w-7 animate-spin text-white"
-                  />
+                    class="h-7 w-7 animate-spin text-white" />
                 </div>
 
                 <UButton
@@ -336,36 +331,30 @@ onUnmounted(() => {
                   size="xs"
                   class="absolute right-2 top-2"
                   :disabled="isSubmitting"
-                  @click="removeImage(index)"
-                />
+                  @click="removeImage(index)" />
               </div>
             </div>
           </div>
 
-          <h3 class="mb-4 text-xl font-bold">
-            Amenities
-          </h3>
+          <h3 class="mb-4 text-xl font-bold">Amenities</h3>
 
           <div class="space-y-3">
             <div
               v-for="(amenity, index) in form.amenities"
               :key="index"
-              class="flex gap-2"
-            >
+              class="flex gap-2">
               <UInput
                 v-model="form.amenities[index]"
                 placeholder="Amenity"
                 icon="i-heroicons-check-circle"
-                class="flex-1"
-              />
+                class="flex-1" />
 
               <UButton
                 icon="i-lucide-trash"
                 color="error"
                 variant="soft"
                 :disabled="form.amenities.length === 1"
-                @click="removeAmenity(index)"
-              />
+                @click="removeAmenity(index)" />
             </div>
 
             <UButton
@@ -373,8 +362,7 @@ onUnmounted(() => {
               icon="i-lucide-plus"
               variant="soft"
               color="neutral"
-              @click="addAmenity"
-            />
+              @click="addAmenity" />
           </div>
 
           <div class="my-10 border-t border-slate-200" />
@@ -382,6 +370,10 @@ onUnmounted(() => {
           <CreateListingUnits v-model="listingUnits" />
 
           <CreateListingAvailability v-model="availableFrom" />
+
+          <div class="my-10 border-t border-slate-200" />
+
+          <CreateListingPriceAdjustments v-model="priceAdjustments" />
         </div>
 
         <div>
@@ -394,15 +386,11 @@ onUnmounted(() => {
 
                 <p
                   v-if="selectedUnits.length"
-                  class="text-3xl font-bold text-slate-900"
-                >
+                  class="text-3xl font-bold text-slate-900">
                   €{{ lowestPrice }} - €{{ highestPrice }}
                 </p>
 
-                <p
-                  v-else
-                  class="text-sm text-slate-500"
-                >
+                <p v-else class="text-sm text-slate-500">
                   Add at least one unit with quantity and price.
                 </p>
               </div>
@@ -415,8 +403,7 @@ onUnmounted(() => {
                 class="bg-indigo-600 font-bold text-white hover:bg-indigo-700"
                 :loading="isSubmitting"
                 :disabled="isSubmitting || selectedUnits.length === 0"
-                @click="createListing"
-              />
+                @click="createListing" />
             </div>
           </UCard>
         </div>

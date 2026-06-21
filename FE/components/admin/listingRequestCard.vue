@@ -1,26 +1,39 @@
 <script setup lang="ts">
 type ListingRequest = {
-  id: number;
-  title: string;
-  location: string;
-  description: string;
-  pricePerNight: number;
-  rating: number;
-  images: string[];
-  amenities: string[];
-  status: string;
-  sellerEmail: string;
-  createdAt: string;
-};
+  id: number
+  title: string
+  location: string
+  description: string
+  lowestPrice: number
+  highestPrice: number
+  rating: number
+  images: string[]
+  amenities: string[]
+  status: string
+  sellerEmail: string
+  createdAt: string
+}
 
-defineProps<{
-  listing: ListingRequest;
-}>();
+const props = defineProps<{
+  listing: ListingRequest
+}>()
 
 const emit = defineEmits<{
-  approve: [id: number];
-  reject: [id: number];
-}>();
+  approve: [id: number]
+  reject: [id: number]
+}>()
+
+const priceLabel = computed(() => {
+  if (!props.listing.lowestPrice && !props.listing.highestPrice) {
+    return 'Price not set'
+  }
+
+  if (props.listing.lowestPrice === props.listing.highestPrice) {
+    return `€${props.listing.lowestPrice} / night`
+  }
+
+  return `€${props.listing.lowestPrice} - €${props.listing.highestPrice} / night`
+})
 </script>
 
 <template>
@@ -51,15 +64,13 @@ const emit = defineEmits<{
       </div>
     </template>
 
-    <div
-      class="flex h-[340px] flex-col gap-4 overflow-y-auto pr-2 text-sm text-slate-600"
-    >
+    <div class="flex h-[340px] flex-col gap-4 overflow-y-auto pr-2 text-sm text-slate-600">
       <img
         v-if="listing.images?.length"
         :src="listing.images[0]"
         class="h-40 w-full rounded-xl object-cover"
         alt="Listing image"
-      />
+      >
 
       <div
         v-else
@@ -73,12 +84,12 @@ const emit = defineEmits<{
           <span class="font-medium text-slate-800">Location:</span>
           {{ listing.location }}
         </p>
+
         <p>
-          <span class="font-medium text-slate-800">Price:</span> €{{
-            listing.pricePerNight
-          }}
-          / night
+          <span class="font-medium text-slate-800">Price:</span>
+          {{ priceLabel }}
         </p>
+
         <p>
           <span class="font-medium text-slate-800">Rating:</span>
           {{ listing.rating }}/5
@@ -89,7 +100,9 @@ const emit = defineEmits<{
         {{ listing.description }}
       </p>
 
-      <p class="text-xs text-slate-400">Created: {{ listing.createdAt }}</p>
+      <p class="text-xs text-slate-400">
+        Created: {{ listing.createdAt }}
+      </p>
     </div>
 
     <template #footer>
