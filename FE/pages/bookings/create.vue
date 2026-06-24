@@ -20,10 +20,12 @@ const guestInfo = reactive({
   travelPurpose: "",
   arrivalTime: "",
   arrivalMethod: "",
+  accessibilityRequirements: "",
   specialRequests: "",
   hasPets: false,
   needsParking: false,
-  accessibilityRequirements: "",
+  travelingFrom: "",
+  
 });
 
 const paymentInfo = reactive({

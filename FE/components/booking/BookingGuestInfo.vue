@@ -12,19 +12,21 @@ defineProps<{
   listing: BookingListing | null;
 }>();
 
-const guestInfo = reactive({
-  name: "",
-  surname: "",
-  email: "",
-  phoneNumber: "",
-  travelingFrom: "",
-  travelPurpose: "",
-  arrivalTime: "",
-  arrivalMethod: "",
-  specialRequests: "",
-  hasPets: false,
-  needsParking: false,
-  accessibilityRequirements: "",
+const guestInfo = defineModel<{
+  name: string;
+  surname: string;
+  email: string;
+  phoneNumber: string;
+  travelingFrom: string;
+  travelPurpose: string;
+  arrivalTime: string;
+  arrivalMethod: string;
+  specialRequests: string;
+  hasPets: boolean;
+  needsParking: boolean;
+  accessibilityRequirements: string;
+}>({
+  required: true,
 });
 
 const emit = defineEmits<{
@@ -44,10 +46,10 @@ const arrivalMethodOptions = ["Car", "Plane", "Bus", "Train", "Other"];
 
 const canContinue = computed(() => {
   return Boolean(
-    guestInfo.name &&
-    guestInfo.surname &&
-    guestInfo.email &&
-    guestInfo.phoneNumber,
+    guestInfo.value.name &&
+    guestInfo.value.surname &&
+    guestInfo.value.email &&
+    guestInfo.value.phoneNumber,
   );
 });
 
@@ -67,10 +69,10 @@ async function fetchCurrentUser() {
       },
     );
 
-    guestInfo.name = user.name ?? "";
-    guestInfo.surname = user.surname ?? "";
-    guestInfo.email = user.email ?? "";
-    guestInfo.phoneNumber = user.phoneNumber ?? "";
+    guestInfo.value.name = user.name ?? "";
+    guestInfo.value.surname = user.surname ?? "";
+    guestInfo.value.email = user.email ?? "";
+    guestInfo.value.phoneNumber = user.phoneNumber ?? "";
   } catch (error) {
     console.error(error);
   }
@@ -115,14 +117,16 @@ onMounted(fetchCurrentUser);
           <UInput
             v-model="guestInfo.travelingFrom"
             placeholder="City or country"
-            class="w-full" />
+            class="w-full"
+          />
         </UFormField>
         <UFormField label="Purpose of travel">
           <USelect
             v-model="guestInfo.travelPurpose"
             :items="travelPurposeOptions"
             placeholder="Select purpose"
-            class="w-full" />
+            class="w-full"
+          />
         </UFormField>
 
         <UFormField label="Estimated arrival time">
@@ -134,7 +138,8 @@ onMounted(fetchCurrentUser);
             v-model="guestInfo.arrivalMethod"
             :items="arrivalMethodOptions"
             placeholder="Select arrival method"
-            class="w-full" />
+            class="w-full"
+          />
         </UFormField>
 
         <UFormField label="Need parking?">
@@ -158,7 +163,8 @@ onMounted(fetchCurrentUser);
             v-model="guestInfo.specialRequests"
             placeholder="Late check-in, baby crib, extra towels..."
             :rows="4"
-            class="w-full" />
+            class="w-full"
+          />
         </UFormField>
 
         <UFormField label="Accessibility requirements">
@@ -166,7 +172,8 @@ onMounted(fetchCurrentUser);
             v-model="guestInfo.accessibilityRequirements"
             placeholder="Anything the host should know before your arrival..."
             :rows="3"
-            class="w-full" />
+            class="w-full"
+          />
         </UFormField>
       </div>
     </UCard>
@@ -180,19 +187,23 @@ onMounted(fetchCurrentUser);
         v-if="listing"
         :location="listing.location"
         :latitude="listing.latitude"
-        :longitude="listing.longitude" />
+        :longitude="listing.longitude"
+      />
     </UCard>
 
     <div
-      class="sticky bottom-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm z-99999">
+      class="sticky bottom-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm z-99999"
+    >
       <div
-        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      >
         <UButton
           label="Back"
           variant="ghost"
           color="neutral"
           icon="i-heroicons-arrow-left"
-          @click="emit('back')" />
+          @click="emit('back')"
+        />
 
         <div class="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
           <p class="text-sm text-slate-500">
@@ -205,7 +216,8 @@ onMounted(fetchCurrentUser);
             trailing-icon="i-heroicons-arrow-right"
             :disabled="!canContinue"
             class="px-6 text-white"
-            @click="emit('continue')" />
+            @click="emit('continue')"
+          />
         </div>
       </div>
     </div>
