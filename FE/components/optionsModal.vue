@@ -14,7 +14,6 @@ const selectedTab = defineModel<string>('tab', {
 const items: TabsItem[] = [
   { label: 'Profile', value: 'profile', icon: 'i-lucide-user' },
   { label: 'Seller Info', value: 'seller', icon: 'i-lucide-store' },
-  { label: 'Booking History', value: 'bookings', icon: 'i-lucide-calendar' }
 ]
 </script>
 

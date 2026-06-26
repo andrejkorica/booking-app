@@ -378,4 +378,44 @@ public class BookingServiceImpl implements BookingService {
                 .map(this::mapToResponse)
                 .toList();
     }
+
+    @Override
+    public BookingResponse approveBooking(String token, Long bookingId) {
+        BookingEntity booking = getSellerOwnedBooking(token, bookingId);
+
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new RuntimeException("Only pending bookings can be approved.");
+        }
+
+        booking.setStatus(BookingStatus.CONFIRMED);
+
+        return mapToResponse(bookingRepository.save(booking));
+    }
+
+    @Override
+    public BookingResponse rejectBooking(String token, Long bookingId) {
+        BookingEntity booking = getSellerOwnedBooking(token, bookingId);
+
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new RuntimeException("Only pending bookings can be rejected.");
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+
+        return mapToResponse(bookingRepository.save(booking));
+    }
+
+    private BookingEntity getSellerOwnedBooking(String token, Long bookingId) {
+        Claims claims = jwtService.extractAllClaims(token);
+        String email = claims.getSubject();
+
+        BookingEntity booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found."));
+
+        if (!booking.getListing().getSeller().getEmail().equals(email)) {
+            throw new RuntimeException("You can only manage bookings for your own listings.");
+        }
+
+        return booking;
+    }
 }

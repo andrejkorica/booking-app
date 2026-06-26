@@ -74,4 +74,20 @@ public class BookingController {
         return bookingService.getBookingsForSellerListing(token, listingId);
     }
 
+    @PostMapping("seller/{bookingId}/approve")
+    public BookingResponse approveBooking(
+            @CookieValue("token") String token,
+            @PathVariable Long bookingId) {
+
+        return bookingService.approveBooking(token, bookingId);
+    }
+
+    @PostMapping("seller/{bookingId}/reject")
+    public BookingResponse rejectBooking(
+            @CookieValue("token") String token,
+            @PathVariable Long bookingId) {
+
+        return bookingService.rejectBooking(token, bookingId);
+    }
+
 }
