@@ -106,6 +106,7 @@
               v-else
               :units="availableUnits"
               title="Available units"
+              class="mt-10"
             />
           </div>
 

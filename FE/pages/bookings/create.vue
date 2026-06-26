@@ -18,10 +18,11 @@ type DateRangeValue = {
 };
 
 type ListingUnit = {
-  id: number;
+  id?: number;
   type: string;
   label: string;
   quantity: number;
+  availableQuantity?: number;
   maxGuests?: number;
   pricePerNight: number;
 };
@@ -50,7 +51,9 @@ const toast = useToast();
 
 const step = ref(1);
 const listing = ref<Listing | null>(null);
+const availableUnits = ref<ListingUnit[]>([]);
 const isLoading = ref(false);
+const isLoadingAvailableUnits = ref(false);
 const isSubmittingBooking = ref(false);
 
 const selectedUnits = ref<Record<string, number>>({});
@@ -95,17 +98,29 @@ const availableFromDate = computed(() => {
 });
 
 const unitOptions = computed(() => {
-  return (
-    listing.value?.units
-      ?.filter((unit) => Number(unit.quantity) > 0)
-      .map((unit) => ({
-        value: unit.type,
-        label: unit.label,
-        pricePerNight: Number(unit.pricePerNight),
-        quantity: Number(unit.quantity),
-        maxGuests: unit.maxGuests,
-      })) ?? []
-  );
+  const sourceUnits = availableUnits.value.length
+    ? availableUnits.value
+    : listing.value?.units ?? [];
+
+  return sourceUnits
+    .filter((unit) => {
+      const quantity =
+        unit.availableQuantity !== undefined
+          ? Number(unit.availableQuantity)
+          : Number(unit.quantity);
+
+      return quantity > 0;
+    })
+    .map((unit) => ({
+      value: unit.type,
+      label: unit.label,
+      pricePerNight: Number(unit.pricePerNight),
+      quantity:
+        unit.availableQuantity !== undefined
+          ? Number(unit.availableQuantity)
+          : Number(unit.quantity),
+      maxGuests: unit.maxGuests,
+    }));
 });
 
 const selectedUnitItems = computed(() => {
@@ -215,6 +230,33 @@ const checkOutLabel = computed(() => {
   return dateRange.value.end.toDate(getLocalTimeZone()).toLocaleDateString();
 });
 
+async function fetchAvailableUnits(listingId: number) {
+  isLoadingAvailableUnits.value = true;
+
+  try {
+    availableUnits.value = await $fetch<ListingUnit[]>(
+      `${config.public.apiBase}/listings/${listingId}/available-units`,
+      {
+        credentials: "include",
+      },
+    );
+
+    selectedUnits.value = {};
+  } catch (error) {
+    console.error(error);
+
+    toast.add({
+      title: "Availability failed",
+      description: "Could not load available units.",
+      color: "error",
+    });
+
+    availableUnits.value = listing.value?.units ?? [];
+  } finally {
+    isLoadingAvailableUnits.value = false;
+  }
+}
+
 async function fetchListing() {
   const listingId = Array.isArray(route.query.listingId)
     ? route.query.listingId[0]
@@ -234,6 +276,8 @@ async function fetchListing() {
         credentials: "include",
       },
     );
+
+    await fetchAvailableUnits(listing.value.id);
   } catch (error) {
     console.error(error);
   } finally {
@@ -352,7 +396,15 @@ onMounted(fetchListing);
 
         <div v-if="step === 1" class="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div class="space-y-6 lg:col-span-2">
+            <div
+              v-if="isLoadingAvailableUnits"
+              class="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500"
+            >
+              Loading available units...
+            </div>
+
             <BookingUnitSelector
+              v-else
               v-model="selectedUnits"
               :unit-options="unitOptions"
             />

@@ -23,7 +23,7 @@ withDefaults(
 </script>
 
 <template>
-  <div class="mt-10">
+  <div class="">
     <h3 class="mb-4 text-xl font-bold">
       {{ title }}
     </h3>

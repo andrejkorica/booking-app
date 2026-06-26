@@ -232,6 +232,7 @@ onMounted(fetchListing);
           <ListingAvailableUnits
             :units="listing.units"
             title="Listed units"
+            class="mt-10"
           />
         </div>
 
