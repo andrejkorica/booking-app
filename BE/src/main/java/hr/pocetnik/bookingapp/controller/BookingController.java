@@ -1,5 +1,6 @@
 package hr.pocetnik.bookingapp.controller;
 
+import hr.pocetnik.bookingapp.dto.booking.BookingDetailsResponse;
 import hr.pocetnik.bookingapp.dto.booking.BookingRequest;
 import hr.pocetnik.bookingapp.dto.booking.BookingResponse;
 import hr.pocetnik.bookingapp.exception.TokenNotFoundException;
@@ -47,7 +48,7 @@ public class BookingController {
     @PostMapping("/{id}/cancel")
     public ResponseEntity<BookingResponse> cancelBooking(
             @CookieValue(name = "token", required = false) String token,
-           @PathVariable("id") Long id) {
+            @PathVariable("id") Long id) {
         if (token == null || token.isEmpty()) {
             throw new TokenNotFoundException();
         }
@@ -55,6 +56,14 @@ public class BookingController {
         BookingResponse response = bookingService.cancelBooking(token, id);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{bookingId}")
+    public BookingDetailsResponse getBooking(
+            @CookieValue("token") String token,
+            @PathVariable Long bookingId) {
+
+        return bookingService.getBooking(token, bookingId);
     }
 
 }

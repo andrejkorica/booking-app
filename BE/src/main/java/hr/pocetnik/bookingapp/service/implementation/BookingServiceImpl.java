@@ -1,8 +1,10 @@
 package hr.pocetnik.bookingapp.service.implementation;
 
+import hr.pocetnik.bookingapp.dto.booking.BookingDetailsResponse;
 import hr.pocetnik.bookingapp.dto.booking.BookingRequest;
 import hr.pocetnik.bookingapp.dto.booking.BookingResponse;
 import hr.pocetnik.bookingapp.dto.booking.BookingUnitRequest;
+import hr.pocetnik.bookingapp.dto.booking.BookingUnitResponse;
 import hr.pocetnik.bookingapp.exception.UserNotFoundException;
 import hr.pocetnik.bookingapp.model.*;
 import hr.pocetnik.bookingapp.repository.BookingRepository;
@@ -118,8 +120,7 @@ public class BookingServiceImpl implements BookingService {
 
                             return unitRequest.getQuantity() + " × " + listingUnit.getLabel();
                         })
-                        .collect(Collectors.joining(", "))
-        );
+                        .collect(Collectors.joining(", ")));
 
         booking.setCheckIn(checkIn);
         booking.setCheckOut(checkOut);
@@ -284,4 +285,80 @@ public class BookingServiceImpl implements BookingService {
 
         return mapToResponse(savedBooking);
     }
+
+    @Override
+    public BookingDetailsResponse getBooking(String token, Long bookingId) {
+        Claims claims = jwtService.extractAllClaims(token);
+        String email = claims.getSubject();
+
+        BookingEntity booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found."));
+
+        if (!booking.getGuest().getEmail().equals(email)) {
+            throw new RuntimeException("You can only view your own booking.");
+        }
+
+        return mapToDetailsResponse(booking);
+    }
+
+    private BookingDetailsResponse mapToDetailsResponse(BookingEntity booking) {
+        BookingDetailsResponse response = new BookingDetailsResponse();
+
+        response.setId(booking.getId());
+
+        response.setListingId(booking.getListing().getId());
+        response.setListingTitle(booking.getListing().getTitle());
+        response.setListingLocation(booking.getListing().getLocation());
+
+        if (booking.getListing().getImages() != null &&
+                !booking.getListing().getImages().isEmpty()) {
+            response.setListingImage(booking.getListing().getImages().get(0));
+        }
+
+        response.setUnits(
+                booking.getUnits()
+                        .stream()
+                        .map(unit -> {
+                            BookingUnitResponse unitResponse = new BookingUnitResponse();
+
+                            unitResponse.setUnitType(unit.getUnitType());
+                            unitResponse.setUnitLabel(unit.getUnitLabel());
+                            unitResponse.setQuantity(unit.getQuantity());
+
+                            return unitResponse;
+                        })
+                        .toList());
+
+        response.setCheckIn(booking.getCheckIn());
+        response.setCheckOut(booking.getCheckOut());
+        response.setNights(booking.getNights());
+
+        response.setPricePerNight(booking.getPricePerNight());
+        response.setTotalPrice(booking.getTotalPrice());
+
+        response.setGuestName(booking.getGuestName());
+        response.setGuestSurname(booking.getGuestSurname());
+        response.setGuestEmail(booking.getGuestEmail());
+        response.setGuestPhoneNumber(booking.getGuestPhoneNumber());
+
+        response.setTravelPurpose(booking.getTravelPurpose());
+        response.setArrivalTime(booking.getArrivalTime());
+        response.setArrivalMethod(booking.getArrivalMethod());
+        response.setSpecialRequests(booking.getSpecialRequests());
+        response.setHasPets(booking.getHasPets());
+        response.setNeedsParking(booking.getNeedsParking());
+        response.setAccessibilityRequirements(booking.getAccessibilityRequirements());
+
+        response.setBillingAddress(booking.getBillingAddress());
+
+        response.setAgreedToRules(booking.getAgreedToRules());
+        response.setAgreedToCancellationPolicy(booking.getAgreedToCancellationPolicy());
+        response.setConfirmedInfoCorrect(booking.getConfirmedInfoCorrect());
+
+        response.setStatus(booking.getStatus());
+        response.setCreatedAt(booking.getCreatedAt());
+
+        return response;
+    }
+
 }
