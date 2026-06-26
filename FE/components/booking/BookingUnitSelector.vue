@@ -4,37 +4,56 @@ type UnitType = {
   value: string
   quantity: number
   pricePerNight: number
+  maxGuests?: number
 }
 
-const selectedUnit = defineModel<string>({
+const selectedUnits = defineModel<Record<string, number>>({
   required: true
 })
 
 defineProps<{
   unitOptions: UnitType[]
 }>()
+
+function increase(unit: UnitType) {
+  const current = selectedUnits.value[unit.value] ?? 0
+
+  if (current >= unit.quantity) {
+    return
+  }
+
+  selectedUnits.value[unit.value] = current + 1
+}
+
+function decrease(unit: UnitType) {
+  const current = selectedUnits.value[unit.value] ?? 0
+
+  if (current <= 0) {
+    return
+  }
+
+  selectedUnits.value[unit.value] = current - 1
+}
 </script>
 
 <template>
   <UCard>
     <template #header>
       <h2 class="text-xl font-semibold">
-        Choose unit type
+        Choose units
       </h2>
     </template>
 
     <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-      <button
+      <div
         v-for="unit in unitOptions"
         :key="unit.value"
-        type="button"
-        class="rounded-xl border p-4 text-left transition hover:border-indigo-400 hover:bg-indigo-50"
+        class="rounded-xl border p-4 transition"
         :class="
-          selectedUnit === unit.value
+          (selectedUnits[unit.value] ?? 0) > 0
             ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
             : 'border-slate-200 bg-white'
         "
-        @click="selectedUnit = unit.value"
       >
         <div class="flex items-start justify-between gap-3">
           <div>
@@ -46,18 +65,66 @@ defineProps<{
               {{ unit.quantity }} available
             </p>
 
+            <p
+              v-if="unit.maxGuests"
+              class="mt-1 text-sm text-slate-500"
+            >
+              Up to {{ unit.maxGuests }}
+              {{ unit.maxGuests === 1 ? 'guest' : 'guests' }} each
+            </p>
+
+            <p
+              v-else
+              class="mt-1 text-sm italic text-slate-400"
+            >
+              Guest capacity not specified
+            </p>
+
             <p class="mt-3 text-lg font-bold text-slate-900">
               €{{ unit.pricePerNight }} / night
             </p>
           </div>
 
           <UIcon
-            v-if="selectedUnit === unit.value"
+            v-if="(selectedUnits[unit.value] ?? 0) > 0"
             name="i-lucide-check-circle"
             class="size-5 shrink-0 text-indigo-600"
           />
         </div>
-      </button>
+
+        <div class="mt-4 flex items-center justify-between">
+          <p class="text-sm text-slate-600">
+            Selected:
+            <span class="font-semibold text-slate-900">
+              {{ selectedUnits[unit.value] ?? 0 }}
+            </span>
+          </p>
+
+          <div class="flex items-center gap-2">
+            <UButton
+              icon="i-lucide-minus"
+              color="neutral"
+              variant="soft"
+              size="sm"
+              :disabled="(selectedUnits[unit.value] ?? 0) <= 0"
+              @click="decrease(unit)"
+            />
+
+            <span class="w-6 text-center font-semibold">
+              {{ selectedUnits[unit.value] ?? 0 }}
+            </span>
+
+            <UButton
+              icon="i-lucide-plus"
+              color="primary"
+              variant="soft"
+              size="sm"
+              :disabled="(selectedUnits[unit.value] ?? 0) >= unit.quantity"
+              @click="increase(unit)"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   </UCard>
 </template>

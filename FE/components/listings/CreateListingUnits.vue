@@ -3,6 +3,7 @@ export type ListingUnit = {
   type: string
   label: string
   quantity: number
+  maxGuests: number
   pricePerNight: number
 }
 
@@ -54,7 +55,7 @@ const highestPrice = computed(() => {
         <div
           v-for="unit in listingUnits"
           :key="unit.type"
-          class="grid grid-cols-1 gap-3 rounded-xl border p-4 transition-all md:grid-cols-4 md:items-center"
+          class="grid grid-cols-1 gap-3 rounded-xl border p-4 transition-all md:grid-cols-5 md:items-center"
           :class="
             unit.quantity > 0
               ? 'border-violet-500 bg-violet-50'
@@ -78,6 +79,15 @@ const highestPrice = computed(() => {
           />
 
           <UInput
+            v-model.number="unit.maxGuests"
+            type="number"
+            min="1"
+            icon="i-lucide-users"
+            placeholder="Max guests"
+            :disabled="unit.quantity <= 0"
+          />
+
+          <UInput
             v-model.number="unit.pricePerNight"
             type="number"
             min="0"
@@ -89,7 +99,7 @@ const highestPrice = computed(() => {
           <p class="text-sm text-slate-500">
             {{
               unit.quantity > 0
-                ? 'Available unit type'
+                ? `Up to ${unit.maxGuests} ${unit.maxGuests === 1 ? 'guest' : 'guests'}`
                 : 'Enter quantity to offer this unit'
             }}
           </p>

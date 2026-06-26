@@ -83,32 +83,7 @@
 
             <p v-else class="text-slate-500">No amenities listed.</p>
 
-            <div class="mt-10">
-              <h3 class="text-xl font-bold mb-4">Available units</h3>
-
-              <div v-if="listingData.units?.length" class="space-y-3">
-                <div
-                  v-for="unit in listingData.units"
-                  :key="unit.type"
-                  class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <div>
-                    <p class="font-semibold text-slate-900">
-                      {{ unit.label }}
-                    </p>
-
-                    <p class="text-sm text-slate-500">
-                      {{ unit.quantity }} available
-                    </p>
-                  </div>
-
-                  <p class="text-lg font-bold text-slate-900">
-                    €{{ unit.pricePerNight }} / night
-                  </p>
-                </div>
-              </div>
-
-              <p v-else class="text-slate-500">No units listed.</p>
-            </div>
+            <ListingAvailableUnits :units="listingData.units" />
           </div>
 
           <div>
@@ -167,12 +142,14 @@
 import { useAuthStore } from "~/stores/auth";
 import CreateListingImagePreview from "~/components/listings/CreateListingImagePreview.vue";
 import ListingLocationMap from "~/components/listings/ListingLocationMap.vue";
+import ListingAvailableUnits from "~/components/listings/ListingAvailableUnits.vue";
 
 type ListingUnit = {
   id?: number;
   type: string;
   label: string;
   quantity: number;
+  maxGuests?: number;
   pricePerNight: number;
 };
 

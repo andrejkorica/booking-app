@@ -12,6 +12,54 @@ definePageMeta({
   layout: "default",
 });
 
+type DateRangeValue = {
+  start: DateValue | undefined;
+  end: DateValue | undefined;
+};
+
+type ListingUnit = {
+  id: number;
+  type: string;
+  label: string;
+  quantity: number;
+  maxGuests?: number;
+  pricePerNight: number;
+};
+
+type PriceAdjustment = {
+  id: number;
+  startDate: string;
+  endDate: string;
+  percent: number;
+};
+
+type Listing = {
+  id: number;
+  title: string;
+  location: string;
+  latitude: number | null;
+  longitude: number | null;
+  availableFrom: string;
+  units: ListingUnit[];
+  priceAdjustments: PriceAdjustment[];
+};
+
+const route = useRoute();
+const config = useRuntimeConfig();
+const toast = useToast();
+
+const step = ref(1);
+const listing = ref<Listing | null>(null);
+const isLoading = ref(false);
+const isSubmittingBooking = ref(false);
+
+const selectedUnits = ref<Record<string, number>>({});
+
+const dateRange = shallowRef<DateRangeValue>({
+  start: undefined,
+  end: undefined,
+});
+
 const guestInfo = reactive({
   name: "",
   surname: "",
@@ -25,7 +73,6 @@ const guestInfo = reactive({
   hasPets: false,
   needsParking: false,
   travelingFrom: "",
-  
 });
 
 const paymentInfo = reactive({
@@ -39,13 +86,180 @@ const paymentInfo = reactive({
   confirmedInfoCorrect: false,
 });
 
-function goBackToGuestInfo() {
+const availableFromDate = computed(() => {
+  if (!listing.value?.availableFrom) {
+    return undefined;
+  }
+
+  return parseDate(listing.value.availableFrom);
+});
+
+const unitOptions = computed(() => {
+  return (
+    listing.value?.units
+      ?.filter((unit) => Number(unit.quantity) > 0)
+      .map((unit) => ({
+        value: unit.type,
+        label: unit.label,
+        pricePerNight: Number(unit.pricePerNight),
+        quantity: Number(unit.quantity),
+        maxGuests: unit.maxGuests,
+      })) ?? []
+  );
+});
+
+const selectedUnitItems = computed(() => {
+  return unitOptions.value
+    .map((unit) => ({
+      ...unit,
+      selectedQuantity: selectedUnits.value[unit.value] ?? 0,
+    }))
+    .filter((unit) => unit.selectedQuantity > 0);
+});
+
+const selectedUnitsLabel = computed(() => {
+  if (!selectedUnitItems.value.length) {
+    return "Not selected";
+  }
+
+  return selectedUnitItems.value
+    .map((unit) => `${unit.selectedQuantity} × ${unit.label}`)
+    .join(", ");
+});
+
+const nights = computed(() => {
+  if (!dateRange.value.start || !dateRange.value.end) {
+    return 0;
+  }
+
+  const start = dateRange.value.start.toDate(getLocalTimeZone());
+  const end = dateRange.value.end.toDate(getLocalTimeZone());
+  const diff = end.getTime() - start.getTime();
+
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+});
+
+function isDateInsideAdjustment(date: Date, adjustment: PriceAdjustment) {
+  const currentDate = date.toISOString().slice(0, 10);
+
+  return (
+    currentDate >= adjustment.startDate && currentDate <= adjustment.endDate
+  );
+}
+
+const nightlyPrices = computed(() => {
+  if (!dateRange.value.start || !dateRange.value.end) {
+    return [];
+  }
+
+  if (!selectedUnitItems.value.length) {
+    return [];
+  }
+
+  const prices: number[] = [];
+
+  const start = dateRange.value.start.toDate(getLocalTimeZone());
+  const end = dateRange.value.end.toDate(getLocalTimeZone());
+
+  const current = new Date(start);
+
+  while (current < end) {
+    let priceForNight = selectedUnitItems.value.reduce((sum, unit) => {
+      return sum + unit.pricePerNight * unit.selectedQuantity;
+    }, 0);
+
+    listing.value?.priceAdjustments?.forEach((adjustment) => {
+      if (isDateInsideAdjustment(current, adjustment)) {
+        priceForNight += priceForNight * (Number(adjustment.percent) / 100);
+      }
+    });
+
+    prices.push(priceForNight);
+    current.setDate(current.getDate() + 1);
+  }
+
+  return prices;
+});
+
+const finalPricePerNight = computed(() => {
+  if (!nightlyPrices.value.length) {
+    return 0;
+  }
+
+  const total = nightlyPrices.value.reduce((sum, price) => sum + price, 0);
+
+  return Math.round(total / nightlyPrices.value.length);
+});
+
+const totalPrice = computed(() => {
+  return Math.round(nightlyPrices.value.reduce((sum, price) => sum + price, 0));
+});
+
+const canContinue = computed(() => {
+  return selectedUnitItems.value.length > 0 && nights.value > 0;
+});
+
+const checkInLabel = computed(() => {
+  if (!dateRange.value.start) {
+    return "Not selected";
+  }
+
+  return dateRange.value.start.toDate(getLocalTimeZone()).toLocaleDateString();
+});
+
+const checkOutLabel = computed(() => {
+  if (!dateRange.value.end) {
+    return "Not selected";
+  }
+
+  return dateRange.value.end.toDate(getLocalTimeZone()).toLocaleDateString();
+});
+
+async function fetchListing() {
+  const listingId = Array.isArray(route.query.listingId)
+    ? route.query.listingId[0]
+    : route.query.listingId;
+
+  if (!listingId) {
+    console.error("Missing listingId in route query");
+    return;
+  }
+
+  isLoading.value = true;
+
+  try {
+    listing.value = await $fetch<Listing>(
+      `${config.public.apiBase}/listings/${listingId}`,
+      {
+        credentials: "include",
+      },
+    );
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+function goNext() {
+  if (!canContinue.value) {
+    return;
+  }
+
   step.value = 2;
 }
 
-const isSubmittingBooking = ref(false)
+function goBackToDates() {
+  step.value = 1;
+}
 
-const toast = useToast()
+function goToPayment() {
+  step.value = 3;
+}
+
+function goBackToGuestInfo() {
+  step.value = 2;
+}
 
 async function confirmBooking() {
   if (!listing.value || !dateRange.value.start || !dateRange.value.end) {
@@ -66,7 +280,11 @@ async function confirmBooking() {
       credentials: "include",
       body: {
         listingId: listing.value.id,
-        unitType: selectedUnit.value,
+
+        units: selectedUnitItems.value.map((unit) => ({
+          unitType: unit.value,
+          quantity: unit.selectedQuantity,
+        })),
 
         checkIn: dateRange.value.start.toString(),
         checkOut: dateRange.value.end.toString(),
@@ -111,212 +329,7 @@ async function confirmBooking() {
   }
 }
 
-type DateRangeValue = {
-  start: DateValue | undefined;
-  end: DateValue | undefined;
-};
-
-type ListingUnit = {
-  id: number;
-  type: string;
-  label: string;
-  quantity: number;
-  pricePerNight: number;
-};
-
-type PriceAdjustment = {
-  id: number;
-  startDate: string;
-  endDate: string;
-  percent: number;
-};
-
-type Listing = {
-  id: number;
-  title: string;
-  location: string;
-  latitude: number | null;
-  longitude: number | null;
-  availableFrom: string;
-  units: ListingUnit[];
-  priceAdjustments: PriceAdjustment[];
-};
-
-const route = useRoute();
-const config = useRuntimeConfig();
-
-const step = ref(1);
-const listing = ref<Listing | null>(null);
-const isLoading = ref(false);
-
-const selectedUnit = ref("");
-const dateRange = shallowRef<DateRangeValue>({
-  start: undefined,
-  end: undefined,
-});
-
-const availableFromDate = computed(() => {
-  if (!listing.value?.availableFrom) {
-    return undefined;
-  }
-
-  return parseDate(listing.value.availableFrom);
-});
-
-const unitOptions = computed(() => {
-  return (
-    listing.value?.units
-      ?.filter((unit) => Number(unit.quantity) > 0)
-      .map((unit) => ({
-        value: unit.type,
-        label: unit.label,
-        pricePerNight: Number(unit.pricePerNight),
-        quantity: Number(unit.quantity),
-      })) ?? []
-  );
-});
-
-const selectedUnitData = computed(() => {
-  return unitOptions.value.find((unit) => unit.value === selectedUnit.value);
-});
-
-const nights = computed(() => {
-  if (!dateRange.value.start || !dateRange.value.end) {
-    return 0;
-  }
-
-  const start = dateRange.value.start.toDate(getLocalTimeZone());
-  const end = dateRange.value.end.toDate(getLocalTimeZone());
-  const diff = end.getTime() - start.getTime();
-
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-});
-
-function isDateInAdjustment(date: Date, adjustment: PriceAdjustment) {
-  const adjustmentStart = new Date(adjustment.startDate);
-  const adjustmentEnd = new Date(adjustment.endDate);
-
-  return date >= adjustmentStart && date <= adjustmentEnd;
-}
-const basePricePerNight = computed(() => {
-  return Number(selectedUnitData.value?.pricePerNight ?? 0);
-});
-
-function isDateInsideAdjustment(date: Date, adjustment: PriceAdjustment) {
-  const currentDate = date.toISOString().slice(0, 10);
-
-  return (
-    currentDate >= adjustment.startDate && currentDate <= adjustment.endDate
-  );
-}
-
-const nightlyPrices = computed(() => {
-  if (!dateRange.value.start || !dateRange.value.end) {
-    return [];
-  }
-
-  if (!selectedUnitData.value) {
-    return [];
-  }
-
-  const prices: number[] = [];
-  const basePrice = basePricePerNight.value;
-
-  const start = dateRange.value.start.toDate(getLocalTimeZone());
-  const end = dateRange.value.end.toDate(getLocalTimeZone());
-
-  const current = new Date(start);
-
-  while (current < end) {
-    let priceForNight = basePrice;
-
-    listing.value?.priceAdjustments?.forEach((adjustment) => {
-      if (isDateInsideAdjustment(current, adjustment)) {
-        priceForNight += priceForNight * (Number(adjustment.percent) / 100);
-      }
-    });
-
-    prices.push(priceForNight);
-    current.setDate(current.getDate() + 1);
-  }
-
-  return prices;
-});
-
-const finalPricePerNight = computed(() => {
-  if (!nightlyPrices.value.length) {
-    return 0;
-  }
-
-  const total = nightlyPrices.value.reduce((sum, price) => sum + price, 0);
-
-  return Math.round(total / nightlyPrices.value.length);
-});
-
-const totalPrice = computed(() => {
-  return Math.round(nightlyPrices.value.reduce((sum, price) => sum + price, 0));
-});
-
-const canContinue = computed(() => {
-  return Boolean(selectedUnit.value && nights.value > 0);
-});
-
-const checkInLabel = computed(() => {
-  if (!dateRange.value.start) return "Not selected";
-
-  return dateRange.value.start.toDate(getLocalTimeZone()).toLocaleDateString();
-});
-
-const checkOutLabel = computed(() => {
-  if (!dateRange.value.end) return "Not selected";
-
-  return dateRange.value.end.toDate(getLocalTimeZone()).toLocaleDateString();
-});
-
-async function fetchListing() {
-  const listingId = Array.isArray(route.query.listingId)
-    ? route.query.listingId[0]
-    : route.query.listingId;
-
-  if (!listingId) {
-    console.error("Missing listingId in route query");
-    return;
-  }
-
-  isLoading.value = true;
-
-  try {
-    listing.value = await $fetch<Listing>(
-      `${config.public.apiBase}/listings/${listingId}`,
-      {
-        credentials: "include",
-      },
-    );
-
-    selectedUnit.value = unitOptions.value[0]?.value ?? "";
-  } catch (error) {
-    console.error(error);
-  } finally {
-    isLoading.value = false;
-  }
-}
-
-function goNext() {
-  if (!canContinue.value) return;
-
-  step.value = 2;
-}
-
-function goBackToDates() {
-  step.value = 1;
-}
-
-function goToPayment() {
-  step.value = 3;
-}
-
 onMounted(fetchListing);
-
 </script>
 
 <template>
@@ -340,23 +353,26 @@ onMounted(fetchListing);
         <div v-if="step === 1" class="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div class="space-y-6 lg:col-span-2">
             <BookingUnitSelector
-              v-model="selectedUnit"
-              :unit-options="unitOptions" />
+              v-model="selectedUnits"
+              :unit-options="unitOptions"
+            />
 
             <BookingDateSelector
               v-model="dateRange"
-              :min-date="availableFromDate || undefined" />
+              :min-date="availableFromDate || undefined"
+            />
           </div>
 
           <BookingPriceSummary
-            :selected-unit-label="selectedUnitData?.label ?? 'Not selected'"
+            :selected-unit-label="selectedUnitsLabel"
             :check-in="checkInLabel"
             :check-out="checkOutLabel"
             :nights="nights"
             :final-price-per-night="finalPricePerNight"
             :total-price="totalPrice"
             :can-continue="canContinue"
-            @continue="goNext" />
+            @continue="goNext"
+          />
         </div>
 
         <div v-else-if="step === 2">
@@ -364,7 +380,8 @@ onMounted(fetchListing);
             v-model="guestInfo"
             :listing="listing"
             @back="goBackToDates"
-            @continue="goToPayment" />
+            @continue="goToPayment"
+          />
         </div>
 
         <div v-else-if="step === 3">
@@ -372,7 +389,8 @@ onMounted(fetchListing);
             v-model="paymentInfo"
             :loading="isSubmittingBooking"
             @back="goBackToGuestInfo"
-            @confirm="confirmBooking" />
+            @confirm="confirmBooking"
+          />
         </div>
       </div>
     </UContainer>

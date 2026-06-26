@@ -10,7 +10,7 @@ import CreateListingPriceAdjustments, {
   type PriceAdjustment,
 } from "../../../components/listings/CreateListingPriceAdjustments.vue";
 import CreateListingLocation from "../../../components/listings/CreateListingLocation.vue";
-import CreateListingImagePreview from "../../../components/listings/CreateListingImagePreview.vue"
+import CreateListingImagePreview from "../../../components/listings/CreateListingImagePreview.vue";
 
 definePageMeta({
   layout: "default",
@@ -47,6 +47,7 @@ const listingUnits = ref<ListingUnit[]>(
     type: unit.value,
     label: unit.label,
     quantity: 0,
+    maxGuests: unit.maxGuests,
     pricePerNight: 0,
   })),
 );
@@ -176,6 +177,7 @@ async function createListing() {
           type: unit.type,
           label: unit.label,
           quantity: Number(unit.quantity),
+          maxGuests: Number(unit.maxGuests),
           pricePerNight: Number(unit.pricePerNight),
         })),
         priceAdjustments: priceAdjustments.value
@@ -223,17 +225,20 @@ onUnmounted(() => {
     <UContainer class="py-12">
       <header class="mb-8">
         <h1
-          class="mb-6 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
+          class="mb-6 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl"
+        >
           Create Listing
         </h1>
 
         <div class="mb-6 flex items-center justify-between gap-4">
           <div
-            class="flex min-w-0 flex-1 flex-col gap-4 md:flex-row md:items-center">
+            class="flex min-w-0 flex-1 flex-col gap-4 md:flex-row md:items-center"
+          >
             <UInput
               v-model="form.title"
               placeholder="Property title"
-              size="xl" />
+              size="xl"
+            />
 
             <UInput
               v-model.number="form.rating"
@@ -242,7 +247,8 @@ onUnmounted(() => {
               max="5"
               placeholder="Rating"
               icon="i-heroicons-star-solid"
-              class="w-full md:max-w-32" />
+              class="w-full md:max-w-32"
+            />
           </div>
 
           <UButton
@@ -251,7 +257,8 @@ onUnmounted(() => {
             variant="soft"
             color="neutral"
             class="shrink-0"
-            @click="router.back()" />
+            @click="router.back()"
+          />
         </div>
       </header>
 
@@ -269,12 +276,14 @@ onUnmounted(() => {
             v-model="form.description"
             :rows="8"
             placeholder="Describe your property..."
-            class="mb-8 w-full" />
+            class="mb-8 w-full"
+          />
 
           <CreateListingLocation
             v-model:location="form.location"
             v-model:latitude="form.latitude"
-            v-model:longitude="form.longitude" />
+            v-model:longitude="form.longitude"
+          />
 
           <h3 class="mb-4 text-xl font-bold">Images</h3>
 
@@ -284,7 +293,8 @@ onUnmounted(() => {
             accept="image/*"
             multiple
             class="hidden"
-            @change="onImagesSelected" />
+            @change="onImagesSelected"
+          />
 
           <div class="mb-8 space-y-4">
             <UButton
@@ -292,23 +302,28 @@ onUnmounted(() => {
               icon="i-lucide-upload"
               variant="soft"
               color="neutral"
-              @click="openFilePicker" />
+              @click="openFilePicker"
+            />
 
             <div
               v-if="images.length"
-              class="grid grid-cols-2 gap-4 md:grid-cols-3">
+              class="grid grid-cols-2 gap-4 md:grid-cols-3"
+            >
               <div
                 v-for="(image, index) in images"
                 :key="image.previewUrl"
-                class="relative overflow-hidden rounded-xl border bg-slate-50">
+                class="relative overflow-hidden rounded-xl border bg-slate-50"
+              >
                 <img :src="image.previewUrl" class="h-32 w-full object-cover" />
 
                 <div
                   v-if="image.isUploading"
-                  class="absolute inset-0 flex items-center justify-center bg-black/40">
+                  class="absolute inset-0 flex items-center justify-center bg-black/40"
+                >
                   <UIcon
                     name="i-lucide-loader-circle"
-                    class="h-7 w-7 animate-spin text-white" />
+                    class="h-7 w-7 animate-spin text-white"
+                  />
                 </div>
 
                 <UButton
@@ -318,7 +333,8 @@ onUnmounted(() => {
                   size="xs"
                   class="absolute right-2 top-2"
                   :disabled="isSubmitting"
-                  @click="removeImage(index)" />
+                  @click="removeImage(index)"
+                />
               </div>
             </div>
           </div>
@@ -329,19 +345,22 @@ onUnmounted(() => {
             <div
               v-for="(amenity, index) in form.amenities"
               :key="index"
-              class="flex gap-2">
+              class="flex gap-2"
+            >
               <UInput
                 v-model="form.amenities[index]"
                 placeholder="Amenity"
                 icon="i-heroicons-check-circle"
-                class="flex-1" />
+                class="flex-1"
+              />
 
               <UButton
                 icon="i-lucide-trash"
                 color="error"
                 variant="soft"
                 :disabled="form.amenities.length === 1"
-                @click="removeAmenity(index)" />
+                @click="removeAmenity(index)"
+              />
             </div>
 
             <UButton
@@ -349,7 +368,8 @@ onUnmounted(() => {
               icon="i-lucide-plus"
               variant="soft"
               color="neutral"
-              @click="addAmenity" />
+              @click="addAmenity"
+            />
           </div>
 
           <div class="my-10 border-t border-slate-200" />
@@ -373,7 +393,8 @@ onUnmounted(() => {
 
                 <p
                   v-if="selectedUnits.length"
-                  class="text-3xl font-bold text-slate-900">
+                  class="text-3xl font-bold text-slate-900"
+                >
                   €{{ lowestPrice }} - €{{ highestPrice }}
                 </p>
 
@@ -390,7 +411,8 @@ onUnmounted(() => {
                 class="bg-indigo-600 font-bold text-white hover:bg-indigo-700"
                 :loading="isSubmitting"
                 :disabled="isSubmitting || selectedUnits.length === 0"
-                @click="createListing" />
+                @click="createListing"
+              />
             </div>
           </UCard>
         </div>

@@ -23,6 +23,8 @@ public class ListingUnitEntity {
 
     private BigDecimal pricePerNight;
 
+    private Integer maxGuests;
+
     @ManyToOne
     @JoinColumn(name = "listing_id", nullable = false)
     private ListingEntity listing;

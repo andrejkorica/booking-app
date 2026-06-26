@@ -1,6 +1,5 @@
 package hr.pocetnik.bookingapp.model;
 
-import hr.pocetnik.bookingapp.model.BookingStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +7,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -28,8 +29,7 @@ public class BookingEntity {
     @JoinColumn(name = "listing_id", nullable = false)
     private ListingEntity listing;
 
-    // Unit snapshot
-    private String unitType;
+    // Summary label (e.g. "1 × Single room, 2 × Double room")
     private String unitLabel;
 
     // Dates
@@ -81,4 +81,7 @@ public class BookingEntity {
             status = BookingStatus.PENDING;
         }
     }
+
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingUnitEntity> units = new ArrayList<>();
 }

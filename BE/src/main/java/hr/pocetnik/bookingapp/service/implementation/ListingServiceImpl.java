@@ -198,6 +198,8 @@ public class ListingServiceImpl implements ListingService {
                     unit.setQuantity(unitRequest.getQuantity());
                     unit.setPricePerNight(unitRequest.getPricePerNight());
                     unit.setListing(listing);
+                    unit.setMaxGuests(unitRequest.getMaxGuests());
+                    
 
                     return unit;
                 })
@@ -221,6 +223,7 @@ public class ListingServiceImpl implements ListingService {
                     adjustment.setEndDate(adjustmentRequest.getEndDate());
                     adjustment.setPercent(adjustmentRequest.getPercent());
                     adjustment.setListing(listing);
+                    
 
                     return adjustment;
                 })
@@ -259,6 +262,7 @@ public class ListingServiceImpl implements ListingService {
                                 unitResponse.setLabel(unit.getLabel());
                                 unitResponse.setQuantity(unit.getQuantity());
                                 unitResponse.setPricePerNight(unit.getPricePerNight());
+                                unitResponse.setMaxGuests(unit.getMaxGuests());
 
                                 return unitResponse;
                             })

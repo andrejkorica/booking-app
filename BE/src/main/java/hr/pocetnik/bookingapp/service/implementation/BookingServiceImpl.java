@@ -2,6 +2,7 @@ package hr.pocetnik.bookingapp.service.implementation;
 
 import hr.pocetnik.bookingapp.dto.booking.BookingRequest;
 import hr.pocetnik.bookingapp.dto.booking.BookingResponse;
+import hr.pocetnik.bookingapp.dto.booking.BookingUnitRequest;
 import hr.pocetnik.bookingapp.exception.UserNotFoundException;
 import hr.pocetnik.bookingapp.model.*;
 import hr.pocetnik.bookingapp.repository.BookingRepository;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingService {
@@ -51,12 +54,6 @@ public class BookingServiceImpl implements BookingService {
             throw new RuntimeException("You cannot book your own listing.");
         }
 
-        ListingUnitEntity selectedUnit = listing.getUnits()
-                .stream()
-                .filter(unit -> unit.getType().equals(request.getUnitType()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Selected unit not found."));
-
         LocalDate checkIn = request.getCheckIn();
         LocalDate checkOut = request.getCheckOut();
 
@@ -64,12 +61,28 @@ public class BookingServiceImpl implements BookingService {
             throw new RuntimeException("Invalid booking dates.");
         }
 
+        if (request.getUnits() == null || request.getUnits().isEmpty()) {
+            throw new RuntimeException("At least one unit must be selected.");
+        }
+
         int nights = (int) ChronoUnit.DAYS.between(checkIn, checkOut);
+
+        BigDecimal basePricePerNight = request.getUnits()
+                .stream()
+                .map(unitRequest -> {
+                    ListingUnitEntity listingUnit = findListingUnit(listing, unitRequest);
+
+                    validateUnitQuantity(unitRequest, listingUnit);
+
+                    return listingUnit.getPricePerNight()
+                            .multiply(BigDecimal.valueOf(unitRequest.getQuantity()));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal totalPrice = calculateTotalPrice(
                 checkIn,
                 checkOut,
-                selectedUnit.getPricePerNight(),
+                basePricePerNight,
                 listing);
 
         BigDecimal averagePricePerNight = totalPrice.divide(
@@ -82,8 +95,31 @@ public class BookingServiceImpl implements BookingService {
         booking.setGuest(guest);
         booking.setListing(listing);
 
-        booking.setUnitType(selectedUnit.getType());
-        booking.setUnitLabel(selectedUnit.getLabel());
+        booking.setUnits(new ArrayList<>());
+
+        for (BookingUnitRequest unitRequest : request.getUnits()) {
+            ListingUnitEntity listingUnit = findListingUnit(listing, unitRequest);
+            validateUnitQuantity(unitRequest, listingUnit);
+
+            BookingUnitEntity bookingUnit = new BookingUnitEntity();
+
+            bookingUnit.setUnitType(unitRequest.getUnitType());
+            bookingUnit.setQuantity(unitRequest.getQuantity());
+            bookingUnit.setBooking(booking);
+
+            booking.getUnits().add(bookingUnit);
+        }
+
+        booking.setUnitLabel(
+                request.getUnits()
+                        .stream()
+                        .map(unitRequest -> {
+                            ListingUnitEntity listingUnit = findListingUnit(listing, unitRequest);
+
+                            return unitRequest.getQuantity() + " × " + listingUnit.getLabel();
+                        })
+                        .collect(Collectors.joining(", "))
+        );
 
         booking.setCheckIn(checkIn);
         booking.setCheckOut(checkOut);
@@ -117,16 +153,43 @@ public class BookingServiceImpl implements BookingService {
         return mapToResponse(savedBooking);
     }
 
+    private ListingUnitEntity findListingUnit(
+            ListingEntity listing,
+            BookingUnitRequest unitRequest) {
+
+        return listing.getUnits()
+                .stream()
+                .filter(unit -> unit.getType().equals(unitRequest.getUnitType()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(
+                        "Selected unit not found: " + unitRequest.getUnitType()));
+    }
+
+    private void validateUnitQuantity(
+            BookingUnitRequest unitRequest,
+            ListingUnitEntity listingUnit) {
+
+        if (unitRequest.getQuantity() == null || unitRequest.getQuantity() <= 0) {
+            throw new RuntimeException("Invalid unit quantity.");
+        }
+
+        if (unitRequest.getQuantity() > listingUnit.getQuantity()) {
+            throw new RuntimeException(
+                    "Not enough available units for: " + listingUnit.getLabel());
+        }
+    }
+
     private BigDecimal calculateTotalPrice(
             LocalDate checkIn,
             LocalDate checkOut,
-            BigDecimal basePrice,
+            BigDecimal basePricePerNight,
             ListingEntity listing) {
+
         BigDecimal total = BigDecimal.ZERO;
         LocalDate current = checkIn;
 
         while (current.isBefore(checkOut)) {
-            BigDecimal nightlyPrice = basePrice;
+            BigDecimal nightlyPrice = basePricePerNight;
 
             if (listing.getPriceAdjustments() != null) {
                 for (ListingPriceAdjustmentEntity adjustment : listing.getPriceAdjustments()) {
@@ -155,7 +218,6 @@ public class BookingServiceImpl implements BookingService {
         response.setListingId(booking.getListing().getId());
         response.setListingTitle(booking.getListing().getTitle());
 
-        response.setUnitType(booking.getUnitType());
         response.setUnitLabel(booking.getUnitLabel());
 
         response.setCheckIn(booking.getCheckIn());
@@ -168,6 +230,7 @@ public class BookingServiceImpl implements BookingService {
         response.setStatus(booking.getStatus());
         response.setCreatedAt(booking.getCreatedAt());
         response.setListingLocation(booking.getListing().getLocation());
+
         if (booking.getListing().getImages() != null &&
                 !booking.getListing().getImages().isEmpty()) {
 
@@ -180,7 +243,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponse> getMyBookings(String token) {
-
         Claims claims = jwtService.extractAllClaims(token);
         String email = claims.getSubject();
 

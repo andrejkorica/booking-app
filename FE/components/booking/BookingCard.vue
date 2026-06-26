@@ -8,7 +8,6 @@ type UserBooking = {
   listingLocation: string;
   listingImage: string | null;
 
-  unitType: string;
   unitLabel: string;
 
   checkIn: string;
@@ -149,7 +148,7 @@ function confirmCancel() {
           <UTooltip text="Period of cancellation over" :disabled="canCancel">
             <span>
               <UButton
-                label="Cancel"
+                :label="cancelLabel"
                 icon="i-lucide-x"
                 color="error"
                 variant="ghost"

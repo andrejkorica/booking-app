@@ -18,4 +18,6 @@ public class ListingUnitResponse {
     private Integer quantity;
 
     private BigDecimal pricePerNight;
+
+    private Integer maxGuests;
 }

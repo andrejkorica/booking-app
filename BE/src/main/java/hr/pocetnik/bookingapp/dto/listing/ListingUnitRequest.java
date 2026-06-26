@@ -16,4 +16,6 @@ public class ListingUnitRequest {
     private Integer quantity;
 
     private BigDecimal pricePerNight;
+
+    private Integer maxGuests;
 }

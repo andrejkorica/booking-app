@@ -14,7 +14,6 @@ type UserBooking = {
   listingLocation: string;
   listingImage: string | null;
 
-  unitType: string;
   unitLabel: string;
 
   checkIn: string;
@@ -53,8 +52,6 @@ const activeBookings = computed(() => {
   });
 });
 
-
-
 const pastBookings = computed(() => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -69,19 +66,12 @@ const pastBookings = computed(() => {
 
 async function fetchBookings() {
   try {
-    const response = await $fetch<any[]>(
+    bookings.value = await $fetch<UserBooking[]>(
       `${config.public.apiBase}/bookings/me`,
       {
         credentials: "include",
       }
     );
-
-    bookings.value = response.map((booking) => ({
-      ...booking,
-      title: booking.listingTitle,
-      location: "Location not available",
-      image: "",
-    }));
   } catch (error) {
     console.error(error);
 
@@ -92,6 +82,7 @@ async function fetchBookings() {
     });
   }
 }
+
 function viewListing(listingId: number) {
   navigateTo(`/listings/${listingId}`);
 }

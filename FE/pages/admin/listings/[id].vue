@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CreateListingImagePreview from "../../../components/listings/CreateListingImagePreview.vue";
 import ListingLocationMap from "../../../components/listings/ListingLocationMap.vue";
+import ListingAvailableUnits from "../../../components/listings/ListingAvailableUnits.vue";
 
 definePageMeta({
   layout: "admin",
@@ -12,6 +13,7 @@ type ListingUnit = {
   type: string;
   label: string;
   quantity: number;
+  maxGuests?: number;
   pricePerNight: number;
 };
 
@@ -203,32 +205,7 @@ onMounted(fetchListing);
 
           <p v-else class="text-slate-500">No amenities listed.</p>
 
-          <div class="mt-10">
-            <h3 class="mb-4 text-xl font-bold">Available units</h3>
-
-            <div v-if="listing.units?.length" class="space-y-3">
-              <div
-                v-for="unit in listing.units"
-                :key="unit.type"
-                class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <div>
-                  <p class="font-semibold text-slate-900">
-                    {{ unit.label }}
-                  </p>
-
-                  <p class="text-sm text-slate-500">
-                    {{ unit.quantity }} available
-                  </p>
-                </div>
-
-                <p class="text-lg font-bold text-slate-900">
-                  €{{ unit.pricePerNight }} / night
-                </p>
-              </div>
-            </div>
-
-            <p v-else class="text-slate-500">No units listed.</p>
-          </div>
+          <ListingAvailableUnits :units="listing.units" />
         </div>
 
         <div>
