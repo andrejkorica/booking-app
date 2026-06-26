@@ -1,7 +1,9 @@
 package hr.pocetnik.bookingapp.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import hr.pocetnik.bookingapp.dto.listing.ListingAvailableUnitResponse;
 import hr.pocetnik.bookingapp.dto.listing.ListingRequest;
 import hr.pocetnik.bookingapp.dto.listing.ListingResponse;
 
@@ -25,7 +27,9 @@ public interface ListingService {
 
         ListingResponse rejectListing(Long listingId);
 
-        void deleteListing(Long id, String sellerEmail);
+        ListingResponse deleteListing(Long id, String sellerEmail);
 
         ListingResponse updateListing(Long id, String sellerEmail, ListingRequest request);
+
+        List<ListingAvailableUnitResponse> getAvailableUnits(Long listingId);
 }

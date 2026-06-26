@@ -1,6 +1,8 @@
 <template>
   <div class="min-h-screen bg-slate-100 text-slate-900">
-    <div class="bg-gradient-to-br from-indigo-600 via-indigo-500 to-blue-500 pb-24 pt-12 md:pt-16">
+    <div
+      class="bg-gradient-to-br from-indigo-600 via-indigo-500 to-blue-500 pb-24 pt-12 md:pt-16"
+    >
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="max-w-4xl mx-auto text-center">
           <h1 class="text-4xl md:text-5xl font-extrabold text-white">
@@ -16,7 +18,9 @@
 
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 -mt-14">
       <form @submit.prevent="handleSearch" class="max-w-5xl mx-auto">
-        <div class="bg-white shadow-2xl rounded-2xl p-4 border border-slate-100">
+        <div
+          class="bg-white shadow-2xl rounded-2xl p-4 border border-slate-100"
+        >
           <div class="grid grid-cols-1 md:grid-cols-10 gap-3 items-center">
             <div class="md:col-span-3">
               <UInput
@@ -68,7 +72,10 @@
           Loading listings...
         </div>
 
-        <div v-else-if="listings.length === 0" class="py-12 text-center text-slate-500">
+        <div
+          v-else-if="listings.length === 0"
+          class="py-12 text-center text-slate-500"
+        >
           No listings found.
         </div>
 
@@ -85,55 +92,55 @@
 </template>
 
 <script setup lang="ts">
-
 definePageMeta({
-  layout: 'default'
-})
+  layout: "default",
+});
 
-import listingCard from '../components/listings/listingCard.vue'
+import listingCard from "../components/listings/listingCard.vue";
 
 type Listing = {
-  id: number
-  title: string
-  location: string
-  description: string
-  pricePerNight: number
-  rating: number
-  images: string[]
-  amenities: string[]
-  status: string
-  sellerEmail: string
-  createdAt: string
-}
+  id: number;
+  title: string;
+  location: string;
+  description: string;
+  lowestPrice: number;
+  highestPrice: number;
+  rating: number;
+  images: string[];
+  amenities: string[];
+  status: string;
+  sellerEmail: string;
+  createdAt: string;
+};
 
-const config = useRuntimeConfig()
+const config = useRuntimeConfig();
 
 const searchQuery = reactive({
-  destination: '',
-  dates: '',
-  occupancy: ''
-})
+  destination: "",
+  dates: "",
+  occupancy: "",
+});
 
-const listings = ref<Listing[]>([])
-const isLoading = ref(false)
+const listings = ref<Listing[]>([]);
+const isLoading = ref(false);
 
 async function fetchListings() {
-  isLoading.value = true
+  isLoading.value = true;
 
   try {
     listings.value = await $fetch<Listing[]>(
-      `${config.public.apiBase}/listings`
-    )
+      `${config.public.apiBase}/listings`,
+    );
   } catch (error) {
-    console.error(error)
+    console.error(error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 function handleSearch() {
-  console.log('Searching with:', searchQuery)
+  console.log("Searching with:", searchQuery);
 }
 
-onMounted(fetchListings)
+onMounted(fetchListings);
 </script>

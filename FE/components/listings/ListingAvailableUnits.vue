@@ -4,18 +4,29 @@ type ListingUnit = {
   type: string;
   label: string;
   quantity: number;
+  availableQuantity?: number;
   maxGuests?: number;
   pricePerNight: number;
 };
 
-defineProps<{
-  units?: ListingUnit[];
-}>();
+withDefaults(
+  defineProps<{
+    units?: ListingUnit[];
+    title?: string;
+    showQuantity?: boolean;
+  }>(),
+  {
+    title: "Available units",
+    showQuantity: true,
+  }
+);
 </script>
 
 <template>
   <div class="mt-10">
-    <h3 class="text-xl font-bold mb-4">Available units</h3>
+    <h3 class="mb-4 text-xl font-bold">
+      {{ title }}
+    </h3>
 
     <div v-if="units?.length" class="space-y-3">
       <div
@@ -28,14 +39,20 @@ defineProps<{
             {{ unit.label }}
           </p>
 
-          <p class="text-sm text-slate-500">{{ unit.quantity }} available</p>
+          <p v-if="showQuantity" class="text-sm text-slate-500">
+            {{
+              unit.availableQuantity !== undefined
+                ? `${unit.availableQuantity} of ${unit.quantity} available`
+                : `${unit.quantity} available`
+            }}
+          </p>
 
           <p v-if="unit.maxGuests" class="text-sm text-slate-500">
             Up to {{ unit.maxGuests }}
             {{ unit.maxGuests === 1 ? "guest" : "guests" }}
           </p>
 
-          <p v-else class="text-sm text-slate-400 italic">
+          <p v-else class="text-sm italic text-slate-400">
             Guest capacity not specified
           </p>
         </div>
@@ -46,6 +63,8 @@ defineProps<{
       </div>
     </div>
 
-    <p v-else class="text-slate-500">No units listed.</p>
+    <p v-else class="text-slate-500">
+      No units listed.
+    </p>
   </div>
 </template>

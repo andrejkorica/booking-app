@@ -63,7 +63,15 @@ public class BookingController {
             @CookieValue("token") String token,
             @PathVariable Long bookingId) {
 
-        return bookingService.getBooking(token, bookingId);
+        return bookingService.getBookingDetails(token, bookingId);
+    }
+
+    @GetMapping("/seller/listings/{listingId}/bookings")
+    public List<BookingResponse> getBookingsForSellerListing(
+            @PathVariable Long listingId,
+            @CookieValue("token") String token) {
+
+        return bookingService.getBookingsForSellerListing(token, listingId);
     }
 
 }

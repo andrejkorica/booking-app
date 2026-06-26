@@ -1,6 +1,7 @@
 package hr.pocetnik.bookingapp.repository;
 
 import hr.pocetnik.bookingapp.model.BookingEntity;
+import hr.pocetnik.bookingapp.model.ListingEntity;
 import hr.pocetnik.bookingapp.model.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -13,4 +14,8 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
     List<BookingEntity> findByListingId(Long listingId);
 
     List<BookingEntity> findByGuestOrderByCreatedAtDesc(UserEntity guest);
+
+    List<BookingEntity> findByListingOrderByCreatedAtDesc(ListingEntity listing);
+
+    List<BookingEntity> findByListing(ListingEntity listing);
 }

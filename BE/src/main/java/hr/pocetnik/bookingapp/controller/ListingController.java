@@ -1,11 +1,13 @@
 package hr.pocetnik.bookingapp.controller;
 
+import hr.pocetnik.bookingapp.dto.listing.ListingAvailableUnitResponse;
 import hr.pocetnik.bookingapp.dto.listing.ListingRequest;
 import hr.pocetnik.bookingapp.dto.listing.ListingResponse;
 import hr.pocetnik.bookingapp.service.ListingService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -50,13 +52,13 @@ public class ListingController {
         return listingService.getListingById(id);
     }
 
-    @DeleteMapping("/seller/listings/{id}")
-    public void deleteListing(
+    @PostMapping("/seller/listings/{id}/delete")
+    public ListingResponse deleteListing(
             @PathVariable("id") Long id,
             Authentication authentication) {
         String email = authentication.getName();
 
-        listingService.deleteListing(id, email);
+        return listingService.deleteListing(id, email);
     }
 
     @PostMapping("/seller/listings/{id}/update")
@@ -67,5 +69,12 @@ public class ListingController {
         String email = authentication.getName();
 
         return listingService.updateListing(id, email, request);
+    }
+
+    @GetMapping("/listings/{listingId}/available-units")
+    public List<ListingAvailableUnitResponse> getAvailableUnits(
+            @PathVariable Long listingId) {
+
+        return listingService.getAvailableUnits(listingId);
     }
 }

@@ -11,5 +11,6 @@ public interface BookingService {
     BookingResponse createBooking(String token, BookingRequest request);
     List<BookingResponse> getMyBookings(String token);
     BookingResponse cancelBooking(String token, Long bookingId);
-    BookingDetailsResponse getBooking(String token, Long bookingId);
+    BookingDetailsResponse getBookingDetails(String token, Long bookingId);
+    List<BookingResponse> getBookingsForSellerListing(String token, Long listingId);
 }

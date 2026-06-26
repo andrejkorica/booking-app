@@ -1,10 +1,8 @@
 package hr.pocetnik.bookingapp.service.implementation;
 
-import hr.pocetnik.bookingapp.dto.booking.BookingDetailsResponse;
 import hr.pocetnik.bookingapp.dto.booking.BookingRequest;
 import hr.pocetnik.bookingapp.dto.booking.BookingResponse;
 import hr.pocetnik.bookingapp.dto.booking.BookingUnitRequest;
-import hr.pocetnik.bookingapp.dto.booking.BookingUnitResponse;
 import hr.pocetnik.bookingapp.exception.UserNotFoundException;
 import hr.pocetnik.bookingapp.model.*;
 import hr.pocetnik.bookingapp.repository.BookingRepository;
@@ -14,7 +12,8 @@ import hr.pocetnik.bookingapp.service.BookingService;
 import hr.pocetnik.bookingapp.service.JwtService;
 import io.jsonwebtoken.Claims;
 import org.springframework.stereotype.Service;
-
+import hr.pocetnik.bookingapp.dto.booking.BookingDetailsResponse;
+import hr.pocetnik.bookingapp.dto.booking.BookingUnitResponse;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -287,15 +286,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDetailsResponse getBooking(String token, Long bookingId) {
+    public BookingDetailsResponse getBookingDetails(String token, Long bookingId) {
         Claims claims = jwtService.extractAllClaims(token);
         String email = claims.getSubject();
 
         BookingEntity booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found."));
 
-        if (!booking.getGuest().getEmail().equals(email)) {
-            throw new RuntimeException("You can only view your own booking.");
+        if (!booking.getGuest().getEmail().equals(email)
+                && !booking.getListing().getSeller().getEmail().equals(email)) {
+            throw new RuntimeException("You are not allowed to view this booking.");
         }
 
         return mapToDetailsResponse(booking);
@@ -310,8 +310,8 @@ public class BookingServiceImpl implements BookingService {
         response.setListingTitle(booking.getListing().getTitle());
         response.setListingLocation(booking.getListing().getLocation());
 
-        if (booking.getListing().getImages() != null &&
-                !booking.getListing().getImages().isEmpty()) {
+        if (booking.getListing().getImages() != null
+                && !booking.getListing().getImages().isEmpty()) {
             response.setListingImage(booking.getListing().getImages().get(0));
         }
 
@@ -361,4 +361,21 @@ public class BookingServiceImpl implements BookingService {
         return response;
     }
 
+    @Override
+    public List<BookingResponse> getBookingsForSellerListing(String token, Long listingId) {
+        Claims claims = jwtService.extractAllClaims(token);
+        String email = claims.getSubject();
+
+        ListingEntity listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new RuntimeException("Listing not found."));
+
+        if (!listing.getSeller().getEmail().equals(email)) {
+            throw new RuntimeException("You can only view bookings for your own listing.");
+        }
+
+        return bookingRepository.findByListingOrderByCreatedAtDesc(listing)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
 }

@@ -13,6 +13,7 @@ type ListingUnit = {
   type: string;
   label: string;
   quantity: number;
+  availableQuantity?: number;
   maxGuests?: number;
   pricePerNight: number;
 };
@@ -36,6 +37,13 @@ type Listing = {
   longitude: number | null;
 };
 
+const route = useRoute();
+const config = useRuntimeConfig();
+const toast = useToast();
+
+const listing = ref<Listing | null>(null);
+const isLoading = ref(false);
+
 const previewImages = computed(() => {
   return (
     listing.value?.images.map((image) => ({
@@ -43,13 +51,6 @@ const previewImages = computed(() => {
     })) ?? []
   );
 });
-
-const route = useRoute();
-const config = useRuntimeConfig();
-const toast = useToast();
-
-const listing = ref<Listing | null>(null);
-const isLoading = ref(false);
 
 const priceLabel = computed(() => {
   if (!listing.value) {
@@ -67,6 +68,22 @@ const priceLabel = computed(() => {
   return `€${listing.value.lowestPrice} - €${listing.value.highestPrice}`;
 });
 
+const statusColor = computed(() => {
+  if (listing.value?.status === "APPROVED") {
+    return "success";
+  }
+
+  if (listing.value?.status === "REJECTED") {
+    return "error";
+  }
+
+  if (listing.value?.status === "DELETED") {
+    return "neutral";
+  }
+
+  return "warning";
+});
+
 async function fetchListing() {
   isLoading.value = true;
 
@@ -75,7 +92,7 @@ async function fetchListing() {
       `${config.public.apiBase}/listings/${route.params.id}`,
       {
         credentials: "include",
-      },
+      }
     );
   } catch (error) {
     console.error(error);
@@ -97,7 +114,9 @@ onMounted(fetchListing);
   <div class="container mx-auto px-4 py-10">
     <div class="mb-8 flex items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">Listing Preview</h1>
+        <h1 class="text-3xl font-bold text-slate-900">
+          Listing Preview
+        </h1>
 
         <p class="mt-2 text-slate-600">
           Review the full listing before approving or rejecting it.
@@ -109,7 +128,8 @@ onMounted(fetchListing);
         icon="i-lucide-arrow-left"
         variant="soft"
         color="neutral"
-        to="/admin/listings" />
+        to="/admin/listings"
+      />
     </div>
 
     <div v-if="isLoading" class="py-10 text-center text-slate-500">
@@ -135,14 +155,9 @@ onMounted(fetchListing);
 
           <UBadge
             :label="listing.status"
-            :color="
-              listing.status === 'APPROVED'
-                ? 'success'
-                : listing.status === 'REJECTED'
-                  ? 'error'
-                  : 'warning'
-            "
-            variant="soft" />
+            :color="statusColor"
+            variant="soft"
+          />
         </div>
 
         <div class="flex items-center space-x-4 text-slate-500">
@@ -154,7 +169,8 @@ onMounted(fetchListing);
               :class="
                 i <= listing.rating ? 'text-yellow-400' : 'text-slate-200'
               "
-              class="h-5 w-5" />
+              class="h-5 w-5"
+            />
           </div>
 
           <div class="flex items-center">
@@ -182,20 +198,26 @@ onMounted(fetchListing);
             :location="listing.location"
             :latitude="listing.latitude"
             :longitude="listing.longitude"
-            class="mb-6" />
+            class="mb-6"
+          />
 
-          <h3 class="mb-4 text-xl font-bold">Amenities</h3>
+          <h3 class="mb-4 text-xl font-bold">
+            Amenities
+          </h3>
 
           <ul
             v-if="listing.amenities?.length"
-            class="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2">
+            class="grid grid-cols-1 gap-x-8 gap-y-2 sm:grid-cols-2"
+          >
             <li
               v-for="amenity in listing.amenities"
               :key="amenity"
-              class="flex items-center">
+              class="flex items-center"
+            >
               <UIcon
                 name="i-heroicons-check-circle"
-                class="mr-3 h-5 w-5 text-indigo-500" />
+                class="mr-3 h-5 w-5 text-indigo-500"
+              />
 
               <span class="text-slate-600">
                 {{ amenity }}
@@ -203,15 +225,22 @@ onMounted(fetchListing);
             </li>
           </ul>
 
-          <p v-else class="text-slate-500">No amenities listed.</p>
+          <p v-else class="text-slate-500">
+            No amenities listed.
+          </p>
 
-          <ListingAvailableUnits :units="listing.units" />
+          <ListingAvailableUnits
+            :units="listing.units"
+            title="Listed units"
+          />
         </div>
 
         <div>
           <UCard class="border border-slate-200 bg-white shadow-lg">
             <div class="space-y-4 text-center">
-              <p class="text-lg text-slate-500">Price per night</p>
+              <p class="text-lg text-slate-500">
+                Price per night
+              </p>
 
               <p class="text-4xl font-bold text-slate-900">
                 {{ priceLabel }}
@@ -221,7 +250,9 @@ onMounted(fetchListing);
                 Available from {{ listing.availableFrom }}
               </p>
 
-              <p class="text-sm text-slate-500">Preview only.</p>
+              <p class="text-sm text-slate-500">
+                Preview only.
+              </p>
             </div>
           </UCard>
         </div>

@@ -1,20 +1,28 @@
 package hr.pocetnik.bookingapp.service.implementation;
 
+import hr.pocetnik.bookingapp.dto.listing.ListingAvailableUnitResponse;
 import hr.pocetnik.bookingapp.dto.listing.ListingRequest;
 import hr.pocetnik.bookingapp.dto.listing.ListingResponse;
+import hr.pocetnik.bookingapp.model.BookingEntity;
+import hr.pocetnik.bookingapp.model.BookingStatus;
+import hr.pocetnik.bookingapp.model.BookingUnitEntity;
 import hr.pocetnik.bookingapp.model.ListingEntity;
 import hr.pocetnik.bookingapp.model.ListingPriceAdjustmentEntity;
 import hr.pocetnik.bookingapp.model.ListingStatus;
 import hr.pocetnik.bookingapp.model.ListingUnitEntity;
 import hr.pocetnik.bookingapp.model.UserEntity;
+import hr.pocetnik.bookingapp.repository.BookingRepository;
 import hr.pocetnik.bookingapp.repository.ListingRepository;
 import hr.pocetnik.bookingapp.repository.UserRepository;
 import hr.pocetnik.bookingapp.service.ListingService;
 
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,12 +30,15 @@ public class ListingServiceImpl implements ListingService {
 
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
 
     public ListingServiceImpl(
             ListingRepository listingRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            BookingRepository bookingRepository) {
         this.listingRepository = listingRepository;
         this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     @Override
@@ -122,10 +133,7 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
-    public void deleteListing(
-            Long id,
-            String sellerEmail) {
-
+    public ListingResponse deleteListing(Long id, String sellerEmail) {
         ListingEntity listing = listingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Listing not found"));
 
@@ -133,7 +141,11 @@ public class ListingServiceImpl implements ListingService {
             throw new RuntimeException("You do not own this listing");
         }
 
-        listingRepository.delete(listing);
+        listing.setStatus(ListingStatus.DELETED);
+
+        ListingEntity savedListing = listingRepository.save(listing);
+
+        return mapToResponse(savedListing);
     }
 
     @Override
@@ -199,7 +211,6 @@ public class ListingServiceImpl implements ListingService {
                     unit.setPricePerNight(unitRequest.getPricePerNight());
                     unit.setListing(listing);
                     unit.setMaxGuests(unitRequest.getMaxGuests());
-                    
 
                     return unit;
                 })
@@ -223,7 +234,6 @@ public class ListingServiceImpl implements ListingService {
                     adjustment.setEndDate(adjustmentRequest.getEndDate());
                     adjustment.setPercent(adjustmentRequest.getPercent());
                     adjustment.setListing(listing);
-                    
 
                     return adjustment;
                 })
@@ -291,5 +301,51 @@ public class ListingServiceImpl implements ListingService {
         }
 
         return response;
+    }
+
+    @Override
+    public List<ListingAvailableUnitResponse> getAvailableUnits(Long listingId) {
+        ListingEntity listing = listingRepository.findById(listingId)
+                .orElseThrow(() -> new RuntimeException("Listing not found."));
+
+        List<BookingEntity> activeBookings = bookingRepository
+                .findByListing(listing)
+                .stream()
+                .filter(booking -> booking.getStatus() != BookingStatus.CANCELLED)
+                .toList();
+
+        Map<String, Integer> bookedByUnitType = new HashMap<>();
+
+        for (BookingEntity booking : activeBookings) {
+            if (booking.getUnits() == null) {
+                continue;
+            }
+
+            for (BookingUnitEntity bookedUnit : booking.getUnits()) {
+                bookedByUnitType.merge(
+                        bookedUnit.getUnitType(),
+                        bookedUnit.getQuantity(),
+                        Integer::sum);
+            }
+        }
+
+        return listing.getUnits()
+                .stream()
+                .map(unit -> {
+                    int bookedQuantity = bookedByUnitType.getOrDefault(unit.getType(), 0);
+                    int availableQuantity = Math.max(0, unit.getQuantity() - bookedQuantity);
+
+                    ListingAvailableUnitResponse response = new ListingAvailableUnitResponse();
+
+                    response.setType(unit.getType());
+                    response.setLabel(unit.getLabel());
+                    response.setQuantity(unit.getQuantity());
+                    response.setAvailableQuantity(availableQuantity);
+                    response.setMaxGuests(unit.getMaxGuests());
+                    response.setPricePerNight(unit.getPricePerNight());
+
+                    return response;
+                })
+                .toList();
     }
 }

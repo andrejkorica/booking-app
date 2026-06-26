@@ -66,8 +66,8 @@ function availability(id: number) {
 async function deleteListing(id: number) {
 
   try {
-    await $fetch(`${config.public.apiBase}/seller/listings/${id}`, {
-      method: 'DELETE',
+    await $fetch(`${config.public.apiBase}/seller/listings/${id}/delete`, {
+      method: 'POST',
       credentials: 'include'
     })
 
