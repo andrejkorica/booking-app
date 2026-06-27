@@ -5,7 +5,6 @@ import {
   parseDate,
 } from "@internationalized/date";
 import type { DateValue } from "@internationalized/date";
-import type { ListingSearchQuery } from "~/types/Search";
 import FilteringGuestSelector from "~/components/filtering/FilteringGuestSelector.vue";
 
 type DateRangeValue = {
@@ -91,16 +90,20 @@ function getDateLabel() {
   return `${df.format(start.toDate(tz))} - ${df.format(end.toDate(tz))}`;
 }
 
-const emit = defineEmits<{
-  search: [query: ListingSearchQuery];
-}>();
+
+const router = useRouter();
 
 function handleSearch() {
-  emit("search", {
-    destination: destination.value,
-    checkIn: checkIn.value,
-    checkOut: checkOut.value,
-    occupancy: `${guestInfo.value.adults} adults · ${guestInfo.value.children} children · ${guestInfo.value.rooms} rooms`,
+  router.push({
+    path: "/listings",
+    query: {
+      location: destination.value || undefined,
+      checkIn: checkIn.value || undefined,
+      checkOut: checkOut.value || undefined,
+      adults: guestInfo.value.adults,
+      children: guestInfo.value.children,
+      rooms: guestInfo.value.rooms,
+    },
   });
 }
 </script>
