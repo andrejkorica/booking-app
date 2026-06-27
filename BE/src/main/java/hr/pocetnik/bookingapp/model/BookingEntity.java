@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import hr.pocetnik.bookingapp.enums.BookingStatus;
+
 @Entity
 @Getter
 @Setter

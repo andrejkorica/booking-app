@@ -1,10 +1,10 @@
 package hr.pocetnik.bookingapp.service.implementation;
 
+import hr.pocetnik.bookingapp.enums.Role;
+import hr.pocetnik.bookingapp.enums.SellerRequestStatus;
 import hr.pocetnik.bookingapp.exception.UserNotFoundException;
-import hr.pocetnik.bookingapp.model.Role;
 import hr.pocetnik.bookingapp.model.SellerDataEntity;
 import hr.pocetnik.bookingapp.model.SellerRequestEntity;
-import hr.pocetnik.bookingapp.model.SellerRequestStatus;
 import hr.pocetnik.bookingapp.model.UserEntity;
 import hr.pocetnik.bookingapp.repository.SellerDataRepository;
 import hr.pocetnik.bookingapp.repository.SellerRequestRepository;

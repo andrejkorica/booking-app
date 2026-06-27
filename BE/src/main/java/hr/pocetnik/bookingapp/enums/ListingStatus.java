@@ -1,4 +1,4 @@
-package hr.pocetnik.bookingapp.model;
+package hr.pocetnik.bookingapp.enums;
 
 public enum ListingStatus {
     PENDING,

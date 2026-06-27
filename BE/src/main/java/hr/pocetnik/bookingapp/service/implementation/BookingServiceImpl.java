@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import hr.pocetnik.bookingapp.dto.booking.BookingDetailsResponse;
 import hr.pocetnik.bookingapp.dto.booking.BookingRangeResponse;
 import hr.pocetnik.bookingapp.dto.booking.BookingUnitResponse;
+import hr.pocetnik.bookingapp.enums.BookingStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

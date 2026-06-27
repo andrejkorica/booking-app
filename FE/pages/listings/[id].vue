@@ -1,3 +1,235 @@
+<script setup lang="ts">
+import { useAuthStore } from "~/stores/auth";
+import CreateListingImagePreview from "~/components/listings/CreateListingImagePreview.vue";
+import ListingLocationMap from "~/components/listings/ListingLocationMap.vue";
+import ListingAvailableUnits from "~/components/listings/ListingAvailableUnits.vue";
+import ListingReviews from "~/components/listings/ListingReviews.vue";
+import type { ListingReview } from "~/types/ReviewTypes";
+import type { Listing, ListingUnit } from "~/types/ListingTypes";
+
+const route = useRoute();
+const router = useRouter();
+const config = useRuntimeConfig();
+const authStore = useAuthStore();
+const toast = useToast();
+
+const listingData = ref<Listing | null>(null);
+const availableUnits = ref<ListingUnit[]>([]);
+const reviews = ref<ListingReview[]>([]);
+
+const isLoading = ref(false);
+const isLoadingAvailableUnits = ref(false);
+const isSubmittingReview = ref(false);
+
+const reviewSort = ref("newest");
+
+const reviewSortOptions = [
+  { label: "Newest", value: "newest" },
+  { label: "Oldest", value: "oldest" },
+  { label: "Highest rating", value: "highest-rating" },
+  { label: "Lowest rating", value: "lowest-rating" },
+  { label: "Most upvoted", value: "most-upvotes" },
+  { label: "Least upvoted", value: "least-upvotes" },
+];
+
+const sortedReviews = computed(() => {
+  const list = [...reviews.value];
+
+  switch (reviewSort.value) {
+    case "highest-rating":
+      return list.sort((a, b) => b.rating - a.rating);
+    case "lowest-rating":
+      return list.sort((a, b) => a.rating - b.rating);
+    case "most-upvotes":
+      return list.sort((a, b) => b.upvotes - a.upvotes);
+    case "least-upvotes":
+      return list.sort((a, b) => a.upvotes - b.upvotes);
+    case "oldest":
+      return list.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+    case "newest":
+    default:
+      return list.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+  }
+});
+
+const previewImages = computed(() => {
+  return (
+    listingData.value?.images.map((image) => ({
+      previewUrl: image,
+    })) ?? []
+  );
+});
+
+const hasAvailableUnits = computed(() => {
+  return availableUnits.value.some((unit) => {
+    const quantity =
+      unit.availableQuantity !== undefined
+        ? unit.availableQuantity
+        : unit.quantity;
+
+    return quantity > 0;
+  });
+});
+
+const isAvailableForBooking = computed(() => {
+  if (!listingData.value?.availableFrom) return true;
+
+  const today = new Date();
+  const availableFrom = new Date(listingData.value.availableFrom);
+
+  today.setHours(0, 0, 0, 0);
+  availableFrom.setHours(0, 0, 0, 0);
+
+  return availableFrom <= today;
+});
+
+const priceLabel = computed(() => {
+  if (!listingData.value) return "Price not set";
+
+  if (!listingData.value.lowestPrice && !listingData.value.highestPrice) {
+    return "Price not set";
+  }
+
+  if (listingData.value.lowestPrice === listingData.value.highestPrice) {
+    return `€${listingData.value.lowestPrice}`;
+  }
+
+  return `€${listingData.value.lowestPrice} - €${listingData.value.highestPrice}`;
+});
+
+const isOwner = computed(() => {
+  if (!authStore.user || !listingData.value) return false;
+
+  return authStore.user.email === listingData.value.sellerEmail;
+});
+
+async function fetchReviews(listingId: number) {
+  try {
+    reviews.value = await $fetch<ListingReview[]>(
+      `${config.public.apiBase}/listings/${listingId}/reviews`,
+      { credentials: "include" },
+    );
+  } catch (error) {
+    console.error(error);
+    reviews.value = [];
+  }
+}
+
+async function fetchAvailableUnits(listingId: number) {
+  isLoadingAvailableUnits.value = true;
+
+  try {
+    availableUnits.value = await $fetch<ListingUnit[]>(
+      `${config.public.apiBase}/listings/${listingId}/available-units`,
+    );
+  } catch (error) {
+    console.error(error);
+    availableUnits.value = listingData.value?.units ?? [];
+  } finally {
+    isLoadingAvailableUnits.value = false;
+  }
+}
+
+async function fetchListing() {
+  isLoading.value = true;
+
+  try {
+    listingData.value = await $fetch<Listing>(
+      `${config.public.apiBase}/listings/${route.params.id}`,
+    );
+
+    await Promise.all([
+      fetchAvailableUnits(listingData.value.id),
+      fetchReviews(listingData.value.id),
+    ]);
+  } catch (error) {
+    console.error(error);
+    listingData.value = null;
+    availableUnits.value = [];
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+async function submitReview(review: { rating: number; comment: string }) {
+  if (!listingData.value) return;
+
+  isSubmittingReview.value = true;
+
+  try {
+    const createdReview = await $fetch<ListingReview>(
+      `${config.public.apiBase}/listings/${listingData.value.id}/reviews`,
+      {
+        method: "POST",
+        credentials: "include",
+        body: review,
+      },
+    );
+
+    reviews.value = [createdReview, ...reviews.value];
+
+    toast.add({
+      title: "Review submitted",
+      description: "Thank you for sharing your experience.",
+      color: "success",
+    });
+  } catch (error) {
+    console.error(error);
+
+    toast.add({
+      title: "Failed to submit review",
+      description: "Please try again later.",
+      color: "error",
+    });
+  } finally {
+    isSubmittingReview.value = false;
+  }
+}
+
+async function voteReview(reviewId: number, voteType: "UP" | "DOWN") {
+  if (!listingData.value) return;
+
+  const listingId = listingData.value.id;
+
+  try {
+    const updatedReview = await $fetch<ListingReview>(
+      `${config.public.apiBase}/listings/${listingId}/reviews/${reviewId}/vote`,
+      {
+        method: "POST",
+        credentials: "include",
+        body: { voteType },
+      },
+    );
+
+    reviews.value = reviews.value.map((review) =>
+      review.id === reviewId ? updatedReview : review,
+    );
+  } catch (error) {
+    console.error(error);
+
+    toast.add({
+      title: "Vote failed",
+      description: "Could not update your vote.",
+      color: "error",
+    });
+  }
+}
+
+onMounted(fetchListing);
+
+useHead(() => ({
+  title: listingData.value
+    ? `${listingData.value.title} | Details`
+    : "Listing Details",
+}));
+</script>
+
 <template>
   <div class="min-h-screen bg-white text-slate-900">
     <UContainer class="py-12">
@@ -7,9 +239,7 @@
 
       <div v-else-if="listingData">
         <header class="mb-8">
-          <h1
-            class="mb-2 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl"
-          >
+          <h1 class="mb-2 text-4xl font-bold tracking-tight md:text-5xl">
             {{ listingData.title }}
           </h1>
 
@@ -111,7 +341,7 @@
               <div class="space-y-4 text-center">
                 <p class="text-lg text-slate-500">Price per night</p>
 
-                <p class="text-4xl font-bold text-slate-900">
+                <p class="text-4xl font-bold">
                   {{ priceLabel }}
                 </p>
 
@@ -143,6 +373,7 @@
                 <p v-else-if="isOwner" class="text-sm text-slate-500">
                   You cannot book your own listing.
                 </p>
+
                 <p
                   v-else-if="!hasAvailableUnits"
                   class="text-sm text-slate-500"
@@ -161,17 +392,12 @@
           </div>
         </div>
 
-        <div class="mt-16">
-          <h2 class="mb-6 border-b border-slate-200 pb-2 text-2xl font-bold">
-            Reviews and Comments (0)
-          </h2>
-
-          <div
-            class="rounded-xl border border-slate-200 bg-slate-50 p-5 text-slate-500"
-          >
-            No reviews yet.
-          </div>
-        </div>
+        <ListingReviews
+          :reviews="reviews"
+          :is-logged-in="Boolean(authStore.user)"
+          @submit-review="submitReview"
+          @vote-review="voteReview"
+        />
       </div>
 
       <div v-else>
@@ -180,148 +406,3 @@
     </UContainer>
   </div>
 </template>
-
-<script setup lang="ts">
-import { useAuthStore } from "~/stores/auth";
-import CreateListingImagePreview from "~/components/listings/CreateListingImagePreview.vue";
-import ListingLocationMap from "~/components/listings/ListingLocationMap.vue";
-import ListingAvailableUnits from "~/components/listings/ListingAvailableUnits.vue";
-
-type ListingUnit = {
-  id?: number;
-  type: string;
-  label: string;
-  quantity: number;
-  availableQuantity?: number;
-  maxGuests?: number;
-  pricePerNight: number;
-};
-
-type Listing = {
-  id: number;
-  title: string;
-  location: string;
-  latitude: number | null;
-  longitude: number | null;
-  description: string;
-  lowestPrice: number;
-  highestPrice: number;
-  rating: number;
-  images: string[];
-  amenities: string[];
-  availableFrom: string;
-  units: ListingUnit[];
-  status: string;
-  sellerEmail: string;
-  createdAt: string;
-};
-
-const route = useRoute();
-const router = useRouter();
-const config = useRuntimeConfig();
-const authStore = useAuthStore();
-
-const listingData = ref<Listing | null>(null);
-const availableUnits = ref<ListingUnit[]>([]);
-const isLoading = ref(false);
-const isLoadingAvailableUnits = ref(false);
-
-const previewImages = computed(() => {
-  return (
-    listingData.value?.images.map((image) => ({
-      previewUrl: image,
-    })) ?? []
-  );
-});
-
-const hasAvailableUnits = computed(() => {
-  return availableUnits.value.some((unit) => {
-    const quantity =
-      unit.availableQuantity !== undefined
-        ? unit.availableQuantity
-        : unit.quantity;
-
-    return quantity > 0;
-  });
-});
-
-const isAvailableForBooking = computed(() => {
-  if (!listingData.value?.availableFrom) {
-    return true;
-  }
-
-  const today = new Date();
-  const availableFrom = new Date(listingData.value.availableFrom);
-
-  today.setHours(0, 0, 0, 0);
-  availableFrom.setHours(0, 0, 0, 0);
-
-  return availableFrom <= today;
-});
-
-const priceLabel = computed(() => {
-  if (!listingData.value) {
-    return "Price not set";
-  }
-
-  if (!listingData.value.lowestPrice && !listingData.value.highestPrice) {
-    return "Price not set";
-  }
-
-  if (listingData.value.lowestPrice === listingData.value.highestPrice) {
-    return `€${listingData.value.lowestPrice}`;
-  }
-
-  return `€${listingData.value.lowestPrice} - €${listingData.value.highestPrice}`;
-});
-
-const isOwner = computed(() => {
-  if (!authStore.user || !listingData.value) {
-    return false;
-  }
-
-  return authStore.user.email === listingData.value.sellerEmail;
-});
-
-async function fetchAvailableUnits(listingId: number) {
-  isLoadingAvailableUnits.value = true;
-
-  try {
-    availableUnits.value = await $fetch<ListingUnit[]>(
-      `${config.public.apiBase}/listings/${listingId}/available-units`,
-    );
-  } catch (error) {
-    console.error(error);
-
-    availableUnits.value = listingData.value?.units ?? [];
-  } finally {
-    isLoadingAvailableUnits.value = false;
-  }
-}
-
-async function fetchListing() {
-  isLoading.value = true;
-
-  try {
-    listingData.value = await $fetch<Listing>(
-      `${config.public.apiBase}/listings/${route.params.id}`,
-    );
-
-    await fetchAvailableUnits(listingData.value.id);
-  } catch (error) {
-    console.error(error);
-    listingData.value = null;
-    availableUnits.value = [];
-  } finally {
-    isLoading.value = false;
-  }
-}
-
-onMounted(fetchListing);
-
-useHead(() => ({
-  title: listingData.value
-    ? `${listingData.value.title} | Details`
-    : "Listing Details",
-}));
-</script>

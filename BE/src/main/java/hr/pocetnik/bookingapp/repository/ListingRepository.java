@@ -1,7 +1,7 @@
 package hr.pocetnik.bookingapp.repository;
 
+import hr.pocetnik.bookingapp.enums.ListingStatus;
 import hr.pocetnik.bookingapp.model.ListingEntity;
-import hr.pocetnik.bookingapp.model.ListingStatus;
 import hr.pocetnik.bookingapp.model.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -1,12 +1,13 @@
 package hr.pocetnik.bookingapp.dto.booking;
 
-import hr.pocetnik.bookingapp.model.BookingStatus;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import hr.pocetnik.bookingapp.enums.BookingStatus;
 
 @Getter
 @Setter

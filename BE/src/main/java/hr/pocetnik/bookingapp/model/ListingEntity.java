@@ -9,6 +9,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import hr.pocetnik.bookingapp.enums.ListingStatus;
+
 @Entity
 @Getter
 @Setter

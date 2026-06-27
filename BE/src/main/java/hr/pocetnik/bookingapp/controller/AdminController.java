@@ -1,12 +1,9 @@
 package hr.pocetnik.bookingapp.controller;
 
 import hr.pocetnik.bookingapp.dto.listing.ListingResponse;
-import hr.pocetnik.bookingapp.model.ListingEntity;
-import hr.pocetnik.bookingapp.model.ListingStatus;
 import hr.pocetnik.bookingapp.model.SellerDataEntity;
 import hr.pocetnik.bookingapp.model.SellerRequestEntity;
 import hr.pocetnik.bookingapp.model.UserEntity;
-import hr.pocetnik.bookingapp.repository.ListingRepository;
 import hr.pocetnik.bookingapp.repository.UserRepository;
 import hr.pocetnik.bookingapp.service.ListingService;
 import hr.pocetnik.bookingapp.service.SellerRequestService;

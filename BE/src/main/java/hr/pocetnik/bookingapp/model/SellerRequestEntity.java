@@ -2,6 +2,7 @@ package hr.pocetnik.bookingapp.model;
 
 import java.time.LocalDateTime;
 
+import hr.pocetnik.bookingapp.enums.SellerRequestStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

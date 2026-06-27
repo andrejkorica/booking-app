@@ -1,17 +1,16 @@
 package hr.pocetnik.bookingapp.service.implementation;
 
+import hr.pocetnik.bookingapp.enums.Role;
 import hr.pocetnik.bookingapp.exception.InvalidCredentialException;
 import hr.pocetnik.bookingapp.exception.InvalidEmailFormatException;
 import hr.pocetnik.bookingapp.exception.UserAlreadyExistsException;
 import hr.pocetnik.bookingapp.exception.UserNotFoundException;
-import hr.pocetnik.bookingapp.model.Role;
 import hr.pocetnik.bookingapp.model.UserEntity;
 import hr.pocetnik.bookingapp.repository.UserRepository;
 import hr.pocetnik.bookingapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;

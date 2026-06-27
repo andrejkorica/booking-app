@@ -1,5 +1,6 @@
 package hr.pocetnik.bookingapp.model;
 
+import hr.pocetnik.bookingapp.enums.Role;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

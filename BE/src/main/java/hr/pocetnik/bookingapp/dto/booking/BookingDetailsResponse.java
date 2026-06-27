@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import hr.pocetnik.bookingapp.model.BookingStatus;
+import hr.pocetnik.bookingapp.enums.BookingStatus;
 import lombok.Getter;
 import lombok.Setter;
 

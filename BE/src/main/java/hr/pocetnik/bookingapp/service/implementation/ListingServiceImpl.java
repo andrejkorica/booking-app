@@ -4,12 +4,14 @@ import hr.pocetnik.bookingapp.dto.booking.BookingRangeResponse;
 import hr.pocetnik.bookingapp.dto.listing.ListingAvailableUnitResponse;
 import hr.pocetnik.bookingapp.dto.listing.ListingRequest;
 import hr.pocetnik.bookingapp.dto.listing.ListingResponse;
+import hr.pocetnik.bookingapp.enums.BookingStatus;
+import hr.pocetnik.bookingapp.enums.ListingStatus;
 import hr.pocetnik.bookingapp.model.BookingEntity;
-import hr.pocetnik.bookingapp.model.BookingStatus;
+
 import hr.pocetnik.bookingapp.model.BookingUnitEntity;
 import hr.pocetnik.bookingapp.model.ListingEntity;
 import hr.pocetnik.bookingapp.model.ListingPriceAdjustmentEntity;
-import hr.pocetnik.bookingapp.model.ListingStatus;
+
 import hr.pocetnik.bookingapp.model.ListingUnitEntity;
 import hr.pocetnik.bookingapp.model.UserEntity;
 import hr.pocetnik.bookingapp.repository.BookingRepository;
