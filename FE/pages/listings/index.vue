@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import FilteringSearchBar from "~/components/filtering/FilteringSearchBar.vue";
 import FilteringSidebar from "~/components/filtering/filterBar/FilteringSidebar.vue";
-import ListingCard from "~/components/listings/listingCard.vue";
+import ListingCard from "~/components/listings/ListingCard.vue";
 import FilteringSortDropdown from "~/components/filtering/FilteringSortDropdown.vue";
+import type { Listing } from "~/types/ListingTypes";
 
 
 const sort = ref("top");
@@ -11,20 +12,6 @@ definePageMeta({
   layout: "default",
 });
 
-type Listing = {
-  id: number;
-  title: string;
-  location: string;
-  description: string;
-  lowestPrice: number;
-  highestPrice: number;
-  rating: number;
-  images: string[];
-  amenities: string[];
-  status: string;
-  sellerEmail: string;
-  createdAt: string;
-};
 
 const config = useRuntimeConfig();
 const route = useRoute();

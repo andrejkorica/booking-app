@@ -7,6 +7,7 @@ import CreateListingAvailability from "../../../components/listings/create/Creat
 import type { PriceAdjustment } from "~/types/ListingTypes.js";
 import CreateListingLocation from "../../../components/listings/create/CreateListingLocation.vue";
 import CreateListingImagePreview from "../../../components/listings/create/CreateListingImagePreview.vue";
+import CreateListingPriceAdjustments from "~/components/listings/create/CreateListingPriceAdjustments.vue";
 import type { ListingUnit } from "~/types/ListingTypes.js";
 
 definePageMeta({

@@ -1,39 +1,21 @@
 <script setup lang="ts">
 import type { DateValue } from "@internationalized/date";
 import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
-import { unitTypes } from "~/types/UnitTypes.js";
-import CreateListingUnits, {
-  type ListingUnit,
-} from "../../../../components/listings/CreateListingUnits.vue";
-import CreateListingAvailability from "../../../../components/listings/CreateListingAvailability.vue";
-import CreateListingPriceAdjustments, {
-  type PriceAdjustment,
-} from "../../../../components/listings/CreateListingPriceAdjustments.vue";
-import CreateListingLocation from "../../../../components/listings/CreateListingLocation.vue";
-import CreateListingImagePreview from "../../../../components/listings/CreateListingImagePreview.vue";
-
+import { unitTypes } from "~/constants/UnitConstants.js";
+import type {
+  Listing,
+  ListingUnit,
+  PriceAdjustment,
+} from "~/types/ListingTypes.js";
+import CreateListingAvailability from "~/components/listings/create/CreateListingAvailability.vue";
+import CreateListingPriceAdjustments from "~/components/listings/create/CreateListingPriceAdjustments.vue";
+import CreateListingLocation from "~/components/listings/create/CreateListingLocation.vue";
+import CreateListingImagePreview from "~/components/listings/create/CreateListingImagePreview.vue";
+import CreateListingUnits from "~/components/listings/create/CreateListingUnits.vue";
 definePageMeta({
   layout: "default",
   middleware: "seller-guard",
 });
-
-type Listing = {
-  id: number;
-  title: string;
-  location: string;
-  description: string;
-  lowestPrice: number;
-  highestPrice: number;
-  rating: number;
-  images: string[];
-  amenities: string[];
-  availableFrom: string;
-  units: ListingUnit[];
-  priceAdjustments: PriceAdjustment[];
-  status: string;
-  latitude: number | null;
-  longitude: number | null;
-};
 
 type ListingImage = {
   file?: File;
@@ -63,10 +45,12 @@ const form = reactive({
 const images = ref<ListingImage[]>([]);
 
 const listingUnits = ref<ListingUnit[]>(
-  unitTypes.map((unit) => ({
-    type: unit.value,
-    label: unit.label,
+  unitTypes.map((unitType) => ({
+    type: unitType.value,
+    label: unitType.label,
     quantity: 0,
+    maxGuests: unitType.maxGuests,
+    roomCount: unitType.roomCount,
     pricePerNight: 0,
   })),
 );
@@ -190,12 +174,16 @@ async function fetchListing() {
     const savedUnits = listing.units || [];
 
     listingUnits.value = unitTypes.map((unitType) => {
-      const savedUnit = savedUnits.find((unit) => unit.type === unitType.value);
+      const savedUnit = savedUnits.find(
+        (unit: ListingUnit) => unit.type === unitType.value,
+      );
 
       return {
         type: unitType.value,
         label: unitType.label,
         quantity: savedUnit ? Number(savedUnit.quantity) : 0,
+        maxGuests: unitType.maxGuests,
+        roomCount: unitType.roomCount,
         pricePerNight: savedUnit ? Number(savedUnit.pricePerNight) : 0,
       };
     });
@@ -276,6 +264,8 @@ async function updateListing() {
             type: unit.type,
             label: unit.label,
             quantity: Number(unit.quantity),
+            maxGuests: Number(unit.maxGuests),
+            roomCount: Number(unit.roomCount),
             pricePerNight: Number(unit.pricePerNight),
           })),
           latitude: form.latitude,
@@ -350,7 +340,8 @@ onUnmounted(() => {
               icon="i-lucide-arrow-left"
               variant="soft"
               color="neutral"
-              to="/seller/listings/manage" />
+              to="/seller/listings/manage"
+            />
           </div>
 
           <div class="flex flex-col gap-4 md:flex-row md:items-center">
@@ -358,7 +349,7 @@ onUnmounted(() => {
               v-model="form.title"
               placeholder="Property title"
               size="xl"
-              />
+            />
 
             <UInput
               v-model.number="form.rating"
@@ -367,7 +358,8 @@ onUnmounted(() => {
               max="5"
               placeholder="Rating"
               icon="i-heroicons-star-solid"
-              class="w-full md:max-w-32" />
+              class="w-full md:max-w-32"
+            />
           </div>
         </header>
 
@@ -383,12 +375,14 @@ onUnmounted(() => {
               v-model="form.description"
               :rows="8"
               placeholder="Describe your property..."
-              class="mb-8 w-full" />
+              class="mb-8 w-full"
+            />
 
             <CreateListingLocation
               v-model:location="form.location"
               v-model:latitude="form.latitude"
-              v-model:longitude="form.longitude" />
+              v-model:longitude="form.longitude"
+            />
 
             <h3 class="mb-4 text-xl font-bold">Images</h3>
 
@@ -398,7 +392,8 @@ onUnmounted(() => {
               accept="image/*"
               multiple
               class="hidden"
-              @change="onImagesSelected" />
+              @change="onImagesSelected"
+            />
 
             <div class="mb-8 space-y-4">
               <UButton
@@ -406,25 +401,31 @@ onUnmounted(() => {
                 icon="i-lucide-upload"
                 variant="soft"
                 color="neutral"
-                @click="openFilePicker" />
+                @click="openFilePicker"
+              />
 
               <div
                 v-if="images.length"
-                class="grid grid-cols-2 gap-4 md:grid-cols-3">
+                class="grid grid-cols-2 gap-4 md:grid-cols-3"
+              >
                 <div
                   v-for="(image, index) in images"
                   :key="image.previewUrl"
-                  class="relative overflow-hidden rounded-xl border bg-slate-50">
+                  class="relative overflow-hidden rounded-xl border bg-slate-50"
+                >
                   <img
                     :src="image.previewUrl"
-                    class="h-32 w-full object-cover" />
+                    class="h-32 w-full object-cover"
+                  />
 
                   <div
                     v-if="image.isUploading"
-                    class="absolute inset-0 flex items-center justify-center bg-black/40">
+                    class="absolute inset-0 flex items-center justify-center bg-black/40"
+                  >
                     <UIcon
                       name="i-lucide-loader-circle"
-                      class="h-7 w-7 animate-spin text-white" />
+                      class="h-7 w-7 animate-spin text-white"
+                    />
                   </div>
 
                   <UButton
@@ -434,7 +435,8 @@ onUnmounted(() => {
                     size="xs"
                     class="absolute right-2 top-2"
                     :disabled="isSubmitting"
-                    @click="removeImage(index)" />
+                    @click="removeImage(index)"
+                  />
                 </div>
               </div>
             </div>
@@ -445,19 +447,22 @@ onUnmounted(() => {
               <div
                 v-for="(amenity, index) in form.amenities"
                 :key="index"
-                class="flex gap-2">
+                class="flex gap-2"
+              >
                 <UInput
                   v-model="form.amenities[index]"
                   placeholder="Amenity"
                   icon="i-heroicons-check-circle"
-                  class="flex-1" />
+                  class="flex-1"
+                />
 
                 <UButton
                   icon="i-lucide-trash"
                   color="error"
                   variant="soft"
                   :disabled="form.amenities.length === 1"
-                  @click="removeAmenity(index)" />
+                  @click="removeAmenity(index)"
+                />
               </div>
 
               <UButton
@@ -465,7 +470,8 @@ onUnmounted(() => {
                 icon="i-lucide-plus"
                 variant="soft"
                 color="neutral"
-                @click="addAmenity" />
+                @click="addAmenity"
+              />
             </div>
 
             <div class="my-10 border-t border-slate-200" />
@@ -481,7 +487,8 @@ onUnmounted(() => {
 
           <div>
             <UCard
-              class="sticky top-6 bg-white shadow-lg ring-1 ring-slate-200">
+              class="sticky top-6 bg-white shadow-lg ring-1 ring-slate-200"
+            >
               <div class="space-y-4">
                 <div>
                   <p class="mb-2 text-sm font-medium text-slate-700">
@@ -490,7 +497,8 @@ onUnmounted(() => {
 
                   <p
                     v-if="selectedUnits.length"
-                    class="text-3xl font-bold text-slate-900">
+                    class="text-3xl font-bold text-slate-900"
+                  >
                     €{{ lowestPrice }} - €{{ highestPrice }}
                   </p>
 
@@ -506,7 +514,8 @@ onUnmounted(() => {
                   class="bg-indigo-600 font-bold text-white hover:bg-indigo-700"
                   :loading="isSubmitting"
                   :disabled="isSubmitting || selectedUnits.length === 0"
-                  @click="updateListing" />
+                  @click="updateListing"
+                />
               </div>
             </UCard>
           </div>

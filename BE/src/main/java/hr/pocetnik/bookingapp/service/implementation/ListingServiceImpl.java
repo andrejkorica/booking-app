@@ -256,31 +256,54 @@ public class ListingServiceImpl implements ListingService {
             Integer children,
             Integer rooms) {
 
-        Integer totalGuests = null;
+        final Integer totalGuests = (adults == null && children == null)
+                ? null
+                : (adults != null ? adults : 0)
+                        + (children != null ? children : 0);
 
-        if (adults != null || children != null) {
-            totalGuests = (adults != null ? adults : 0)
-                    + (children != null ? children : 0);
-        }
+        String cleanedLocation = blankToNull(location);
 
         List<ListingEntity> listings;
 
-        if (checkIn == null) {
-            listings = listingRepository.searchListingsWithoutDate(
+        if (checkIn == null && cleanedLocation == null) {
+            listings = listingRepository.searchWithoutDateWithoutLocation(
                     ListingStatus.APPROVED,
-                    blankToNull(location),
+                    rooms,
+                    totalGuests);
+        } else if (checkIn == null) {
+            listings = listingRepository.searchWithoutDateWithLocation(
+                    ListingStatus.APPROVED,
+                    cleanedLocation,
+                    rooms,
+                    totalGuests);
+        } else if (cleanedLocation == null) {
+            listings = listingRepository.searchWithDateWithoutLocation(
+                    ListingStatus.APPROVED,
+                    checkIn,
                     rooms,
                     totalGuests);
         } else {
-            listings = listingRepository.searchListingsWithDate(
+            listings = listingRepository.searchWithDateWithLocation(
                     ListingStatus.APPROVED,
-                    blankToNull(location),
+                    cleanedLocation,
                     checkIn,
                     rooms,
                     totalGuests);
         }
 
+        if (checkIn == null || checkOut == null) {
+            return listings.stream()
+                    .map(this::mapToResponse)
+                    .toList();
+        }
+
         return listings.stream()
+                .filter(listing -> hasAvailableUnitsForSearch(
+                        listing,
+                        checkIn,
+                        checkOut,
+                        rooms,
+                        totalGuests))
                 .map(this::mapToResponse)
                 .toList();
     }
@@ -291,6 +314,47 @@ public class ListingServiceImpl implements ListingService {
         }
 
         return value.trim();
+    }
+
+    private boolean hasAvailableUnitsForSearch(
+            ListingEntity listing,
+            LocalDate checkIn,
+            LocalDate checkOut,
+            Integer rooms,
+            Integer totalGuests) {
+
+        List<BookingEntity> overlappingBookings = bookingRepository
+                .findByListingAndStatusNotAndCheckInLessThanAndCheckOutGreaterThan(
+                        listing,
+                        BookingStatus.CANCELLED,
+                        checkOut,
+                        checkIn);
+
+        Map<String, Integer> bookedByUnitType = new HashMap<>();
+
+        for (BookingEntity booking : overlappingBookings) {
+            if (booking.getUnits() == null) {
+                continue;
+            }
+
+            for (BookingUnitEntity bookedUnit : booking.getUnits()) {
+                bookedByUnitType.merge(
+                        bookedUnit.getUnitType(),
+                        bookedUnit.getQuantity(),
+                        Integer::sum);
+            }
+        }
+
+        return listing.getUnits().stream().anyMatch(unit -> {
+            int bookedQuantity = bookedByUnitType.getOrDefault(unit.getType(), 0);
+            int availableQuantity = unit.getQuantity() - bookedQuantity;
+
+            boolean hasEnoughQuantity = rooms == null || availableQuantity >= rooms;
+            boolean hasEnoughGuests = totalGuests == null || unit.getMaxGuests() >= totalGuests;
+            boolean hasEnoughRooms = rooms == null || unit.getRoomCount() >= rooms;
+
+            return hasEnoughQuantity && hasEnoughGuests && hasEnoughRooms;
+        });
     }
 
     @Override

@@ -1,20 +1,21 @@
+import { useAuthStore } from "~/stores/auth";
+
 export default defineNuxtRouteMiddleware(async () => {
-  if (import.meta.server) return
+  const authStore = useAuthStore();
 
-  const authStore = useAuthStore()
-
-  if (!authStore.user) {
-    await authStore.fetchUser()
+  if (import.meta.server) {
+    return;
   }
 
   if (!authStore.user) {
-    return navigateTo('/auth/signin')
+    await authStore.fetchUser();
   }
 
-  if (
-    authStore.user.role !== 'SELLER' &&
-    authStore.user.role !== 'ADMIN'
-  ) {
-    return navigateTo('/')
+  if (!authStore.user) {
+    return navigateTo("/auth/signin");
   }
-})
+
+  if (authStore.user.role !== "SELLER") {
+    return navigateTo("/");
+  }
+});

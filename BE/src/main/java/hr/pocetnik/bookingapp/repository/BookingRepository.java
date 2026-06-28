@@ -1,12 +1,14 @@
 package hr.pocetnik.bookingapp.repository;
 
 import hr.pocetnik.bookingapp.dto.booking.BookingRangeResponse;
+import hr.pocetnik.bookingapp.enums.BookingStatus;
 import hr.pocetnik.bookingapp.model.BookingEntity;
 import hr.pocetnik.bookingapp.model.ListingEntity;
 import hr.pocetnik.bookingapp.model.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
@@ -31,4 +33,10 @@ public interface BookingRepository extends JpaRepository<BookingEntity, Long> {
                 and b.status in ('PENDING', 'CONFIRMED')
             """)
     List<BookingRangeResponse> findBookedRangesByListingId(Long listingId);
+
+    List<BookingEntity> findByListingAndStatusNotAndCheckInLessThanAndCheckOutGreaterThan(
+            ListingEntity listing,
+            BookingStatus status,
+            LocalDate checkOut,
+            LocalDate checkIn);
 }
