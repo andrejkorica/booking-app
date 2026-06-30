@@ -455,7 +455,9 @@ public class ListingServiceImpl implements ListingService {
                 .orElseThrow(() -> new RuntimeException("Seller not found"));
 
         BigDecimal totalEarnings = bookingRepository.findTotalEarningsBySeller(seller);
-        Long totalListings = listingRepository.countBySeller(seller);
+        Long totalListings = listingRepository.countBySellerAndStatusNot(
+                seller,
+                ListingStatus.DELETED);
         Long activeBookings = bookingRepository.countActiveBookingsBySeller(seller);
 
         return new SellerStatisticsResponse(
