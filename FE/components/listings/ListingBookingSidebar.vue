@@ -10,6 +10,7 @@ const props =defineProps<{
   isTogglingFavorite: boolean;
   listingData: {
     sellerId: number;
+    businessName: string;
     sellerName: string;
     sellerSurname: string;
     sellerProfileImage: string | null;
@@ -98,6 +99,7 @@ const emit = defineEmits<{
       v-model:open="isSellerModalOpen"
       :seller="{
         id: listingData.sellerId,
+        businessName: listingData.businessName,
         name: listingData.sellerName,
         surname: listingData.sellerSurname,
         email: listingData.sellerEmail,

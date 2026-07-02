@@ -50,6 +50,8 @@ public class ListingResponse {
     private String sellerSurname;
     
     private String sellerProfileImage;
+    
+    private String businessName;
 
     private String sellerEmail;
 

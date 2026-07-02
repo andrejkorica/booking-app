@@ -56,6 +56,8 @@ export type Listing = ListingLocation &
   ListingReviews & {
     id: number;
 
+    businessName: string;
+
     title: string;
     description: string;
 

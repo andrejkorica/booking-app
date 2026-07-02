@@ -6,6 +6,7 @@ const props = defineProps<{
   open: boolean;
   seller: {
     id: number;
+    businessName: string;
     name: string;
     surname: string;
     email: string;
@@ -48,6 +49,27 @@ const emit = defineEmits<{
           </div>
 
           <div class="space-y-3">
+
+            <div
+              class="flex items-center gap-4 rounded-lg border border-slate-200 p-4"
+            >
+              <UIcon
+                name="i-heroicons-building-office-2"
+                class="h-5 w-5 text-indigo-600"
+              />
+
+              <div>
+                <p class="text-xs uppercase tracking-wide text-slate-500">
+                  Business
+                </p>
+
+                <p class="font-semibold text-slate-900">
+                  {{ seller.businessName }}
+                </p>
+
+              </div>
+            </div>
+
             <div
               class="flex items-center gap-4 rounded-lg border border-slate-200 p-4"
             >

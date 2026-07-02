@@ -537,6 +537,11 @@ public class ListingServiceImpl implements ListingService {
             UserEntity seller = listing.getSeller();
 
             response.setSellerId(seller.getId());
+
+            if (seller.getSellerData() != null) {
+                response.setBusinessName(seller.getSellerData().getBusinessName());
+            }
+
             response.setSellerName(seller.getName());
             response.setSellerSurname(seller.getSurname());
             response.setSellerEmail(seller.getEmail());

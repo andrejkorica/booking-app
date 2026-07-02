@@ -11,6 +11,11 @@ const isGalleryOpen = ref(false);
 const coverImage = computed(() => props.images[0] ?? null);
 const sideImages = computed(() => props.images.slice(1, 5));
 const emptySlots = computed(() => Math.max(0, 5 - props.images.length));
+
+
+function openGallery() {
+  isGalleryOpen.value = true;
+}
 </script>
 
 <template>
@@ -39,7 +44,7 @@ const emptySlots = computed(() => Math.max(0, 5 - props.images.length));
         color="neutral"
         variant="solid"
         class="absolute bottom-4 right-4 z-20 border border-slate-300 bg-white text-slate-900 shadow-lg hover:border-indigo-600 hover:bg-indigo-600 hover:text-white"
-        @click="isGalleryOpen = true" />
+        @click="openGallery" />
     </div>
 
     <UCard
