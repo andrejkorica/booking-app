@@ -43,7 +43,17 @@ public class ListingResponse {
 
     private LocalDateTime createdAt;
 
+    private Long sellerId;
+
+    private String sellerName;
+
+    private String sellerSurname;
+    
+    private String sellerProfileImage;
+
     private String sellerEmail;
+
+    private String sellerPhoneNumber;
 
     private List<ListingPriceAdjustmentResponse> priceAdjustments;
 

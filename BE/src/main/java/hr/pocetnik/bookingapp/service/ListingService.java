@@ -48,6 +48,7 @@ public interface ListingService {
                         BigDecimal minPrice,
                         BigDecimal maxPrice,
                         Integer rating,
+                        Long sellerId,
                         String sort);
 
         List<String> getAmenities();

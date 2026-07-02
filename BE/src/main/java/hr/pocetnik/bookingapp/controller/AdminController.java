@@ -112,21 +112,23 @@ public class AdminController {
     }
 
     private Map<String, String> mapSellerRequest(SellerRequestEntity request) {
-        SellerDataEntity sellerData = request.getUser().getSellerData();
-
         return Map.ofEntries(
-                Map.entry("id", request.getId().toString()),
-                Map.entry("requestText", request.getRequestText()),
+                Map.entry("id", String.valueOf(request.getId())),
+                Map.entry("requestText", valueOrEmpty(request.getRequestText())),
                 Map.entry("status", request.getStatus().name()),
-                Map.entry("createdAt", request.getCreatedAt().toString()),
+                Map.entry("createdAt", request.getCreatedAt() != null ? request.getCreatedAt().toString() : ""),
 
-                Map.entry("userName", request.getUser().getName()),
-                Map.entry("userSurname", request.getUser().getSurname()),
-                Map.entry("userEmail", request.getUser().getEmail()),
+                Map.entry("userName", valueOrEmpty(request.getUser().getName())),
+                Map.entry("userSurname", valueOrEmpty(request.getUser().getSurname())),
+                Map.entry("userEmail", valueOrEmpty(request.getUser().getEmail())),
 
-                Map.entry("businessName", sellerData.getBusinessName()),
-                Map.entry("oib", sellerData.getOib()),
-                Map.entry("iban", sellerData.getIban()),
-                Map.entry("billingAddress", sellerData.getBillingAddress()));
+                Map.entry("businessName", valueOrEmpty(request.getBusinessName())),
+                Map.entry("oib", valueOrEmpty(request.getOib())),
+                Map.entry("iban", valueOrEmpty(request.getIban())),
+                Map.entry("billingAddress", valueOrEmpty(request.getBillingAddress())));
+    }
+
+    private String valueOrEmpty(String value) {
+        return value != null ? value : "";
     }
 }

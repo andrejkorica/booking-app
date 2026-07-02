@@ -47,6 +47,7 @@ async function fetchListings() {
           minPrice: route.query.minPrice,
           maxPrice: route.query.maxPrice,
           rating: route.query.rating,
+          sellerId: route.query.sellerId,
           sort: sort.value,
         },
       },

@@ -264,6 +264,7 @@ public class ListingServiceImpl implements ListingService {
             BigDecimal minPrice,
             BigDecimal maxPrice,
             Integer rating,
+            Long sellerId,
             String sort) {
 
         String cleanedLocation = blankToNull(location);
@@ -302,6 +303,11 @@ public class ListingServiceImpl implements ListingService {
                 .filter(listing -> maxPrice == null
                         || (listing.getHighestPrice() != null
                                 && listing.getHighestPrice().compareTo(maxPrice) <= 0))
+
+                // Seller
+                .filter(listing -> sellerId == null
+                        || (listing.getSeller() != null
+                                && listing.getSeller().getId().equals(sellerId)))
 
                 // Rating
                 .filter(listing -> rating == null
@@ -466,8 +472,6 @@ public class ListingServiceImpl implements ListingService {
                 activeBookings);
     }
 
-
-
     @Override
     public ListingResponse mapListingToResponse(ListingEntity listing) {
 
@@ -530,7 +534,14 @@ public class ListingServiceImpl implements ListingService {
         }
 
         if (listing.getSeller() != null) {
-            response.setSellerEmail(listing.getSeller().getEmail());
+            UserEntity seller = listing.getSeller();
+
+            response.setSellerId(seller.getId());
+            response.setSellerName(seller.getName());
+            response.setSellerSurname(seller.getSurname());
+            response.setSellerEmail(seller.getEmail());
+            response.setSellerProfileImage(seller.getProfileImageUrl());
+            response.setSellerPhoneNumber(seller.getPhoneNumber());
         }
 
         return response;

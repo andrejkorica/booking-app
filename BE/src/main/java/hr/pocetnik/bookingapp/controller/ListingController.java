@@ -93,6 +93,7 @@ public class ListingController {
             @RequestParam(required = false) List<String> amenities,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Long sellerId,
             @RequestParam(required = false) Integer rating,
             @RequestParam(required = false, defaultValue = "top") String sort) {
 
@@ -107,6 +108,7 @@ public class ListingController {
                 minPrice,
                 maxPrice,
                 rating,
+                sellerId,
                 sort);
     }
 

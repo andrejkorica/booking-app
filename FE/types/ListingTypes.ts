@@ -68,6 +68,13 @@ export type Listing = ListingLocation &
     priceAdjustments: PriceAdjustment[];
 
     status: string;
+    
     sellerEmail: string;
+    sellerId: number;
+    sellerName: string;
+    sellerSurname: string;
+    sellerProfileImage: string | null;
+    sellerPhoneNumber: string | null;
+
     createdAt: string;
   };

@@ -410,8 +410,10 @@ useHead(() => ({
           </div>
 
           <div>
+
             <ListingBookingSidebar
               :price-label="priceLabel"
+              :listing-data="listingData"
               :can-book="canBook"
               :book-to="bookTo"
               :disabled-message="disabledMessage"
