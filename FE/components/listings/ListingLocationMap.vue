@@ -2,57 +2,61 @@
 import "leaflet/dist/leaflet.css";
 
 const props = defineProps<{
-  location: string
-  latitude: number | null
-  longitude: number | null
-}>()
+  location: string;
+  latitude: number | null;
+  longitude: number | null;
+}>();
 
-const mapEl = ref<HTMLElement | null>(null)
+const mapEl = ref<HTMLElement | null>(null);
 
-let map: any = null
-let L: any = null
+let map: any = null;
+let L: any = null;
 
 onMounted(async () => {
-  await nextTick()
+  await nextTick();
 
   if (props.latitude === null || props.longitude === null) {
-    return
+    return;
   }
 
-  L = await import("leaflet")
+  L = await import("leaflet");
 
-  if (!mapEl.value) return
+  if (!mapEl.value) return;
 
   map = L.map(mapEl.value, {
     dragging: false,
-    scrollWheelZoom: false
-  }).setView([props.latitude, props.longitude], 15)
+    scrollWheelZoom: false,
+  }).setView([props.latitude, props.longitude], 15);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap contributors"
-  }).addTo(map)
+    attribution: "&copy; OpenStreetMap contributors",
+  }).addTo(map);
 
-  L.marker([props.latitude, props.longitude]).addTo(map)
+  L.marker([props.latitude, props.longitude]).addTo(map);
 
   setTimeout(() => {
-    map?.invalidateSize()
-  }, 100)
-})
+    map?.invalidateSize();
+  }, 100);
+});
 
 onUnmounted(() => {
-  map?.remove()
-})
+  map?.remove();
+});
 </script>
 
 <template>
   <section>
-    <h3 class="mb-4 text-xl font-bold">
-      Location
-    </h3>
+    <h3 class="mb-4 text-xl font-bold">Location</h3>
 
-    <p class="mb-4 flex items-center text-slate-600">
-      <UIcon name="i-heroicons-map-pin" class="mr-2 h-5 w-5 text-indigo-500" />
-      {{ location }}
+    <p class="mb-4 flex items-start text-slate-600">
+      <UIcon
+        name="i-heroicons-map-pin"
+        class="mr-2 mt-0.5 h-5 w-5 shrink-0 text-indigo-500"
+      />
+
+      <span class="min-w-0 break-words">
+        {{ location }}
+      </span>
     </p>
 
     <ClientOnly>

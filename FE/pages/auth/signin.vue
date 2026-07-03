@@ -6,6 +6,7 @@ import { useAuthStore } from "~/stores/auth";
 
 definePageMeta({
   layout: "auth",
+  middleware: "guest-guard",
 });
 
 const config = useRuntimeConfig();

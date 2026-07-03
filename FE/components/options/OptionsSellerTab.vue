@@ -80,12 +80,11 @@ onMounted(async () => {
   }
 });
 </script>
-
 <template>
   <div class="space-y-6">
     <template v-if="isAdmin">
-      <div class="mx-auto max-w-md">
-        <UCard>
+      <div class="mx-auto flex justify-center">
+        <UCard class="w-full max-w-md">
           <div class="flex flex-col items-center py-8 text-center">
             <UIcon name="i-lucide-lock" class="mb-4 size-12 text-slate-400" />
 
@@ -100,117 +99,78 @@ onMounted(async () => {
       </div>
     </template>
 
-    <template v-else-if="isSeller">
-      <div class="text-center">
-        <h2 class="text-xl font-semibold">Seller Info</h2>
-
-        <p class="mt-1 text-sm text-slate-600">
-          Update your seller billing information.
-        </p>
-      </div>
-
-      <div class="mx-auto max-w-lg">
-        <UCard>
-          <template #header>
-            <h3 class="font-semibold">Update Seller Info</h3>
-          </template>
-
-          <div class="space-y-4">
-            <UFormField label="Business Name">
-              <UInput
-                v-model="form.businessName"
-                placeholder="Enter your business name"
-              />
-            </UFormField>
-
-            <UFormField label="OIB">
-              <UInput v-model="form.oib" placeholder="Enter your OIB" />
-            </UFormField>
-
-            <UFormField label="IBAN">
-              <UInput v-model="form.iban" placeholder="Enter your IBAN" />
-            </UFormField>
-
-            <UFormField label="Billing Address">
-              <UInput
-                v-model="form.address"
-                placeholder="Enter your billing address"
-              />
-            </UFormField>
-
-            <UFormField label="Request Message">
-              <UTextarea
-                v-model="form.requestText"
-                placeholder="Tell the admin why you want to update"
-                :rows="4"
-                class="w-full"
-              />
-            </UFormField>
-
-            <div class="pt-2">
-              <UButton
-                label="Send Update Request"
-                :loading="isSending"
-                class="bg-indigo-600 text-white hover:bg-indigo-700"
-                @click="sendSellerRequest"
-              />
-            </div>
-          </div>
-        </UCard>
-      </div>
-    </template>
-
     <template v-else>
       <div class="text-center">
-        <h2 class="text-xl font-semibold">Become a Seller</h2>
+        <h2 class="text-xl font-semibold">
+          {{ isSeller ? "Seller Info" : "Become a Seller" }}
+        </h2>
 
         <p class="mx-auto mt-1 max-w-md text-sm text-slate-600">
-          Fill in your billing information and send a request to become a
-          seller. An admin needs to approve your request first.
+          {{
+            isSeller
+              ? "Update your seller billing information."
+              : "Fill in your billing information and send a request to become a seller. An admin needs to approve your request first."
+          }}
         </p>
       </div>
 
-      <div class="mx-auto max-w-lg">
-        <UCard>
+      <div class="mx-auto flex justify-center">
+        <UCard class="w-full max-w-md">
           <template #header>
-            <h3 class="font-semibold">Seller Request</h3>
+            <h3 class="text-center font-semibold">
+              {{ isSeller ? "Update Seller Info" : "Seller Request" }}
+            </h3>
           </template>
 
-          <div class="space-y-4">
-            <UFormField label="Business Name">
+          <div class="mx-auto flex max-w-sm flex-col items-center space-y-4">
+            <UFormField label="Business Name" class="w-full">
               <UInput
                 v-model="form.businessName"
                 placeholder="Enter your business name"
+                class="w-full"
               />
             </UFormField>
 
-            <UFormField label="OIB">
-              <UInput v-model="form.oib" placeholder="Enter your OIB" />
+            <UFormField label="OIB" class="w-full">
+              <UInput
+                v-model="form.oib"
+                placeholder="Enter your OIB"
+                class="w-full"
+              />
             </UFormField>
 
-            <UFormField label="IBAN">
-              <UInput v-model="form.iban" placeholder="Enter your IBAN" />
+            <UFormField label="IBAN" class="w-full">
+              <UInput
+                v-model="form.iban"
+                placeholder="Enter your IBAN"
+                class="w-full"
+              />
             </UFormField>
 
-            <UFormField label="Billing Address">
+            <UFormField label="Billing Address" class="w-full">
               <UInput
                 v-model="form.address"
                 placeholder="Enter your billing address"
+                class="w-full"
               />
             </UFormField>
 
-            <UFormField label="Request Message">
+            <UFormField label="Request Message" class="w-full">
               <UTextarea
                 v-model="form.requestText"
-                placeholder="Tell us why you want to become a seller"
+                :placeholder="
+                  isSeller
+                    ? 'Tell the admin why you want to update'
+                    : 'Tell us why you want to become a seller'
+                "
                 :rows="4"
                 class="w-full"
               />
             </UFormField>
 
-            <div class="pt-2">
+            <div class="flex w-full justify-center pt-4">
               <UButton
-                label="Send Request"
+                :label="isSeller ? 'Send Update Request' : 'Send Request'"
                 :loading="isSending"
                 class="bg-indigo-600 text-white hover:bg-indigo-700"
                 @click="sendSellerRequest"

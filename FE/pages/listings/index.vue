@@ -70,13 +70,15 @@ watch(() => route.fullPath, fetchListings, { immediate: true });
     <FilteringSearchBar />
 
     <main class="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
-      <div class="flex items-start gap-6">
-        <aside class="w-[280px] shrink-0">
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <aside class="w-full lg:w-[280px] lg:shrink-0">
           <FilteringSidebar />
         </aside>
 
         <section class="min-w-0 flex-1 pb-12">
-          <div class="mb-4 flex items-center justify-between gap-4">
+          <div
+            class="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+          >
             <div>
               <h1 class="text-2xl font-bold text-slate-900">Search results</h1>
 

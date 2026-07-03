@@ -12,7 +12,6 @@ const coverImage = computed(() => props.images[0] ?? null);
 const sideImages = computed(() => props.images.slice(1, 5));
 const emptySlots = computed(() => Math.max(0, 5 - props.images.length));
 
-
 function openGallery() {
   isGalleryOpen.value = true;
 }
@@ -20,36 +19,69 @@ function openGallery() {
 
 <template>
   <div class="mb-12">
-    <div
-      v-if="coverImage"
-      class="relative grid h-[440px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl">
-      <div class="col-span-2 row-span-2">
-        <img :src="coverImage.previewUrl" class="h-full w-full object-cover" />
+    <div v-if="coverImage">
+      <!-- Mobile: one image only -->
+      <div class="relative h-[260px] overflow-hidden rounded-2xl sm:hidden">
+        <img
+          :src="coverImage.previewUrl"
+          class="h-full w-full object-cover"
+          alt="Listing cover image"
+        />
+
+        <UButton
+          label="Photos"
+          icon="i-lucide-grid-3x3"
+          color="neutral"
+          variant="solid"
+          size="sm"
+          class="absolute bottom-3 right-3 z-20 border border-slate-300 bg-white text-slate-900 shadow-lg"
+          @click="openGallery"
+        />
       </div>
 
-      <div v-for="image in sideImages" :key="image.previewUrl">
-        <img :src="image.previewUrl" class="h-full w-full object-cover" />
-      </div>
-
+      <!-- Desktop/tablet: gallery grid -->
       <div
-        v-for="index in emptySlots"
-        :key="`empty-${index}`"
-        class="flex items-center justify-center bg-slate-100 text-slate-400">
-        <UIcon name="i-lucide-image" class="size-8" />
-      </div>
+        class="relative hidden h-[440px] grid-cols-4 grid-rows-2 gap-2 overflow-hidden rounded-2xl sm:grid"
+      >
+        <div class="col-span-2 row-span-2">
+          <img
+            :src="coverImage.previewUrl"
+            class="h-full w-full object-cover"
+            alt="Listing cover image"
+          />
+        </div>
 
-      <UButton
-        label="Show all photos"
-        icon="i-lucide-grid-3x3"
-        color="neutral"
-        variant="solid"
-        class="absolute bottom-4 right-4 z-20 border border-slate-300 bg-white text-slate-900 shadow-lg hover:border-indigo-600 hover:bg-indigo-600 hover:text-white"
-        @click="openGallery" />
+        <div v-for="image in sideImages" :key="image.previewUrl">
+          <img
+            :src="image.previewUrl"
+            class="h-full w-full object-cover"
+            alt="Listing image"
+          />
+        </div>
+
+        <div
+          v-for="index in emptySlots"
+          :key="`empty-${index}`"
+          class="flex items-center justify-center bg-slate-100 text-slate-400"
+        >
+          <UIcon name="i-lucide-image" class="size-8" />
+        </div>
+
+        <UButton
+          label="Show all photos"
+          icon="i-lucide-grid-3x3"
+          color="neutral"
+          variant="solid"
+          class="absolute bottom-4 right-4 z-20 border border-slate-300 bg-white text-slate-900 shadow-lg hover:border-indigo-600 hover:bg-indigo-600 hover:text-white"
+          @click="openGallery"
+        />
+      </div>
     </div>
 
     <UCard
       v-else
-      class="flex h-72 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50">
+      class="flex h-72 items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50"
+    >
       <div class="text-center text-slate-500">
         <UIcon name="i-lucide-image-plus" class="mx-auto mb-3 size-10" />
         <p class="font-medium">Upload photos to preview your listing.</p>
@@ -58,6 +90,7 @@ function openGallery() {
 
     <CreateListingImageGalleryModal
       v-model:open="isGalleryOpen"
-      :images="images" />
+      :images="images"
+    />
   </div>
 </template>

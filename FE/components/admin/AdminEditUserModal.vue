@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { User } from '~/types/UserTypes';
+import type { User } from "~/types/UserTypes";
+import { countryCodes } from "~/constants/CountryCodeConstants";
 
 const open = defineModel<boolean>("open", {
   default: false,
@@ -22,23 +23,47 @@ const form = reactive({
   name: "",
   surname: "",
   email: "",
+  countryCode: "+385",
   phoneNumber: "",
   role: "USER",
 });
+
+function splitPhoneNumber(value: string) {
+  const code = countryCodes.find((item) => value.startsWith(item.value));
+
+  if (!code) {
+    return {
+      countryCode: "+385",
+      phoneNumber: value,
+    };
+  }
+
+  return {
+    countryCode: code.value,
+    phoneNumber: value.replace(code.value, ""),
+  };
+}
 
 watch(
   () => props.user,
   (user) => {
     if (!user) return;
 
+    const phone = splitPhoneNumber(user.phoneNumber || "");
+
     form.name = user.name;
     form.surname = user.surname;
     form.email = user.email;
-    form.phoneNumber = user.phoneNumber;
+    form.countryCode = phone.countryCode;
+    form.phoneNumber = phone.phoneNumber;
     form.role = user.role;
   },
   { immediate: true },
 );
+
+function closeModal() {
+  open.value = false;
+}
 
 async function saveUserChanges() {
   if (!props.user) return;
@@ -55,7 +80,7 @@ async function saveUserChanges() {
           name: form.name,
           surname: form.surname,
           email: form.email,
-          phoneNumber: form.phoneNumber,
+          phoneNumber: `${form.countryCode}${form.phoneNumber}`,
           role: form.role,
         },
       },
@@ -69,7 +94,7 @@ async function saveUserChanges() {
       color: "success",
     });
 
-    open.value = false;
+    closeModal();
   } catch (error) {
     console.error(error);
 
@@ -87,54 +112,103 @@ async function saveUserChanges() {
 <template>
   <UModal
     v-model:open="open"
+    title="Edit User"
+    description="Update account information and role."
     :ui="{
-      content: 'max-w-lg w-full overflow-hidden',
-    }">
+      content:
+        'w-[95vw] max-w-lg max-h-[90vh] overflow-hidden bg-white p-3 sm:p-4',
+    }"
+  >
     <template #content>
-      <div class="max-h-[90vh] overflow-y-auto p-4">
-        <UCard>
-          <template #header>
-            <h3 class="text-lg font-semibold">Edit User</h3>
-          </template>
+      <div class="max-h-[calc(90vh-2rem)] overflow-y-auto">
+        <div class="mb-6 text-center">
+          <h2 class="text-xl font-semibold">Edit User</h2>
 
-          <div class="space-y-4">
-            <UFormField label="First Name">
-              <UInput v-model="form.name" placeholder="First name" />
-            </UFormField>
+          <p class="mt-1 text-sm text-slate-500">
+            Update account information and role.
+          </p>
+        </div>
 
-            <UFormField label="Last Name">
-              <UInput v-model="form.surname" placeholder="Last name" />
-            </UFormField>
+        <div class="mx-auto flex justify-center">
+          <UCard class="w-full max-w-md">
+            <template #header>
+              <h3 class="text-center font-semibold">User Information</h3>
+            </template>
 
-            <UFormField label="Email">
-              <UInput v-model="form.email" placeholder="Email" />
-            </UFormField>
+            <div class="mx-auto flex max-w-sm flex-col items-center space-y-4">
+              <UFormField label="First Name" class="w-full">
+                <UInput
+                  v-model="form.name"
+                  placeholder="Enter first name"
+                  class="w-full"
+                />
+              </UFormField>
 
-            <UFormField label="Phone Number">
-              <UInput v-model="form.phoneNumber" placeholder="Phone number" />
-            </UFormField>
+              <UFormField label="Last Name" class="w-full">
+                <UInput
+                  v-model="form.surname"
+                  placeholder="Enter last name"
+                  class="w-full"
+                />
+              </UFormField>
 
-            <UFormField label="Role">
-              <USelect
-                v-model="form.role"
-                :items="['USER', 'SELLER', 'ADMIN']" />
-            </UFormField>
+              <UFormField label="Email Address" class="w-full">
+                <UInput
+                  v-model="form.email"
+                  placeholder="Enter email"
+                  class="w-full"
+                />
+              </UFormField>
 
-            <div class="flex justify-end gap-2 pt-2">
-              <UButton
-                label="Cancel"
-                variant="soft"
-                color="neutral"
-                @click="open = false" />
+              <UFormField label="Phone Number" class="w-full">
+                <div class="flex w-full gap-2">
+                  <USelectMenu
+                    v-model="form.countryCode"
+                    :items="countryCodes"
+                    value-key="value"
+                    label-key="label"
+                    class="w-28"
+                  />
 
-              <UButton
-                label="Save Changes"
-                :loading="isSaving"
-                class="bg-indigo-600 text-white hover:bg-indigo-700"
-                @click="saveUserChanges" />
+                  <UInput
+                    v-model="form.phoneNumber"
+                    placeholder="Enter phone number"
+                    class="flex-1"
+                  />
+                </div>
+              </UFormField>
+
+              <UFormField label="Role" class="w-full">
+                <USelect
+                  v-model="form.role"
+                  :items="['USER', 'SELLER', 'ADMIN']"
+                  class="w-full"
+                />
+              </UFormField>
+
+              <div
+                class="grid w-full grid-cols-1 gap-2 pt-4 sm:flex sm:justify-center"
+              >
+                <UButton
+                  label="Cancel"
+                  variant="soft"
+                  color="neutral"
+                  block
+                  class="sm:w-auto"
+                  @click="closeModal"
+                />
+
+                <UButton
+                  label="Save Changes"
+                  :loading="isSaving"
+                  block
+                  class="bg-indigo-600 text-white hover:bg-indigo-700 sm:w-auto"
+                  @click="saveUserChanges"
+                />
+              </div>
             </div>
-          </div>
-        </UCard>
+          </UCard>
+        </div>
       </div>
     </template>
   </UModal>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from "~/stores/auth";
 import defaultAvatar from "~/public/images/default-avatar.png";
+import { countryCodes } from "~/constants/CountryCodeConstants";
 
 const config = useRuntimeConfig();
 const toast = useToast();
@@ -12,6 +13,7 @@ const isUploadingImage = ref(false);
 const form = reactive({
   name: "",
   surname: "",
+  countryCode: "+385",
   phoneNumber: "",
   email: "",
 });
@@ -19,6 +21,22 @@ const form = reactive({
 const selectedImage = ref<string>(defaultAvatar);
 const selectedFile = ref<File | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
+
+function splitPhoneNumber(value: string) {
+  const code = countryCodes.find((item) => value.startsWith(item.value));
+
+  if (!code) {
+    return {
+      countryCode: "+385",
+      phoneNumber: value,
+    };
+  }
+
+  return {
+    countryCode: code.value,
+    phoneNumber: value.replace(code.value, ""),
+  };
+}
 
 function openFilePicker() {
   if (isUploadingImage.value) return;
@@ -40,9 +58,12 @@ watch(
   (user) => {
     if (!user) return;
 
+    const phone = splitPhoneNumber(user.phoneNumber || "");
+
     form.name = user.name;
     form.surname = user.surname;
-    form.phoneNumber = user.phoneNumber;
+    form.countryCode = phone.countryCode;
+    form.phoneNumber = phone.phoneNumber;
     form.email = user.email;
 
     selectedImage.value = user.profileImageUrl || defaultAvatar;
@@ -98,7 +119,7 @@ async function saveProfile() {
       body: {
         name: form.name,
         surname: form.surname,
-        phoneNumber: form.phoneNumber,
+        phoneNumber: `${form.countryCode}${form.phoneNumber}`,
         email: form.email,
       },
     });
@@ -187,33 +208,57 @@ async function saveProfile() {
       </div>
     </div>
 
-    <div class="mx-auto max-w-lg">
-      <UCard>
+    <div class="mx-auto flex justify-center">
+      <UCard class="w-full max-w-md">
         <template #header>
-          <h3 class="font-semibold">Personal Information</h3>
+          <h3 class="text-center font-semibold">Personal Information</h3>
         </template>
 
-        <div class="space-y-4">
-          <UFormField label="First Name">
-            <UInput v-model="form.name" placeholder="Enter your first name" />
-          </UFormField>
-
-          <UFormField label="Last Name">
-            <UInput v-model="form.surname" placeholder="Enter your last name" />
-          </UFormField>
-
-          <UFormField label="Phone Number">
+        <div class="mx-auto flex max-w-sm flex-col items-center space-y-4">
+          <UFormField label="First Name" class="w-full">
             <UInput
-              v-model="form.phoneNumber"
-              placeholder="Enter your phone number"
+              v-model="form.name"
+              placeholder="Enter your first name"
+              class="w-full"
             />
           </UFormField>
 
-          <UFormField label="Email Address">
-            <UInput v-model="form.email" placeholder="Enter your email" />
+          <UFormField label="Last Name" class="w-full">
+            <UInput
+              v-model="form.surname"
+              placeholder="Enter your last name"
+              class="w-full"
+            />
           </UFormField>
 
-          <div class="pt-2">
+          <UFormField label="Phone Number" class="w-full">
+            <div class="flex w-full gap-2">
+              <USelectMenu
+                v-model="form.countryCode"
+                :items="countryCodes"
+                value-key="value"
+                label-key="label"
+                size="md"
+                class="w-28"
+              />
+
+              <UInput
+                v-model="form.phoneNumber"
+                placeholder="Enter your phone number"
+                class="flex-1"
+              />
+            </div>
+          </UFormField>
+
+          <UFormField label="Email Address" class="w-full">
+            <UInput
+              v-model="form.email"
+              placeholder="Enter your email"
+              class="w-full"
+            />
+          </UFormField>
+
+          <div class="flex w-full justify-center pt-4">
             <UButton
               label="Save Profile"
               :loading="isSavingProfile"

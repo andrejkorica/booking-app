@@ -305,64 +305,106 @@ useHead(() => ({
 
 <template>
   <div class="min-h-screen bg-white text-slate-900">
-    <UContainer class="py-12">
+    <UContainer class="px-4 py-6 sm:py-8 lg:py-12">
       <div v-if="isLoading">
         <p>Loading listing data...</p>
       </div>
 
       <div v-else-if="listingData">
-        <header class="mb-8">
-          <h1 class="mb-2 text-4xl font-bold tracking-tight md:text-5xl">
-            {{ listingData.title }}
-          </h1>
-
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex min-w-0 items-center space-x-4 text-slate-500">
-              <div class="flex shrink-0 items-center">
-                <UIcon
-                  v-for="i in 5"
-                  :key="i"
-                  name="i-heroicons-star-solid"
-                  :class="
-                    i <= listingData.rating
-                      ? 'text-yellow-400'
-                      : 'text-slate-200'
-                  "
-                  class="h-5 w-5"
-                />
-              </div>
-
-              <div class="flex min-w-0 items-center">
-                <UIcon
-                  name="i-heroicons-map-pin"
-                  class="mr-2 h-5 w-5 shrink-0"
-                />
-                <span class="truncate">{{ listingData.location }}</span>
-              </div>
-            </div>
-
+        <header class="mb-6 sm:mb-8">
+          <!-- Mobile -->
+          <div class="mb-4 flex items-center gap-3 sm:hidden">
             <UButton
-              label="Back"
               icon="i-lucide-arrow-left"
               variant="soft"
               color="neutral"
-              class="shrink-0"
+              size="sm"
+              square
               @click="router.back()"
             />
+
+            <h1 class="min-w-0 text-2xl font-bold leading-tight">
+              {{ listingData.title }}
+            </h1>
+          </div>
+
+          <!-- Desktop -->
+          <div class="hidden sm:block">
+            <h1 class="mb-3 text-4xl font-bold tracking-tight md:text-5xl">
+              {{ listingData.title }}
+            </h1>
+
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex min-w-0 items-center gap-4 text-slate-500">
+                <div class="flex shrink-0 items-center">
+                  <UIcon
+                    v-for="i in 5"
+                    :key="i"
+                    name="i-heroicons-star-solid"
+                    :class="
+                      i <= listingData.rating
+                        ? 'text-yellow-400'
+                        : 'text-slate-200'
+                    "
+                    class="h-5 w-5"
+                  />
+                </div>
+
+                <div class="flex min-w-0 items-center">
+                  <UIcon
+                    name="i-heroicons-map-pin"
+                    class="mr-2 h-5 w-5 shrink-0"
+                  />
+                  <span class="truncate">{{ listingData.location }}</span>
+                </div>
+              </div>
+
+              <UButton
+                label="Back"
+                icon="i-lucide-arrow-left"
+                variant="soft"
+                color="neutral"
+                @click="router.back()"
+              />
+            </div>
+          </div>
+
+          <!-- Mobile rating/location -->
+          <div class="flex flex-col gap-2 text-slate-500 sm:hidden">
+            <div class="flex items-center">
+              <UIcon
+                v-for="i in 5"
+                :key="i"
+                name="i-heroicons-star-solid"
+                :class="
+                  i <= listingData.rating ? 'text-yellow-400' : 'text-slate-200'
+                "
+                class="h-5 w-5"
+              />
+            </div>
+
+            <div class="flex items-center">
+              <UIcon name="i-heroicons-map-pin" class="mr-2 h-5 w-5 shrink-0" />
+              <span class="truncate">
+                {{ listingData.location }}
+              </span>
+            </div>
           </div>
         </header>
 
-        <div class="mb-12">
+        <div class="mb-8 sm:mb-12">
           <CreateListingImagePreview :images="previewImages" />
         </div>
 
-        <div class="grid grid-cols-1 gap-12 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-12">
           <div class="lg:col-span-2">
-            <h2 class="mb-4 border-b border-slate-200 pb-2 text-2xl font-bold">
+            <h2
+              class="mb-4 border-b border-slate-200 pb-2 text-xl font-bold sm:text-2xl"
+            >
               About the Property
             </h2>
 
-            <p class="mb-8 leading-relaxed text-slate-600">
+            <p class="mb-6 leading-relaxed text-slate-600 sm:mb-8">
               {{ listingData.description }}
             </p>
 
@@ -373,11 +415,11 @@ useHead(() => ({
               class="mb-6"
             />
 
-            <h3 class="mb-4 text-xl font-bold">Amenities</h3>
+            <h3 class="mb-4 text-lg font-bold sm:text-xl">Amenities</h3>
 
             <ul
               v-if="listingData.amenities?.length"
-              class="grid grid-cols-2 gap-x-8 gap-y-2"
+              class="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2"
             >
               <li
                 v-for="amenity in listingData.amenities"
@@ -386,7 +428,7 @@ useHead(() => ({
               >
                 <UIcon
                   name="i-heroicons-check-circle"
-                  class="mr-3 h-5 w-5 text-indigo-500"
+                  class="mr-3 h-5 w-5 shrink-0 text-indigo-500"
                 />
                 <span class="text-slate-600">{{ amenity }}</span>
               </li>
@@ -396,7 +438,7 @@ useHead(() => ({
 
             <div
               v-if="isLoadingAvailableUnits"
-              class="mt-10 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500"
+              class="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500 sm:mt-10"
             >
               Loading available units...
             </div>
@@ -405,12 +447,11 @@ useHead(() => ({
               v-else
               :units="availableUnits"
               title="Available units"
-              class="mt-10"
+              class="mt-8 sm:mt-10"
             />
           </div>
 
-          <div>
-
+          <div class="lg:col-span-1">
             <ListingBookingSidebar
               :price-label="priceLabel"
               :listing-data="listingData"
@@ -424,12 +465,14 @@ useHead(() => ({
           </div>
         </div>
 
-        <ListingsReviews
-          :reviews="reviews"
-          :is-logged-in="Boolean(authStore.user)"
-          @submit-review="submitReview"
-          @vote-review="voteReview"
-        />
+        <div class="mt-10 sm:mt-12">
+          <ListingsReviews
+            :reviews="reviews"
+            :is-logged-in="Boolean(authStore.user)"
+            @submit-review="submitReview"
+            @vote-review="voteReview"
+          />
+        </div>
       </div>
 
       <div v-else>
