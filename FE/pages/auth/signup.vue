@@ -10,7 +10,7 @@ const auth = useAuthStore();
 
 definePageMeta({
   layout: "auth",
-  middleware: "guest-guard"
+  middleware: "guest-guard",
 });
 
 const state = reactive({
@@ -240,25 +240,29 @@ async function onSubmit(event: FormSubmitEvent<any>) {
           />
         </UForm>
 
-        <p class="text-center text-sm text-slate-500">
-          Already have an account?
+        <div class="space-y-2">
+          <p class="text-center text-sm text-slate-500">
+            Already have an account?
 
-          <ULink
-            to="/auth/signin"
-            class="font-semibold text-indigo-600 hover:text-indigo-700"
-          >
-            Sign in
-          </ULink>
-        </p>
-        <p class="text-sm text-center text-slate-500">
-          Want to go back?
-          <ULink
-            to="/"
-            class="font-semibold text-indigo-600 hover:text-indigo-700"
-          >
-            Home page
-          </ULink>
-        </p>
+            <ULink
+              to="/auth/signin"
+              class="font-semibold text-indigo-600 hover:text-indigo-700"
+            >
+              Sign in
+            </ULink>
+          </p>
+
+          <p class="text-center text-sm text-slate-500">
+            Want to go back?
+
+            <ULink
+              to="/"
+              class="font-semibold text-indigo-600 hover:text-indigo-700"
+            >
+              Home page
+            </ULink>
+          </p>
+        </div>
       </div>
     </UCard>
   </div>
