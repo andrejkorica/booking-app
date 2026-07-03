@@ -1,15 +1,10 @@
 <script setup lang="ts">
 import { useAuthStore } from "~/stores/auth";
+import type { SellerDashboardStats } from "~/types/SellerTypes";
 
 definePageMeta({
   middleware: "seller-guard",
 });
-
-type SellerDashboardStats = {
-  totalEarnings: number;
-  totalListings: number;
-  activeBookings: number;
-};
 
 const authStore = useAuthStore();
 const config = useRuntimeConfig();

@@ -20,54 +20,51 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-        private final AuthFilter authFilter;
+    private final AuthFilter authFilter;
 
-        @Autowired
-        public SecurityConfig(AuthFilter authFilter) {
-                this.authFilter = authFilter;
-        }
+    @Autowired
+    public SecurityConfig(AuthFilter authFilter) {
+        this.authFilter = authFilter;
+    }
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-                http
-                                .cors(withDefaults())
-                                .csrf(csrf -> csrf.disable())
-                                .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers("/users/register", "/users/login", "/users/logout")
-                                                .permitAll()
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/users/register", "/users/login", "/users/logout").permitAll()
 
-                                                .requestMatchers(HttpMethod.GET, "/listings/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/listings/**").permitAll()
 
-                                                .requestMatchers("/admin/**").hasRole("ADMIN")
-                                                .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
-                                                .anyRequest().authenticated())
-                                .sessionManagement(session -> session
-                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/seller/**").hasAnyRole("SELLER", "ADMIN")
+                        .anyRequest().authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
 
-                return http.build();
-        }
+        return http.build();
+    }
 
-        @Bean
-        public CorsConfigurationSource corsConfigurationSource() {
-                CorsConfiguration configuration = new CorsConfiguration();
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
 
-                configuration.setAllowedOrigins(List.of(
-                                "http://localhost:3000",
-                                "http://192.168.8.164:3000"));
+        configuration.setAllowedOrigins(
+                List.of("http://localhost:3000"));
 
-                configuration.setAllowedMethods(
-                                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(
+                List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-                configuration.setAllowedHeaders(
-                                List.of("*"));
+        configuration.setAllowedHeaders(
+                List.of("*"));
 
-                configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(true);
 
-                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-                source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
 
-                return source;
-        }
+        return source;
+    }
 }

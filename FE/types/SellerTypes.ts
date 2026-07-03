@@ -12,3 +12,9 @@ export type SellerRequest = {
   iban: string
   billingAddress: string
 }
+
+export type SellerDashboardStats = {
+  totalEarnings: number;
+  totalListings: number;
+  activeBookings: number;
+};
