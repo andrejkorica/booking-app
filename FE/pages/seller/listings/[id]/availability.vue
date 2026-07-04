@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import BookingSellerCard from "~/components/booking/BookingSellerCard.vue";
-import ListingAvailableUnits from "~/components/listings/ListingAvailableUnits.vue";
-import type { UserBooking } from "~/types/BookingTypes";
-import type { ListingUnit } from "~/types/ListingTypes";
+import type { UserBooking } from "~/types/booking";
+import type { ListingUnit } from "~/types/listing";
 
 definePageMeta({
   middleware: "seller-guard",

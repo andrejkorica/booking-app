@@ -1,15 +1,9 @@
 <script setup lang="ts">
 import type { DateValue } from "@internationalized/date";
 import { today, getLocalTimeZone } from "@internationalized/date";
-import CreateListingUnits from "../../../components/listings/create/CreateListingUnits.vue";
-import CreateListingAvailability from "../../../components/listings/create/CreateListingAvailability.vue";
-import type { PriceAdjustment } from "~/types/ListingTypes.js";
-import CreateListingLocation from "../../../components/listings/create/CreateListingLocation.vue";
-import CreateListingImagePreview from "../../../components/listings/create/CreateListingImagePreview.vue";
-import CreateListingPriceAdjustments from "~/components/listings/create/CreateListingPriceAdjustments.vue";
 import { unitTypes } from "~/constants/UnitConstants.js";
-import type { ListingUnit } from "~/types/ListingTypes.js";
-import type { ListingImage } from "~/types/ListingTypes.js";
+import type { ListingUnit, PriceAdjustment } from "~/types/listing.js";
+import type { ListingImage } from "~/types/image";
 
 definePageMeta({
   middleware: "seller-guard",
@@ -276,7 +270,7 @@ onUnmounted(() => {
       </header>
 
       <div class="mb-12">
-        <CreateListingImagePreview :images="images" />
+        <ListingCreateImagePreview :images="images" />
       </div>
 
       <div class="grid grid-cols-1 gap-12 lg:grid-cols-3">
@@ -292,7 +286,7 @@ onUnmounted(() => {
             class="mb-8 w-full"
           />
 
-          <CreateListingLocation
+          <ListingCreateLocation
             v-model:location="form.location"
             v-model:latitude="form.latitude"
             v-model:longitude="form.longitude"
@@ -387,13 +381,13 @@ onUnmounted(() => {
 
           <div class="my-10 border-t border-slate-200" />
 
-          <CreateListingUnits v-model="listingUnits" />
+          <ListingCreateUnits v-model="listingUnits" />
 
-          <CreateListingAvailability v-model="availableFrom" />
+          <ListingCreateAvailability v-model="availableFrom" />
 
           <div class="my-10 border-t border-slate-200" />
 
-          <CreateListingPriceAdjustments v-model="priceAdjustments" />
+          <ListingCreatePriceAdjustments v-model="priceAdjustments" />
         </div>
 
         <div>

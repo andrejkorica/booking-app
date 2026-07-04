@@ -3,7 +3,6 @@ import { ref, computed } from "vue";
 import { useAuthStore } from "~/stores/auth";
 import type { DropdownMenuItem } from "@nuxt/ui";
 import OptionsModal from "./OptionsModal.vue";
-import defaultAvatar from "~/public/images/default-avatar.png";
 
 const authStore = useAuthStore();
 

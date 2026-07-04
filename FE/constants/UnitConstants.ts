@@ -1,4 +1,4 @@
-import type { Unit } from "~/types/UnitTypes";
+import type { Unit } from "~/types/unit";
 
 export const unitTypes: Unit[] = [
   { label: 'Single room', value: 'single_room', maxGuests: 1, roomCount: 1 },

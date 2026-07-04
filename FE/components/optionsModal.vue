@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import type { TabsItem } from "@nuxt/ui";
-import SellerTab from "./options/OptionsSellerTab.vue";
-import ProfileTab from "./options/OptionsProfileTab.vue";
 
 const isOpen = defineModel<boolean>("open", {
   default: false,
@@ -17,7 +15,7 @@ const items: TabsItem[] = [
 ];
 
 function closeModal() {
-  isOpen.value = false
+  isOpen.value = false;
 }
 </script>
 
@@ -44,11 +42,9 @@ function closeModal() {
           }"
         />
 
-        <div
-          class="min-h-[220px] overflow-y-auto p-2 sm:min-h-[300px] sm:pr-3"
-        >
-          <ProfileTab v-if="selectedTab === 'profile'" />
-          <SellerTab v-else-if="selectedTab === 'seller'" />
+        <div class="min-h-[220px] overflow-y-auto p-2 sm:min-h-[300px] sm:pr-3">
+          <OptionsProfileTab v-if="selectedTab === 'profile'" />
+          <OptionsSellerTab v-else-if="selectedTab === 'seller'" />
         </div>
 
         <!-- Mobile only -->

@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from "~/stores/auth";
-import CreateListingImagePreview from "~/components/listings/create/CreateListingImagePreview.vue";
-import ListingLocationMap from "~/components/listings/ListingLocationMap.vue";
-import ListingAvailableUnits from "~/components/listings/ListingAvailableUnits.vue";
-import ListingsReviews from "~/components/listings/reviews/ListingsReviews.vue";
-import ListingBookingSidebar from "~/components/listings/ListingBookingSidebar.vue";
-import type { ListingReview } from "~/types/ReviewTypes";
-import type { Listing, ListingUnit } from "~/types/ListingTypes";
+import type { ListingReview } from "~/types/review";
+import type { Listing, ListingUnit } from "~/types/listing";
 
 const route = useRoute();
 const router = useRouter();
@@ -393,7 +388,7 @@ useHead(() => ({
         </header>
 
         <div class="mb-8 sm:mb-12">
-          <CreateListingImagePreview :images="previewImages" />
+          <ListingCreateImagePreview :images="previewImages" />
         </div>
 
         <div class="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-12">
@@ -466,7 +461,7 @@ useHead(() => ({
         </div>
 
         <div class="mt-10 sm:mt-12">
-          <ListingsReviews
+          <ListingReview
             :reviews="reviews"
             :is-logged-in="Boolean(authStore.user)"
             @submit-review="submitReview"

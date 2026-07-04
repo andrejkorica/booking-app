@@ -1,80 +1,74 @@
 <script setup lang="ts">
-import AdminEditUserModal from '~/components/admin/AdminEditUserModal.vue'
-import AdminDeleteUserModal from '~/components/admin/AdminDeleteUserModal.vue'
-import type { User } from '~/types/UserTypes'
+import type { User } from "~/types/user";
 
 definePageMeta({
-  middleware: 'admin-guard'
-})
+  middleware: "admin-guard",
+});
 
-const config = useRuntimeConfig()
-const toast = useToast()
+const config = useRuntimeConfig();
+const toast = useToast();
 
-const users = ref<User[]>([])
-const isLoading = ref(false)
+const users = ref<User[]>([]);
+const isLoading = ref(false);
 
-const selectedUser = ref<User | null>(null)
+const selectedUser = ref<User | null>(null);
 
-const editModalOpen = ref(false)
-const deleteModalOpen = ref(false)
+const editModalOpen = ref(false);
+const deleteModalOpen = ref(false);
 
 async function fetchUsers() {
-  isLoading.value = true
+  isLoading.value = true;
 
   try {
     users.value = await $fetch<User[]>(`${config.public.apiBase}/admin/users`, {
-      credentials: 'include'
-    })
+      credentials: "include",
+    });
   } catch (error) {
-    console.error(error)
+    console.error(error);
 
     toast.add({
-      title: 'Error',
-      description: 'Failed to load users.',
-      color: 'error'
-    })
+      title: "Error",
+      description: "Failed to load users.",
+      color: "error",
+    });
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
 function openEditModal(user: User) {
-  selectedUser.value = user
-  editModalOpen.value = true
+  selectedUser.value = user;
+  editModalOpen.value = true;
 }
 
 function openDeleteModal(user: User) {
-  selectedUser.value = user
-  deleteModalOpen.value = true
+  selectedUser.value = user;
+  deleteModalOpen.value = true;
 }
 
 function handleUserUpdated(updatedUser: User) {
-  users.value = users.value.map(user =>
-    user.id === updatedUser.id ? updatedUser : user
-  )
+  users.value = users.value.map((user) =>
+    user.id === updatedUser.id ? updatedUser : user,
+  );
 
-  selectedUser.value = null
+  selectedUser.value = null;
 }
 
 function handleUserDeleted(userId: number) {
-  users.value = users.value.filter(user => user.id !== userId)
-  selectedUser.value = null
+  users.value = users.value.filter((user) => user.id !== userId);
+  selectedUser.value = null;
 }
 
-onMounted(fetchUsers)
+onMounted(fetchUsers);
 </script>
 
 <template>
   <div class="container mx-auto px-4 py-10">
     <div class="mb-8 flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">
-          Registered Users
-        </h1>
+        <h1 class="text-3xl font-bold text-slate-900">Registered Users</h1>
 
-        <p class="mt-2 text-slate-600">
-          View, edit, and delete users.
-        </p>
+        <p class="mt-2 text-slate-600">View, edit, and delete users.</p>
       </div>
 
       <UButton
@@ -91,7 +85,10 @@ onMounted(fetchUsers)
         Loading users...
       </div>
 
-      <div v-else-if="users.length === 0" class="py-10 text-center text-slate-500">
+      <div
+        v-else-if="users.length === 0"
+        class="py-10 text-center text-slate-500"
+      >
         No users found.
       </div>
 

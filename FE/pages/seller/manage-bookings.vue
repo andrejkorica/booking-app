@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import BookingCard from "~/components/booking/BookingCard.vue";
-import type { UserBooking } from "~/types/BookingTypes";
+import type { UserBooking } from "~/types/booking";
 
 definePageMeta({
   middleware: "seller-guard",

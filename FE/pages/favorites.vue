@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import ListingCard from "~/components/listings/ListingCard.vue";
-import type { Listing } from "~/types/ListingTypes";
+import type { Listing } from "~/types/listing";
 
 definePageMeta({
   middleware: "user-guard",

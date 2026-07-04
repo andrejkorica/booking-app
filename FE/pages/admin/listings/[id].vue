@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import CreateListingImagePreview from "~/components/listings/create/CreateListingImagePreview.vue";
-import ListingLocationMap from "../../../components/listings/ListingLocationMap.vue";
-import ListingAvailableUnits from "../../../components/listings/ListingAvailableUnits.vue";
-import type { Listing } from "~/types/ListingTypes.js";
+import type { Listing } from "~/types/listing";
 
 definePageMeta({
 
@@ -154,7 +151,7 @@ onMounted(fetchListing);
       </header>
 
       <div class="mb-12">
-        <CreateListingImagePreview :images="previewImages" />
+        <ListingCreateImagePreview :images="previewImages" />
       </div>
 
       <div class="grid grid-cols-1 gap-12 lg:grid-cols-3">

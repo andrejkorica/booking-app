@@ -1,37 +1,36 @@
 <script setup lang="ts">
-import AdminListingRequestCard from '~/components/admin/AdminListingRequestCard.vue'
-import type { Listing } from '~/types/ListingTypes'
+import type { Listing } from "~/types/listing";
 
 definePageMeta({
-  middleware: 'admin-guard'
-})
+  middleware: "admin-guard",
+});
 
-const config = useRuntimeConfig()
-const toast = useToast()
+const config = useRuntimeConfig();
+const toast = useToast();
 
-const listings = ref<Listing[]>([])
-const isLoading = ref(false)
+const listings = ref<Listing[]>([]);
+const isLoading = ref(false);
 
 async function fetchListings() {
-  isLoading.value = true
+  isLoading.value = true;
 
   try {
     listings.value = await $fetch<Listing[]>(
       `${config.public.apiBase}/admin/listings`,
       {
-        credentials: 'include'
-      }
-    )
+        credentials: "include",
+      },
+    );
   } catch (error) {
-    console.error(error)
+    console.error(error);
 
     toast.add({
-      title: 'Error',
-      description: 'Failed to load listings.',
-      color: 'error'
-    })
+      title: "Error",
+      description: "Failed to load listings.",
+      color: "error",
+    });
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
 }
 
@@ -40,28 +39,28 @@ async function approveListing(listingId: number) {
     const updatedListing = await $fetch<Listing>(
       `${config.public.apiBase}/admin/listings/${listingId}/approve`,
       {
-        method: 'POST',
-        credentials: 'include'
-      }
-    )
+        method: "POST",
+        credentials: "include",
+      },
+    );
 
-    listings.value = listings.value.map(listing =>
-      listing.id === updatedListing.id ? updatedListing : listing
-    )
+    listings.value = listings.value.map((listing) =>
+      listing.id === updatedListing.id ? updatedListing : listing,
+    );
 
     toast.add({
-      title: 'Approved',
-      description: 'Listing approved successfully.',
-      color: 'success'
-    })
+      title: "Approved",
+      description: "Listing approved successfully.",
+      color: "success",
+    });
   } catch (error) {
-    console.error(error)
+    console.error(error);
 
     toast.add({
-      title: 'Error',
-      description: 'Failed to approve listing.',
-      color: 'error'
-    })
+      title: "Error",
+      description: "Failed to approve listing.",
+      color: "error",
+    });
   }
 }
 
@@ -70,41 +69,39 @@ async function rejectListing(listingId: number) {
     const updatedListing = await $fetch<Listing>(
       `${config.public.apiBase}/admin/listings/${listingId}/reject`,
       {
-        method: 'POST',
-        credentials: 'include'
-      }
-    )
+        method: "POST",
+        credentials: "include",
+      },
+    );
 
-    listings.value = listings.value.map(listing =>
-      listing.id === updatedListing.id ? updatedListing : listing
-    )
+    listings.value = listings.value.map((listing) =>
+      listing.id === updatedListing.id ? updatedListing : listing,
+    );
 
     toast.add({
-      title: 'Rejected',
-      description: 'Listing rejected.',
-      color: 'success'
-    })
+      title: "Rejected",
+      description: "Listing rejected.",
+      color: "success",
+    });
   } catch (error) {
-    console.error(error)
+    console.error(error);
 
     toast.add({
-      title: 'Error',
-      description: 'Failed to reject listing.',
-      color: 'error'
-    })
+      title: "Error",
+      description: "Failed to reject listing.",
+      color: "error",
+    });
   }
 }
 
-onMounted(fetchListings)
+onMounted(fetchListings);
 </script>
 
 <template>
   <div class="container mx-auto px-4 py-10">
     <div class="mb-8 flex items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">
-          Listing Requests
-        </h1>
+        <h1 class="text-3xl font-bold text-slate-900">Listing Requests</h1>
 
         <p class="mt-2 text-slate-600">
           Review and approve property listings submitted by sellers.
@@ -125,14 +122,14 @@ onMounted(fetchListings)
         Loading listing requests...
       </div>
 
-      <div v-else-if="listings.length === 0" class="py-10 text-center text-slate-500">
+      <div
+        v-else-if="listings.length === 0"
+        class="py-10 text-center text-slate-500"
+      >
         No listing requests found.
       </div>
 
-      <div
-        v-else
-        class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3"
-      >
+      <div v-else class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
         <AdminListingRequestCard
           v-for="listing in listings"
           :key="listing.id"

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import ListingCard from "~/components/listings/ListingCard.vue";
-import FilteringSearchBar from "~/components/filtering/FilteringSearchBar.vue";
-import type { Listing } from "~/types/ListingTypes";
+import type { Listing } from "~/types/listing";
 
 const config = useRuntimeConfig();
 

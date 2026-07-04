@@ -6,13 +6,8 @@ import type {
   Listing,
   ListingUnit,
   PriceAdjustment,
-  ListingImage
-} from "~/types/ListingTypes.js";
-import CreateListingAvailability from "~/components/listings/create/CreateListingAvailability.vue";
-import CreateListingPriceAdjustments from "~/components/listings/create/CreateListingPriceAdjustments.vue";
-import CreateListingLocation from "~/components/listings/create/CreateListingLocation.vue";
-import CreateListingImagePreview from "~/components/listings/create/CreateListingImagePreview.vue";
-import CreateListingUnits from "~/components/listings/create/CreateListingUnits.vue";
+} from "~/types/listing.js";
+import type { ListingImage } from "~/types/image";
 
 definePageMeta({
   middleware: "seller-guard",
@@ -353,7 +348,7 @@ onUnmounted(() => {
           </div>
         </header>
 
-        <CreateListingImagePreview :images="previewImages" />
+        <ListingCreateImagePreview :images="previewImages" />
 
         <div class="grid grid-cols-1 gap-12 lg:grid-cols-3">
           <div class="lg:col-span-2">
@@ -368,7 +363,7 @@ onUnmounted(() => {
               class="mb-8 w-full"
             />
 
-            <CreateListingLocation
+            <ListingCreateLocation
               v-model:location="form.location"
               v-model:latitude="form.latitude"
               v-model:longitude="form.longitude"
@@ -466,13 +461,13 @@ onUnmounted(() => {
 
             <div class="my-10 border-t border-slate-200" />
 
-            <CreateListingUnits v-model="listingUnits" />
+            <ListingCreateUnits v-model="listingUnits" />
 
-            <CreateListingAvailability v-model="availableFrom" />
+            <ListingCreateAvailability v-model="availableFrom" />
 
             <div class="my-10 border-t border-slate-200" />
 
-            <CreateListingPriceAdjustments v-model="priceAdjustments" />
+            <ListingCreatePriceAdjustments v-model="priceAdjustments" />
           </div>
 
           <div>

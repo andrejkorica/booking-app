@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import FilteringSearchBar from "~/components/filtering/FilteringSearchBar.vue";
-import FilteringSidebar from "~/components/filtering/filterBar/FilteringSidebar.vue";
-import ListingCard from "~/components/listings/ListingCard.vue";
-import FilteringSortDropdown from "~/components/filtering/FilteringSortDropdown.vue";
-import type { Listing } from "~/types/ListingTypes";
+
+import type { Listing } from "~/types/listing";
 
 const sort = ref("top");
 
@@ -72,7 +69,7 @@ watch(() => route.fullPath, fetchListings, { immediate: true });
     <main class="mx-auto max-w-7xl px-4 pt-10 sm:px-6 lg:px-8">
       <div class="flex flex-col gap-6 lg:flex-row lg:items-start">
         <aside class="w-full lg:w-[280px] lg:shrink-0">
-          <FilteringSidebar />
+          <FilteringBarSidebar />
         </aside>
 
         <section class="min-w-0 flex-1 pb-12">

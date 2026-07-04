@@ -1,14 +1,8 @@
 <script setup lang="ts">
 import { getLocalTimeZone, parseDate } from "@internationalized/date";
-import BookingSteps from "~/components/booking/BookingSteps.vue";
-import BookingUnitSelector from "~/components/booking/BookingUnitSelector.vue";
-import BookingDateSelector from "~/components/booking/BookingDateSelector.vue";
-import BookingPriceSummary from "~/components/booking/BookingPriceSummary.vue";
-import BookingGuestInfo from "~/components/booking/BookingGuestInfo.vue";
-import BookingPaymentForm from "~/components/booking/BookingPaymentForm.vue";
-import type { BookedRange } from "~/types/BookingTypes";
-import type { Listing, ListingUnit, PriceAdjustment } from "~/types/ListingTypes";
-import type { DateRangeValue } from "~/types/ComponentTypes";
+import type { BookedRange } from "~/types/booking";
+import type { Listing, ListingUnit, PriceAdjustment } from "~/types/listing";
+import type { DateRangeValue } from "~/types/filter";
 
 const route = useRoute();
 const config = useRuntimeConfig();
