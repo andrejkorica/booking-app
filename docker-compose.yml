@@ -35,7 +35,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NUXT_PUBLIC_API_BASE: http://localhost:8080/api
+      NUXT_PUBLIC_API_BASE: http://165.245.216.118:8080/api
+      # NUXT_PUBLIC_API_BASE: http://localhost:8080/api
       CHOKIDAR_USEPOLLING: "true"
       WATCHPACK_POLLING: "true"
     volumes:
