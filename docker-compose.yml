@@ -28,22 +28,15 @@ services:
       CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
 
   frontend:
-    build: ./FE
-    container_name: booking_frontend
-    depends_on:
-      - backend
-    ports:
-      - "3000:3000"
-    environment:
-      NUXT_PUBLIC_API_BASE: http://165.245.216.118:8080/api
-      # NUXT_PUBLIC_API_BASE: http://localhost:8080/api
-      CHOKIDAR_USEPOLLING: "true"
-      WATCHPACK_POLLING: "true"
-    volumes:
-      - ./FE:/app
-      - /app/node_modules
-    working_dir: /app
-    command: npm run dev -- --host 0.0.0.0
+  build: ./FE
+  container_name: booking_frontend
+  depends_on:
+    - backend
+  ports:
+    - "3000:3000"
+  environment:
+    NUXT_PUBLIC_API_BASE: http://165.245.216.118:8080/api
+  command: npm run preview -- --host 0.0.0.0
 
 volumes:
   postgres_data:
