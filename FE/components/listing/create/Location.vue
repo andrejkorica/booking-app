@@ -12,9 +12,9 @@ const suggestions = ref<LocationSuggestion[]>([]);
 const isSearching = ref(false);
 const isSuggestionsOpen = ref(false);
 
+let L: any = null;
 let map: any = null;
 let marker: any = null;
-let L: any = null;
 let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
 function setMarker(lat: number, lng: number) {
@@ -53,9 +53,10 @@ async function fetchSuggestions() {
         query: {
           q: searchQuery.value,
           format: "json",
-          limit: 5,
+          limit: 10,
           addressdetails: 1,
           countrycodes: "hr",
+          dedupe: 1,
         },
       },
     );
@@ -94,12 +95,33 @@ async function searchFirstSuggestion() {
   }
 
   await fetchSuggestions();
+
+  if (suggestions.value[0]) {
+    selectSuggestion(suggestions.value[0]);
+  }
 }
 
 onMounted(async () => {
   await nextTick();
 
-  L = await import("leaflet");
+  const leaflet = await import("leaflet");
+  L = leaflet.default;
+
+  const markerIcon2x = (
+    await import("leaflet/dist/images/marker-icon-2x.png")
+  ).default;
+  const markerIcon = (await import("leaflet/dist/images/marker-icon.png"))
+    .default;
+  const markerShadow = (await import("leaflet/dist/images/marker-shadow.png"))
+    .default;
+
+  delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+  });
 
   if (!mapEl.value) return;
 

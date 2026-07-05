@@ -112,7 +112,6 @@ function removeAmenity(index: number) {
   form.amenities.splice(index, 1);
 }
 
-
 async function uploadImage(image: ListingImage) {
   if (!image.file) {
     throw new Error("Image file is missing.");
@@ -138,7 +137,6 @@ async function uploadImage(image: ListingImage) {
     image.isUploading = false;
   }
 }
-
 
 async function createListing() {
   isSubmitting.value = true;
@@ -204,7 +202,6 @@ async function createListing() {
   } finally {
     isSubmitting.value = false;
   }
-
 }
 
 const canContinue = computed(() => {
@@ -212,12 +209,9 @@ const canContinue = computed(() => {
     form.title.trim() !== "" &&
     form.location.trim() !== "" &&
     form.description.trim() !== "" &&
-
     images.value.length > 0 &&
-
     form.amenities.length > 0 &&
     form.amenities.every((amenity) => amenity.trim() !== "") &&
-
     selectedUnits.value.length > 0
   );
 });
@@ -286,11 +280,13 @@ onUnmounted(() => {
             class="mb-8 w-full"
           />
 
-          <ListingCreateLocation
-            v-model:location="form.location"
-            v-model:latitude="form.latitude"
-            v-model:longitude="form.longitude"
-          />
+          <ClientOnly>
+            <ListingCreateLocation
+              v-model:location="form.location"
+              v-model:latitude="form.latitude"
+              v-model:longitude="form.longitude"
+            />
+          </ClientOnly>
 
           <h3 class="mb-4 text-xl font-bold">Images</h3>
 
@@ -404,8 +400,6 @@ onUnmounted(() => {
                 >
                   €{{ lowestPrice }} - €{{ highestPrice }}
                 </p>
-
-                
               </div>
 
               <UButton
@@ -420,7 +414,8 @@ onUnmounted(() => {
               />
 
               <p class="text-sm text-slate-500">
-                  Fill in all required fields, upload at least one image, and add at least one unit with a price to create your listing.
+                Fill in all required fields, upload at least one image, and add
+                at least one unit with a price to create your listing.
               </p>
             </div>
           </UCard>
