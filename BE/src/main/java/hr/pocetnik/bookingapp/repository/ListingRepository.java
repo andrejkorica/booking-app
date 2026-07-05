@@ -11,63 +11,59 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ListingRepository extends JpaRepository<ListingEntity, Long> {
-        List<ListingEntity> findBySeller(UserEntity seller);
+    List<ListingEntity> findBySeller(UserEntity seller);
 
-        List<ListingEntity> findByStatus(ListingStatus status);
+    List<ListingEntity> findByStatus(ListingStatus status);
 
-        List<ListingEntity> findBySellerAndStatus(UserEntity seller, ListingStatus status);
+    List<ListingEntity> findBySellerAndStatus(UserEntity seller, ListingStatus status);
 
-        List<ListingEntity> findAllByOrderByCreatedAtDesc();
+    List<ListingEntity> findAllByOrderByCreatedAtDesc();
 
-        @Query("""
-                            select distinct l.location
-                            from ListingEntity l
-                            where l.location is not null
-                            and l.location <> ''
-                            order by l.location
-                        """)
-        List<String> findDistinctLocations();
+    @Query("""
+                select distinct l.location
+                from ListingEntity l
+                where l.location is not null
+                and l.location <> ''
+                order by l.location
+            """)
+    List<String> findDistinctLocations();
 
-        @Query("""
-                            select distinct l
-                            from ListingEntity l
-                            join l.units u
-                            where l.status = :status
-                            and lower(l.location) like lower(concat('%', coalesce(:location, ''), '%'))
-                            and (:checkIn is null or l.availableFrom <= :checkIn)
-                            and (:rooms is null or u.roomCount >= :rooms)
-                            and (:totalGuests is null or u.maxGuests >= :totalGuests)
-                            order by l.createdAt desc
-                        """)
+    @Query("""
+                select distinct l
+                from ListingEntity l
+                join l.units u
+                where l.status = :status
+                and lower(l.location) like lower(concat('%', coalesce(:location, ''), '%'))
+                and (:rooms is null or u.roomCount >= :rooms)
+                and (:totalGuests is null or u.maxGuests >= :totalGuests)
+                order by l.createdAt desc
+            """)
+    List<ListingEntity> searchListings(
+            @Param("status") ListingStatus status,
+            @Param("location") String location,
+            @Param("rooms") Integer rooms,
+            @Param("totalGuests") Integer totalGuests);
 
-        List<ListingEntity> searchListings(
-                        @Param("status") ListingStatus status,
-                        @Param("location") String location,
-                        @Param("checkIn") LocalDate checkIn,
-                        @Param("rooms") Integer rooms,
-                        @Param("totalGuests") Integer totalGuests);
+    @Query("""
+                select distinct amenity
+                from ListingEntity l
+                join l.amenities amenity
+                order by amenity
+            """)
+    List<String> findDistinctAmenities();
 
-        @Query("""
-                            select distinct amenity
-                            from ListingEntity l
-                            join l.amenities amenity
-                            order by amenity
-                        """)
+    Long countBySeller(UserEntity seller);
 
-        List<String> findDistinctAmenities();
+    Long countBySellerAndStatusNot(
+            UserEntity seller,
+            ListingStatus status);
 
-        Long countBySeller(UserEntity seller);
-
-        Long countBySellerAndStatusNot(
-                        UserEntity seller,
-                        ListingStatus status);
-
-        @Query("""
-                            select distinct l.city
-                            from ListingEntity l
-                            where l.city is not null
-                            and l.city <> ''
-                            order by l.city
-                        """)
-        List<String> findDistinctCities();
+    @Query("""
+                select distinct l.city
+                from ListingEntity l
+                where l.city is not null
+                and l.city <> ''
+                order by l.city
+            """)
+    List<String> findDistinctCities();
 }

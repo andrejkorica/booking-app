@@ -278,7 +278,6 @@ public class ListingServiceImpl implements ListingService {
         List<ListingEntity> listings = listingRepository.searchListings(
                 ListingStatus.APPROVED,
                 cleanedLocation,
-                checkIn,
                 rooms,
                 totalGuests);
 
