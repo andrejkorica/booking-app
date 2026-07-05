@@ -15,6 +15,7 @@ const citySearch = ref("");
 const checkIn = ref("");
 const checkOut = ref("");
 const isCalendarOpen = ref(false);
+const isCityMenuOpen = ref(false);
 
 const guestInfo = ref({
   adults: 2,
@@ -91,9 +92,12 @@ function getDateLabel() {
 function clearCity() {
   city.value = "";
   citySearch.value = "";
+  isCityMenuOpen.value = false;
 }
 
 function handleSearch() {
+  isCityMenuOpen.value = false;
+
   router.push({
     path: "/listings",
     query: {
@@ -136,6 +140,7 @@ function handleSearch() {
               <UInputMenu
                 v-model="city"
                 v-model:search-term="citySearch"
+                v-model:open="isCityMenuOpen"
                 :items="filteredCitySuggestions"
                 :loading="isLoadingCities"
                 open-on-focus
@@ -148,13 +153,20 @@ function handleSearch() {
                   leadingIcon: 'text-indigo-400',
                   base: city ? 'pr-16' : '',
                 }"
+                @update:model-value="
+                  (value) => {
+                    if (value) {
+                      isCityMenuOpen = false;
+                    }
+                  }
+                "
               />
 
               <button
                 v-if="city"
                 type="button"
                 class="absolute right-9 top-1/2 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                @click.stop="clearCity"
+                @click.prevent.stop="clearCity"
               >
                 <UIcon name="i-heroicons-x-mark-20-solid" class="h-4 w-4" />
               </button>
