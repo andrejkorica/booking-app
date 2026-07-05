@@ -10,11 +10,11 @@ import hr.pocetnik.bookingapp.service.ListingService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
 @RestController
 @RequestMapping("/favorites")
 @RequiredArgsConstructor
@@ -22,14 +22,14 @@ public class FavoriteListingsController {
 
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
-    private final JwtService jwtService;
     private final ListingService listingService;
 
     @PostMapping("/{listingId}/toggle")
     public Map<String, Object> toggleFavorite(
             @PathVariable Long listingId,
-            HttpServletRequest request) {
-        String email = getEmailFromCookie(request);
+            Authentication authentication) {
+
+        String email = authentication.getName();
 
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -55,8 +55,9 @@ public class FavoriteListingsController {
     @GetMapping("/{listingId}")
     public Map<String, Boolean> isFavorited(
             @PathVariable Long listingId,
-            HttpServletRequest request) {
-        String email = getEmailFromCookie(request);
+            Authentication authentication) {
+
+        String email = authentication.getName();
 
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -68,23 +69,9 @@ public class FavoriteListingsController {
         return Map.of("favorited", favorited);
     }
 
-    private String getEmailFromCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) {
-            throw new RuntimeException("Token missing");
-        }
-
-        for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals("token")) {
-                return jwtService.extractAllClaims(cookie.getValue()).getSubject();
-            }
-        }
-
-        throw new RuntimeException("Token missing");
-    }
-
     @GetMapping
-    public List<ListingResponse> getFavoriteListings(HttpServletRequest request) {
-        String email = getEmailFromCookie(request);
+    public List<ListingResponse> getFavoriteListings(Authentication authentication) {
+        String email = authentication.getName();
 
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));

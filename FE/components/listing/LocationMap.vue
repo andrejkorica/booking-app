@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import "leaflet/dist/leaflet.css";
 
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+
 const props = defineProps<{
   location: string;
   latitude: number | null;
@@ -21,11 +25,22 @@ onMounted(async () => {
 
   L = await import("leaflet");
 
-  if (!mapEl.value) return;
+  delete L.Icon.Default.prototype._getIconUrl;
+
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+  });
+
+  if (!mapEl.value) {
+    return;
+  }
 
   map = L.map(mapEl.value, {
     dragging: false,
     scrollWheelZoom: false,
+    zoomControl: true,
   }).setView([props.latitude, props.longitude], 15);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {

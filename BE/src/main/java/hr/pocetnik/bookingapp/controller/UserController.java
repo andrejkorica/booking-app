@@ -30,7 +30,8 @@ public class UserController {
         private final ImageService imageService;
 
         @Autowired
-        public UserController(UserService userService, JwtService jwtService, UserRepository userRepository, ImageService imageService) {
+        public UserController(UserService userService, JwtService jwtService, UserRepository userRepository,
+                        ImageService imageService) {
                 this.userService = userService;
                 this.jwtService = jwtService;
                 this.userRepository = userRepository;
@@ -58,7 +59,7 @@ public class UserController {
                                 .httpOnly(true)
                                 .secure(false)
                                 .path("/")
-                                .maxAge(Duration.ofHours(1))
+                                .maxAge(Duration.ofDays(1))
                                 .sameSite("Strict")
                                 .build();
 
@@ -82,7 +83,7 @@ public class UserController {
                                 .httpOnly(true)
                                 .secure(false)
                                 .path("/")
-                                .maxAge(Duration.ofHours(1))
+                                .maxAge(Duration.ofDays(1))
                                 .sameSite("Strict")
                                 .build();
 
