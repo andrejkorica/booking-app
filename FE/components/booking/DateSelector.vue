@@ -13,12 +13,8 @@ const props = defineProps<{
   bookedRanges?: BookedRange[]
 }>()
 
-const fallbackMinDate = today(getLocalTimeZone())
-
 const isDateUnavailable = (date: DateValue) => {
-  const min = props.minDate ?? fallbackMinDate
-
-  if (date.compare(min) < 0) {
+  if (date.compare(effectiveMinDate.value) < 0) {
     return true
   }
 
@@ -31,6 +27,20 @@ const isDateUnavailable = (date: DateValue) => {
     }) ?? false
   )
 }
+
+const effectiveMinDate = computed(() => {
+  const todayDate = today(getLocalTimeZone())
+
+  if (!props.minDate) {
+    return todayDate
+  }
+
+  return props.minDate.compare(todayDate) > 0
+    ? props.minDate
+    : todayDate
+})
+
+
 </script>
 
 <template>

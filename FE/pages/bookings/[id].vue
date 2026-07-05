@@ -5,6 +5,7 @@ const route = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
 const toast = useToast();
+const { formatDate } = useDateFormat()
 
 const booking = ref<BookingDetails | null>(null);
 const isLoading = ref(false);
@@ -107,12 +108,12 @@ onMounted(fetchBooking);
                 <div class="mt-5 grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p class="text-slate-500">Check-in</p>
-                    <p class="font-medium">{{ booking.checkIn }}</p>
+                    <p class="font-medium">{{ formatDate(booking.checkIn) }}</p>
                   </div>
 
                   <div>
                     <p class="text-slate-500">Check-out</p>
-                    <p class="font-medium">{{ booking.checkOut }}</p>
+                    <p class="font-medium">{{ formatDate(booking.checkOut) }}</p>
                   </div>
 
                   <div>
@@ -122,7 +123,7 @@ onMounted(fetchBooking);
 
                   <div>
                     <p class="text-slate-500">Created</p>
-                    <p class="font-medium">{{ booking.createdAt }}</p>
+                    <p class="font-medium">{{ formatDate(booking.createdAt) }}</p>
                   </div>
                 </div>
               </div>

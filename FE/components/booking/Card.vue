@@ -11,6 +11,8 @@ const emit = defineEmits<{
   cancel: [bookingId: number];
 }>();
 
+const { formatDate } = useDateFormat()
+
 const isCancelModalOpen = ref(false);
 
 const statusColor = computed(() => {
@@ -90,12 +92,12 @@ function confirmCancel() {
           >
             <div class="rounded-lg bg-white p-3">
               <p class="text-slate-500">Check-in</p>
-              <p class="font-medium">{{ booking.checkIn }}</p>
+              <p class="font-medium">{{ formatDate(booking.checkIn) }}</p>
             </div>
 
             <div class="rounded-lg bg-white p-3">
               <p class="text-slate-500">Check-out</p>
-              <p class="font-medium">{{ booking.checkOut }}</p>
+              <p class="font-medium">{{ formatDate(booking.checkOut) }}</p>
             </div>
 
             <div class="rounded-lg bg-white p-3">

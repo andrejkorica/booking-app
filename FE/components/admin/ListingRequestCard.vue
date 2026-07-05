@@ -10,6 +10,8 @@ const emit = defineEmits<{
   reject: [id: number]
 }>()
 
+const { formatDate } = useDateFormat()
+
 const priceLabel = computed(() => {
   if (!props.listing.lowestPrice && !props.listing.highestPrice) {
     return 'Price not set'
@@ -88,7 +90,7 @@ const priceLabel = computed(() => {
       </p>
 
       <p class="text-xs text-slate-400">
-        Created: {{ listing.createdAt }}
+        Created: {{ formatDate(listing.createdAt) }}
       </p>
     </div>
 

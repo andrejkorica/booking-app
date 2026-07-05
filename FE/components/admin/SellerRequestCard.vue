@@ -10,6 +10,8 @@ const emit = defineEmits<{
   reject: [id: number];
 }>();
 
+const { formatDate } = useDateFormat()
+
 const canReview = computed(() => {
   return (
     props.request.status === "PENDING" || props.request.status === "UPDATE"
@@ -76,7 +78,7 @@ const statusColor = computed(() => {
         </p>
       </div>
 
-      <p class="text-xs text-slate-400">Created: {{ request.createdAt }}</p>
+      <p class="text-xs text-slate-400">Created: {{ formatDate(request.createdAt) }}</p>
     </div>
 
     <template #footer>

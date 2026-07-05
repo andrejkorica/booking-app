@@ -74,6 +74,54 @@ function reviewRequest(bookingId: number) {
   navigateTo(`/bookings/${bookingId}`);
 }
 
+async function approveBooking(bookingId: number) {
+  try {
+    await $fetch(`${config.public.apiBase}/bookings/seller/${bookingId}/approve`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    toast.add({
+      title: "Booking approved",
+      color: "success",
+    });
+
+    await fetchSellerBookings();
+  } catch (error) {
+    console.error(error);
+
+    toast.add({
+      title: "Error",
+      description: "Failed to approve booking.",
+      color: "error",
+    });
+  }
+}
+
+async function rejectBooking(bookingId: number) {
+  try {
+    await $fetch(`${config.public.apiBase}/bookings/seller/${bookingId}/reject`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    toast.add({
+      title: "Booking rejected",
+      color: "success",
+    });
+
+    await fetchSellerBookings();
+  } catch (error) {
+    console.error(error);
+
+    toast.add({
+      title: "Error",
+      description: "Failed to reject booking.",
+      color: "error",
+    });
+  }
+}
+
 onMounted(fetchSellerBookings);
 </script>
 
@@ -116,19 +164,23 @@ onMounted(fetchSellerBookings);
             </div>
 
             <UIcon
-              :name="pendingOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+              :name="
+                pendingOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'
+              "
               class="h-5 w-5 text-slate-500"
             />
           </button>
 
           <div v-if="pendingOpen" class="mt-6">
             <div v-if="pendingBookings.length" class="space-y-4">
-              <BookingCard
+              <BookingSellerCard
                 v-for="booking in pendingBookings"
                 :key="booking.id"
                 :booking="booking"
                 @view-listing="viewListing"
                 @review-request="reviewRequest"
+                @approve="approveBooking"
+                @reject="rejectBooking"
               />
             </div>
 
@@ -157,7 +209,9 @@ onMounted(fetchSellerBookings);
             </div>
 
             <UIcon
-              :name="activeOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+              :name="
+                activeOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'
+              "
               class="h-5 w-5 text-slate-500"
             />
           </button>

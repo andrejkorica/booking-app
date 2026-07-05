@@ -8,6 +8,7 @@ defineProps<{
   totalPrice: number
   canContinue: boolean
 }>()
+const {formatDate} = useDateFormat()
 
 const emit = defineEmits<{
   continue: []
@@ -34,14 +35,14 @@ const emit = defineEmits<{
         <div class="flex justify-between">
           <span>Check-in</span>
           <span class="font-medium text-slate-900">
-            {{ checkIn }}
+            {{ formatDate(checkIn) }}
           </span>
         </div>
 
         <div class="flex justify-between">
           <span>Check-out</span>
           <span class="font-medium text-slate-900">
-            {{ checkOut }}
+            {{ formatDate(checkOut) }}
           </span>
         </div>
 

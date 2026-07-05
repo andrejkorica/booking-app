@@ -19,6 +19,8 @@ const statusColor = computed(() => {
 });
 
 const isPending = computed(() => props.booking.status === "PENDING");
+
+const { formatDate } = useDateFormat()
 </script>
 
 <template>
@@ -59,12 +61,12 @@ const isPending = computed(() => props.booking.status === "PENDING");
           <div class="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 md:grid-cols-5">
             <div class="rounded-lg bg-white p-3">
               <p class="text-slate-500">Check-in</p>
-              <p class="font-medium">{{ booking.checkIn }}</p>
+              <p class="font-medium">{{ formatDate(booking.checkIn) }}</p>
             </div>
 
             <div class="rounded-lg bg-white p-3">
               <p class="text-slate-500">Check-out</p>
-              <p class="font-medium">{{ booking.checkOut }}</p>
+              <p class="font-medium">{{ formatDate(booking.checkOut) }}</p>
             </div>
 
             <div class="rounded-lg bg-white p-3">
