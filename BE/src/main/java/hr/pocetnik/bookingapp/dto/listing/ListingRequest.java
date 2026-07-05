@@ -15,6 +15,8 @@ public class ListingRequest {
 
     private String location;
 
+    private String city;
+
     private String description;
 
     private Integer rating;

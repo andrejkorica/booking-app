@@ -57,4 +57,6 @@ public interface ListingService {
 
         ListingResponse mapListingToResponse(ListingEntity listing);
 
+        List<String> getCities();
+
 }

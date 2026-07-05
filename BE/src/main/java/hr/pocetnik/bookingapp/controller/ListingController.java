@@ -50,6 +50,11 @@ public class ListingController {
         return ResponseEntity.ok(listingService.getLocations());
     }
 
+    @GetMapping("/listings/cities")
+    public ResponseEntity<List<String>> getCities() {
+        return ResponseEntity.ok(listingService.getCities());
+    }
+
     @GetMapping("/listings/{id}")
     public ListingResponse getListingById(
             @PathVariable("id") Long id) {

@@ -5,6 +5,7 @@ import type { LocationSuggestion } from "~/types/filter";
 const location = defineModel<string>("location", { default: "" });
 const latitude = defineModel<number | null>("latitude", { default: null });
 const longitude = defineModel<number | null>("longitude", { default: null });
+  const city = defineModel<string>("city", { default: "" });
 
 const mapEl = ref<HTMLElement | null>(null);
 const searchQuery = ref("");
@@ -78,12 +79,27 @@ function onSearchInput() {
 }
 
 function selectSuggestion(suggestion: LocationSuggestion) {
+  const selectedCity = getCityFromSuggestion(suggestion);
+
   location.value = suggestion.display_name;
+  city.value = selectedCity;
   searchQuery.value = suggestion.display_name;
+
   suggestions.value = [];
   isSuggestionsOpen.value = false;
 
   setMarker(Number(suggestion.lat), Number(suggestion.lon));
+}
+
+function getCityFromSuggestion(suggestion: LocationSuggestion) {
+  return (
+    suggestion.address?.city ||
+    suggestion.address?.town ||
+    suggestion.address?.village ||
+    suggestion.address?.municipality ||
+    suggestion.address?.county ||
+    ""
+  );
 }
 
 async function searchFirstSuggestion() {
@@ -163,7 +179,7 @@ onUnmounted(() => {
     </h2>
 
     <div class="relative mb-4 flex gap-2">
-      <div class="relative flex-1">
+      <div class="relative flex-1 z-[9999]">
         <UInput
           v-model="searchQuery"
           placeholder="Search street, address, city..."

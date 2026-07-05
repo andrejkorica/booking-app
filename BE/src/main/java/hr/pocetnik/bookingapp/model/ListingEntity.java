@@ -31,6 +31,8 @@ public class ListingEntity {
 
     private LocalDate availableFrom;
 
+    private String city;
+
     @ElementCollection
     @CollectionTable(name = "listing_images", joinColumns = @JoinColumn(name = "listing_id"))
     @Column(name = "image_url", columnDefinition = "TEXT")

@@ -10,8 +10,8 @@ import type { DateRangeValue } from "~/types/filter";
 const config = useRuntimeConfig();
 const router = useRouter();
 
-const destination = ref("");
-const destinationSearch = ref("");
+const city = ref("");
+const citySearch = ref("");
 const checkIn = ref("");
 const checkOut = ref("");
 const isCalendarOpen = ref(false);
@@ -22,39 +22,40 @@ const guestInfo = ref({
   rooms: 1,
 });
 
-const locationSuggestions = ref<string[]>([]);
-const isLoadingLocations = ref(false);
+const citySuggestions = ref<string[]>([]);
+const isLoadingCities = ref(false);
 
-const filteredLocationSuggestions = computed(() => {
-  const query = destinationSearch.value.trim().toLowerCase();
+const filteredCitySuggestions = computed(() => {
+  const query = citySearch.value.trim().toLowerCase();
 
   if (!query) {
-    return locationSuggestions.value.slice(0, 4);
+    return citySuggestions.value.slice(0, 4);
   }
 
-  return locationSuggestions.value.filter((location) =>
-    location.toLowerCase().includes(query),
+  return citySuggestions.value.filter((city) =>
+    city.toLowerCase().includes(query),
   );
 });
 
-async function fetchLocations() {
-  isLoadingLocations.value = true;
+async function fetchCities() {
+  isLoadingCities.value = true;
 
   try {
-    locationSuggestions.value = await $fetch<string[]>(
-      `${config.public.apiBase}/listings/locations`,
+    citySuggestions.value = await $fetch<string[]>(
+      `${config.public.apiBase}/listings/cities`,
     );
   } catch (error) {
     console.error(error);
-    locationSuggestions.value = [];
+    citySuggestions.value = [];
   } finally {
-    isLoadingLocations.value = false;
+    isLoadingCities.value = false;
   }
 }
 
-onMounted(fetchLocations);
+onMounted(fetchCities);
 
 const tz = getLocalTimeZone();
+
 const df = new DateFormatter("en-US", {
   dateStyle: "medium",
 });
@@ -87,16 +88,16 @@ function getDateLabel() {
   return `${df.format(start.toDate(tz))} - ${df.format(end.toDate(tz))}`;
 }
 
-function clearDestination() {
-  destination.value = "";
-  destinationSearch.value = "";
+function clearCity() {
+  city.value = "";
+  citySearch.value = "";
 }
 
 function handleSearch() {
   router.push({
     path: "/listings",
     query: {
-      location: destination.value || undefined,
+      location: city.value || undefined,
       checkIn: checkIn.value || undefined,
       checkOut: checkOut.value || undefined,
       adults: guestInfo.value.adults,
@@ -133,10 +134,10 @@ function handleSearch() {
           <div class="grid grid-cols-1 gap-3 md:grid-cols-10 md:items-center">
             <div class="relative md:col-span-3">
               <UInputMenu
-                v-model="destination"
-                v-model:search-term="destinationSearch"
-                :items="filteredLocationSuggestions"
-                :loading="isLoadingLocations"
+                v-model="city"
+                v-model:search-term="citySearch"
+                :items="filteredCitySuggestions"
+                :loading="isLoadingCities"
                 open-on-focus
                 ignore-filter
                 icon="i-heroicons-map-pin"
@@ -145,15 +146,15 @@ function handleSearch() {
                 class="w-full"
                 :ui="{
                   leadingIcon: 'text-indigo-400',
-                  base: destination ? 'pr-16' : '',
+                  base: city ? 'pr-16' : '',
                 }"
               />
 
               <button
-                v-if="destination"
+                v-if="city"
                 type="button"
                 class="absolute right-9 top-1/2 z-10 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                @click.stop="clearDestination"
+                @click.stop="clearCity"
               >
                 <UIcon name="i-heroicons-x-mark-20-solid" class="h-4 w-4" />
               </button>

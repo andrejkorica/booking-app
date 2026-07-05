@@ -21,6 +21,7 @@ export type ListingLocation = {
   location: string;
   latitude: number | null;
   longitude: number | null;
+  city: string;
 };
 
 export type ListingPrice = {

@@ -21,6 +21,7 @@ const form = reactive({
   location: "",
   latitude: null as number | null,
   longitude: null as number | null,
+  city: "",
   rating: 5,
   description: "",
   amenities: [""],
@@ -154,6 +155,7 @@ async function createListing() {
         location: form.location,
         latitude: form.latitude,
         longitude: form.longitude,
+        city: form.city,
         description: form.description,
         rating: form.rating,
         images: uploadedImageUrls,
@@ -285,6 +287,7 @@ onUnmounted(() => {
               v-model:location="form.location"
               v-model:latitude="form.latitude"
               v-model:longitude="form.longitude"
+              v-model:city="form.city"
             />
           </ClientOnly>
 

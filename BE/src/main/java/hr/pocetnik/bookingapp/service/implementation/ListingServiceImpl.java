@@ -29,7 +29,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -64,6 +63,7 @@ public class ListingServiceImpl implements ListingService {
 
         listing.setTitle(request.getTitle());
         listing.setLocation(request.getLocation());
+        listing.setCity(request.getCity());
         listing.setDescription(request.getDescription());
         listing.setRating(request.getRating());
         listing.setImages(request.getImages());
@@ -174,6 +174,7 @@ public class ListingServiceImpl implements ListingService {
 
         listing.setTitle(request.getTitle());
         listing.setLocation(request.getLocation());
+        listing.setCity(request.getCity());
         listing.setDescription(request.getDescription());
         listing.setRating(request.getRating());
         listing.setLowestPrice(request.getLowestPrice());
@@ -451,6 +452,11 @@ public class ListingServiceImpl implements ListingService {
     }
 
     @Override
+    public List<String> getCities() {
+        return listingRepository.findDistinctCities();
+    }
+
+    @Override
     public List<String> getAmenities() {
         return listingRepository.findDistinctAmenities();
     }
@@ -482,6 +488,7 @@ public class ListingServiceImpl implements ListingService {
         response.setId(listing.getId());
         response.setTitle(listing.getTitle());
         response.setLocation(listing.getLocation());
+        response.setCity(listing.getCity());
         response.setDescription(listing.getDescription());
         response.setReviewCount(reviewCount);
         response.setAverageRating(averageRating != null ? averageRating : 0.0);

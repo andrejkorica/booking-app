@@ -24,6 +24,7 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const form = reactive({
   title: "",
   location: "",
+  city: "",
   rating: 5,
   description: "",
   amenities: [""],
@@ -132,6 +133,7 @@ async function fetchListing() {
 
     form.title = listing.title;
     form.location = listing.location;
+    form.city = listing.city;
     form.rating = listing.rating;
     form.description = listing.description;
     form.amenities = listing.amenities?.length ? [...listing.amenities] : [""];
@@ -238,6 +240,7 @@ async function updateListing() {
         body: {
           title: form.title,
           location: form.location,
+          city: form.city,
           description: form.description,
           rating: form.rating,
           lowestPrice: lowestPrice.value,
@@ -365,6 +368,7 @@ onUnmounted(() => {
 
             <ListingCreateLocation
               v-model:location="form.location"
+              v-model:city="form.city"
               v-model:latitude="form.latitude"
               v-model:longitude="form.longitude"
             />
