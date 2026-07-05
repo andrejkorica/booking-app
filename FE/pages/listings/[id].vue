@@ -325,7 +325,9 @@ useHead(() => ({
 
           <!-- Desktop -->
           <div class="hidden sm:block">
-            <h1 class="mb-3 text-4xl font-bold tracking-tight md:text-5xl">
+            <h1
+              class="mb-3 break-words text-4xl font-bold tracking-tight md:text-5xl"
+            >
               {{ listingData.title }}
             </h1>
 

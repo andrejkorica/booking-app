@@ -1,40 +1,46 @@
 <script setup lang="ts">
-import type { Listing } from '~/types/listing';
+import type { Listing } from "~/types/listing";
 
 const props = defineProps<{
-  listing: Listing
-}>()
+  listing: Listing;
+}>();
 
 const emit = defineEmits<{
-  approve: [id: number]
-  reject: [id: number]
-}>()
+  approve: [id: number];
+  reject: [id: number];
+}>();
 
-const { formatDate } = useDateFormat()
+const { formatDate } = useDateFormat();
 
 const priceLabel = computed(() => {
   if (!props.listing.lowestPrice && !props.listing.highestPrice) {
-    return 'Price not set'
+    return "Price not set";
   }
 
   if (props.listing.lowestPrice === props.listing.highestPrice) {
-    return `€${props.listing.lowestPrice} / night`
+    return `€${props.listing.lowestPrice} / night`;
   }
 
-  return `€${props.listing.lowestPrice} - €${props.listing.highestPrice} / night`
-})
+  return `€${props.listing.lowestPrice} - €${props.listing.highestPrice} / night`;
+});
 </script>
 
 <template>
   <UCard class="h-[530px]">
     <template #header>
       <div class="flex items-start justify-between gap-3">
-        <div>
-          <h2 class="line-clamp-2 font-semibold text-slate-900">
+        <div class="min-w-0 flex-1">
+          <h2
+            class="truncate font-semibold text-slate-900"
+            :title="listing.title"
+          >
             {{ listing.title }}
           </h2>
 
-          <p class="text-sm text-slate-500">
+          <p
+            class="truncate text-sm text-slate-500"
+            :title="listing.sellerEmail"
+          >
             {{ listing.sellerEmail }}
           </p>
         </div>
@@ -53,13 +59,15 @@ const priceLabel = computed(() => {
       </div>
     </template>
 
-    <div class="flex h-[340px] flex-col gap-4 overflow-y-auto pr-2 text-sm text-slate-600">
+    <div
+      class="flex h-[340px] flex-col gap-4 overflow-y-auto pr-2 text-sm text-slate-600"
+    >
       <img
         v-if="listing.images?.length"
         :src="listing.images[0]"
         class="h-40 w-full rounded-xl object-cover"
         alt="Listing image"
-      >
+      />
 
       <div
         v-else

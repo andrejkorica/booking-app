@@ -11,9 +11,10 @@ const emit = defineEmits<{
   cancel: [bookingId: number];
 }>();
 
-const { formatDate } = useDateFormat()
+const { formatDate } = useDateFormat();
 
 const isCancelModalOpen = ref(false);
+const toast = useToast();
 
 const statusColor = computed(() => {
   if (props.booking.status === "CONFIRMED") return "success";
@@ -42,6 +43,21 @@ function openCancelModal() {
 
 function closeCancelModal() {
   isCancelModalOpen.value = false;
+}
+
+function handleCancelClick() {
+  if (!canCancel.value) {
+    toast.add({
+      title: "Cancellation period is over",
+      description:
+        "Cancellation is only allowed more than one day before check-in.",
+      color: "warning",
+    });
+
+    return;
+  }
+
+  openCancelModal();
 }
 
 function confirmCancel() {
@@ -142,7 +158,7 @@ function confirmCancel() {
             @click="emit('reviewRequest', booking.id)"
           />
 
-          <UTooltip text="Period of cancellation over" :disabled="canCancel">
+          <UTooltip text="Cancellation period is over" :disabled="canCancel">
             <span class="w-full sm:w-auto">
               <UButton
                 label="Cancel"
@@ -152,8 +168,8 @@ function confirmCancel() {
                 size="sm"
                 block
                 class="sm:w-auto"
-                :disabled="!canCancel"
-                @click="openCancelModal"
+                :disabled="false"
+                @click="handleCancelClick"
               />
             </span>
           </UTooltip>

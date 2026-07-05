@@ -105,7 +105,8 @@ onUnmounted(stopSlideshow);
       <div class="flex min-w-0 flex-col justify-between p-4 sm:w-1/2 sm:p-6">
         <div>
           <h2
-            class="line-clamp-2 text-lg font-bold leading-snug text-slate-800 sm:text-xl"
+            class="min-w-0 line-clamp-1 break-words text-lg font-bold leading-snug text-slate-800 sm:text-xl"
+            :title="listing.title"
           >
             {{ listing.title }}
           </h2>

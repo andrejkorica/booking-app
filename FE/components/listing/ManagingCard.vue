@@ -50,7 +50,7 @@ function confirmDelete(id: number) {
   <UCard :ui="cardUi">
     <template #header>
       <div>
-        <h2 class="font-bold text-slate-900">
+        <h2 class="truncate font-bold text-slate-900" :title="listing.title">
           {{ listing.title }}
         </h2>
 
