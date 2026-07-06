@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DateValue } from "@internationalized/date";
 import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
-import { unitTypes } from "~/constants/UnitConstants.js";
+import { unitTemplate } from "~/constants/UnitConstants.js";
 import type {
   Listing,
   ListingUnit,
@@ -35,12 +35,12 @@ const form = reactive({
 const images = ref<ListingImage[]>([]);
 
 const listingUnits = ref<ListingUnit[]>(
-  unitTypes.map((unitType) => ({
-    type: unitType.value,
-    label: unitType.label,
+  unitTemplate.map((unitTemplate) => ({
+    type: unitTemplate.type,
+    label: unitTemplate.label,
     quantity: 0,
-    maxGuests: unitType.maxGuests,
-    roomCount: unitType.roomCount,
+    maxGuests: unitTemplate.maxGuests,
+    roomCount: unitTemplate.roomCount,
     pricePerNight: 0,
   })),
 );
@@ -133,7 +133,7 @@ async function fetchListing() {
 
     form.title = listing.title;
     form.location = listing.location;
-    form.city = listing.city;
+    form.city = listing.city ?? "";
     form.rating = listing.rating;
     form.description = listing.description;
     form.amenities = listing.amenities?.length ? [...listing.amenities] : [""];
@@ -160,17 +160,17 @@ async function fetchListing() {
 
     const savedUnits = listing.units || [];
 
-    listingUnits.value = unitTypes.map((unitType) => {
+    listingUnits.value = unitTemplate.map((unitValue) => {
       const savedUnit = savedUnits.find(
-        (unit: ListingUnit) => unit.type === unitType.value,
+        (unit: ListingUnit) => unit.type === unitValue.type,
       );
 
       return {
-        type: unitType.value,
-        label: unitType.label,
+        type: unitValue.type,
+        label: unitValue.label,
         quantity: savedUnit ? Number(savedUnit.quantity) : 0,
-        maxGuests: unitType.maxGuests,
-        roomCount: unitType.roomCount,
+        maxGuests: unitValue.maxGuests,
+        roomCount: unitValue.roomCount,
         pricePerNight: savedUnit ? Number(savedUnit.pricePerNight) : 0,
       };
     });

@@ -9,7 +9,6 @@ defineProps<{
 
 const config = useRuntimeConfig();
 
-
 const guestInfo = defineModel<{
   name: string;
   surname: string;

@@ -6,14 +6,17 @@ export type PriceAdjustment = {
 
 export type ListingStatus = "PENDING" | "APPROVED" | "REJECTED" | "DELETED";
 
-export type ListingUnit = {
-  id?: number;
-  type: string;
+export type UnitTemplate = {
   label: string;
+  type: string;
+  maxGuests: number;
+  roomCount: number;
+};
+
+export type ListingUnit = UnitTemplate & {
+  id?: number;
   quantity: number;
   availableQuantity?: number;
-  maxGuests?: number;
-  roomCount: number;
   pricePerNight: number;
 };
 

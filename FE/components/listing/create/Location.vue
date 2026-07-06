@@ -5,7 +5,7 @@ import type { LocationSuggestion } from "~/types/filter";
 const location = defineModel<string>("location", { default: "" });
 const latitude = defineModel<number | null>("latitude", { default: null });
 const longitude = defineModel<number | null>("longitude", { default: null });
-  const city = defineModel<string>("city", { default: "" });
+const city = defineModel<string>("city", { default: "" });
 
 const mapEl = ref<HTMLElement | null>(null);
 const searchQuery = ref("");

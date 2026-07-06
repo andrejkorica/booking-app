@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DateValue } from "@internationalized/date";
 import { today, getLocalTimeZone } from "@internationalized/date";
-import { unitTypes } from "~/constants/UnitConstants.js";
+import { unitTemplate } from "~/constants/UnitConstants.js";
 import type { ListingUnit, PriceAdjustment } from "~/types/listing.js";
 import type { ListingImage } from "~/types/image";
 
@@ -30,8 +30,8 @@ const form = reactive({
 const images = ref<ListingImage[]>([]);
 
 const listingUnits = ref<ListingUnit[]>(
-  unitTypes.map((unit) => ({
-    type: unit.value,
+  unitTemplate.map((unit) => ({
+    type: unit.type,
     label: unit.label,
     quantity: 0,
     maxGuests: unit.maxGuests,
