@@ -9,16 +9,25 @@ const config = useRuntimeConfig();
 const authStore = useAuthStore();
 const toast = useToast();
 
-const listingData = ref<Listing | null>(null);
 const availableUnits = ref<ListingUnit[]>([]);
 const reviews = ref<ListingReview[]>([]);
 
-const isLoading = ref(false);
 const isLoadingAvailableUnits = ref(false);
 const isSubmittingReview = ref(false);
 
 const isFavorited = ref(false);
 const isTogglingFavorite = ref(false);
+
+const {
+  data: listingData,
+  pending: isLoading,
+} = await useAsyncData<Listing | null>(
+  `listing-${route.params.id}`,
+  () =>
+    $fetch<Listing>(`${config.public.apiBase}/listings/${route.params.id}`),
+  { default: () => null },
+);
+
 
 const previewImages = computed(() => {
   return (
@@ -201,29 +210,18 @@ async function fetchAvailableUnits(listingId: number) {
   }
 }
 
-async function fetchListing() {
-  isLoading.value = true;
+async function loadSecondaryData() {
+  if (!listingData.value) return;
 
-  try {
-    await authStore.fetchUser();
+  await authStore.fetchUser();
 
-    listingData.value = await $fetch<Listing>(
-      `${config.public.apiBase}/listings/${route.params.id}`,
-    );
-
-    await Promise.all([
-      fetchAvailableUnits(listingData.value.id),
-      fetchReviews(listingData.value.id),
-      fetchFavoriteStatus(listingData.value.id),
-    ]);
-  } catch (error) {
-    console.error(error);
-    listingData.value = null;
-    availableUnits.value = [];
-  } finally {
-    isLoading.value = false;
-  }
+  await Promise.all([
+    fetchAvailableUnits(listingData.value.id),
+    fetchReviews(listingData.value.id),
+    fetchFavoriteStatus(listingData.value.id),
+  ]);
 }
+
 
 async function submitReview(review: { rating: number; comment: string }) {
   if (!listingData.value) return;
@@ -289,13 +287,16 @@ async function voteReview(reviewId: number, voteType: "UP" | "DOWN") {
   }
 }
 
-onMounted(fetchListing);
+
+
+onMounted(loadSecondaryData);
 
 useHead(() => ({
   title: listingData.value
     ? `${listingData.value.title} | Details`
     : "Listing Details",
 }));
+
 </script>
 
 <template>
