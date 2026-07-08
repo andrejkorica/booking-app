@@ -222,7 +222,6 @@ async function loadSecondaryData() {
   ]);
 }
 
-
 async function submitReview(review: { rating: number; comment: string }) {
   if (!listingData.value) return;
 
@@ -286,8 +285,6 @@ async function voteReview(reviewId: number, voteType: "UP" | "DOWN") {
     });
   }
 }
-
-
 
 onMounted(loadSecondaryData);
 

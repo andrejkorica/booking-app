@@ -1,11 +1,9 @@
 import { useAuthStore } from "~/stores/auth";
 
 export default defineNuxtRouteMiddleware(async () => {
-  const authStore = useAuthStore();
+  if (import.meta.server) return;
 
-  if (import.meta.server) {
-    return;
-  }
+  const authStore = useAuthStore();
 
   if (!authStore.user) {
     await authStore.fetchUser();

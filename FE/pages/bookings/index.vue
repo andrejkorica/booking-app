@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { UserBooking } from "~/types/booking";
+import type { FavoriteListing } from "~/types/listing";
 
 const config = useRuntimeConfig();
 const toast = useToast();
@@ -8,8 +9,23 @@ const activeOpen = ref(true);
 const favoritesOpen = ref(true);
 const pastOpen = ref(false);
 
-const bookings = ref<UserBooking[]>([]);
-const favorites = ref([]);
+const headers = useRequestHeaders(["cookie"]);
+const favorites = ref<FavoriteListing[]>([]);
+
+const { data: bookings, refresh: refreshBookings } = await useFetch<
+  UserBooking[]
+>(`${config.public.apiBase}/bookings/me`, {
+  headers,
+  credentials: "include",
+  default: () => [],
+  onResponseError() {
+    toast.add({
+      title: "Error",
+      description: "Failed to load your bookings.",
+      color: "error",
+    });
+  },
+});
 
 const activeBookings = computed(() => {
   const today = new Date();
@@ -19,10 +35,7 @@ const activeBookings = computed(() => {
     const checkOut = new Date(booking.checkOut);
     checkOut.setHours(0, 0, 0, 0);
 
-    return (
-      booking.status !== "CANCELLED" &&
-      checkOut >= today
-    );
+    return booking.status !== "CANCELLED" && checkOut >= today;
   });
 });
 
@@ -38,25 +51,6 @@ const pastBookings = computed(() => {
   });
 });
 
-async function fetchBookings() {
-  try {
-    bookings.value = await $fetch<UserBooking[]>(
-      `${config.public.apiBase}/bookings/me`,
-      {
-        credentials: "include",
-      }
-    );
-  } catch (error) {
-    console.error(error);
-
-    toast.add({
-      title: "Error",
-      description: "Failed to load your bookings.",
-      color: "error",
-    });
-  }
-}
-
 function viewListing(listingId: number) {
   navigateTo(`/listings/${listingId}`);
 }
@@ -67,13 +61,10 @@ function reviewRequest(bookingId: number) {
 
 async function cancelBooking(bookingId: number) {
   try {
-    await $fetch(
-      `${config.public.apiBase}/bookings/${bookingId}/cancel`,
-      {
-        method: "POST",
-        credentials: "include",
-      }
-    );
+    await $fetch(`${config.public.apiBase}/bookings/${bookingId}/cancel`, {
+      method: "POST",
+      credentials: "include",
+    });
 
     toast.add({
       title: "Booking cancelled",
@@ -81,7 +72,7 @@ async function cancelBooking(bookingId: number) {
       color: "success",
     });
 
-    await fetchBookings();
+    await refreshBookings();
   } catch (error) {
     console.error(error);
 
@@ -92,8 +83,6 @@ async function cancelBooking(bookingId: number) {
     });
   }
 }
-
-onMounted(fetchBookings);
 </script>
 
 <template>
@@ -122,9 +111,7 @@ onMounted(fetchBookings);
 
             <UIcon
               :name="
-                activeOpen
-                  ? 'i-lucide-chevron-up'
-                  : 'i-lucide-chevron-down'
+                activeOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'
               "
               class="h-5 w-5 text-slate-500"
             />
@@ -169,9 +156,7 @@ onMounted(fetchBookings);
 
             <UIcon
               :name="
-                favoritesOpen
-                  ? 'i-lucide-chevron-up'
-                  : 'i-lucide-chevron-down'
+                favoritesOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'
               "
               class="h-5 w-5 text-slate-500"
             />
@@ -211,11 +196,7 @@ onMounted(fetchBookings);
             </div>
 
             <UIcon
-              :name="
-                pastOpen
-                  ? 'i-lucide-chevron-up'
-                  : 'i-lucide-chevron-down'
-              "
+              :name="pastOpen ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
               class="h-5 w-5 text-slate-500"
             />
           </button>

@@ -3,35 +3,20 @@ import type { Listing } from "~/types/listing";
 
 const config = useRuntimeConfig();
 
-const listings = ref<Listing[]>([]);
-const isLoading = ref(false);
-
 const page = ref(1);
 const itemsPerPage = 8;
+
+const { data: listings, pending: isLoading } = await useFetch<Listing[]>(
+  `${config.public.apiBase}/listings`,
+  {
+    default: () => [],
+  },
+);
 
 const paginatedListings = computed(() => {
   const start = (page.value - 1) * itemsPerPage;
   return listings.value.slice(start, start + itemsPerPage);
 });
-
-async function fetchListings() {
-  isLoading.value = true;
-
-  try {
-    listings.value = await $fetch<Listing[]>(
-      `${config.public.apiBase}/listings`,
-    );
-
-    page.value = 1;
-  } catch (error) {
-    console.error(error);
-    listings.value = [];
-  } finally {
-    isLoading.value = false;
-  }
-}
-
-onMounted(fetchListings);
 </script>
 
 <template>
