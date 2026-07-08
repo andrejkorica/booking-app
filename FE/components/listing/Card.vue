@@ -131,7 +131,7 @@ onUnmounted(stopSlideshow);
           </div>
 
           <div class="mt-1 line-clamp-1 text-sm text-slate-500">
-            {{ listing.location }}
+            {{ listing.city || listing.location }}
           </div>
 
           <div class="mt-3 line-clamp-2 text-sm text-slate-600">

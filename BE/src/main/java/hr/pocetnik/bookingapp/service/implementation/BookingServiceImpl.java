@@ -234,6 +234,7 @@ public class BookingServiceImpl implements BookingService {
         response.setStatus(booking.getStatus());
         response.setCreatedAt(booking.getCreatedAt());
         response.setListingLocation(booking.getListing().getLocation());
+        response.setListingCity(booking.getListing().getCity());
 
         if (booking.getListing().getImages() != null &&
                 !booking.getListing().getImages().isEmpty()) {

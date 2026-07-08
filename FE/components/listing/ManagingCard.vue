@@ -80,7 +80,7 @@ function confirmDelete(id: number) {
       <div class="space-y-2 text-sm text-slate-700">
         <p>
           <span class="font-semibold text-slate-900">Location:</span>
-          {{ listing.location }}
+          {{ listing.city || listing.location }}
         </p>
 
         <p>

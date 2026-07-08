@@ -2,7 +2,6 @@
 import type { Listing } from "~/types/listing";
 
 definePageMeta({
-
   middleware: "admin-guard",
 });
 
@@ -62,7 +61,7 @@ async function fetchListing() {
       `${config.public.apiBase}/listings/${route.params.id}`,
       {
         credentials: "include",
-      }
+      },
     );
   } catch (error) {
     console.error(error);
@@ -84,9 +83,7 @@ onMounted(fetchListing);
   <div class="container mx-auto px-4 py-10">
     <div class="mb-8 flex items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">
-          Listing Preview
-        </h1>
+        <h1 class="text-3xl font-bold text-slate-900">Listing Preview</h1>
 
         <p class="mt-2 text-slate-600">
           Review the full listing before approving or rejecting it.
@@ -113,8 +110,10 @@ onMounted(fetchListing);
     <UCard v-else class="bg-white shadow-lg">
       <header class="mb-8">
         <div class="mb-3 flex items-start justify-between gap-4">
-          <div>
-            <h2 class="text-4xl font-bold tracking-tight text-slate-900">
+          <div class="min-w-0 flex-1">
+            <h2
+              class="break-words text-4xl font-bold tracking-tight text-slate-900"
+            >
               {{ listing.title }}
             </h2>
 
@@ -123,11 +122,7 @@ onMounted(fetchListing);
             </p>
           </div>
 
-          <UBadge
-            :label="listing.status"
-            :color="statusColor"
-            variant="soft"
-          />
+          <UBadge :label="listing.status" :color="statusColor" variant="soft" />
         </div>
 
         <div class="flex items-center space-x-4 text-slate-500">
@@ -171,9 +166,7 @@ onMounted(fetchListing);
             class="mb-6"
           />
 
-          <h3 class="mb-4 text-xl font-bold">
-            Amenities
-          </h3>
+          <h3 class="mb-4 text-xl font-bold">Amenities</h3>
 
           <ul
             v-if="listing.amenities?.length"
@@ -195,9 +188,7 @@ onMounted(fetchListing);
             </li>
           </ul>
 
-          <p v-else class="text-slate-500">
-            No amenities listed.
-          </p>
+          <p v-else class="text-slate-500">No amenities listed.</p>
 
           <ListingAvailableUnits
             :units="listing.units"
@@ -209,9 +200,7 @@ onMounted(fetchListing);
         <div>
           <UCard class="border border-slate-200 bg-white shadow-lg">
             <div class="space-y-4 text-center">
-              <p class="text-lg text-slate-500">
-                Price per night
-              </p>
+              <p class="text-lg text-slate-500">Price per night</p>
 
               <p class="text-4xl font-bold text-slate-900">
                 {{ priceLabel }}
@@ -221,9 +210,7 @@ onMounted(fetchListing);
                 Available from {{ listing.availableFrom }}
               </p>
 
-              <p class="text-sm text-slate-500">
-                Preview only.
-              </p>
+              <p class="text-sm text-slate-500">Preview only.</p>
             </div>
           </UCard>
         </div>

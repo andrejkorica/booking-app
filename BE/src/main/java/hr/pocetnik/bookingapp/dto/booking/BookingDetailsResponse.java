@@ -18,6 +18,7 @@ public class BookingDetailsResponse {
     private Long listingId;
     private String listingTitle;
     private String listingLocation;
+    private String listingCity;
     private String listingImage;
 
     private List<BookingUnitResponse> units;

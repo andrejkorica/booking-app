@@ -94,7 +94,7 @@ function confirmCancel() {
               </h3>
 
               <p class="mt-1 text-sm text-slate-500">
-                {{ booking.listingLocation }}
+                {{ booking.listingCity || booking.listingLocation }}
               </p>
             </div>
 

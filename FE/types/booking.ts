@@ -9,6 +9,7 @@ export type BookingListing = {
   listingId: number;
   listingTitle: string;
   listingLocation: string;
+  listingCity: string;
   listingImage: string | null;
 };
 
