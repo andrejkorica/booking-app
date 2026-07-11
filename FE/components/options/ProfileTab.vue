@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useAuthStore } from "~/stores/auth";
 import defaultAvatar from "~/public/images/default-avatar.png";
-import { countryCodes } from "~/constants/CountryCodeConstants";
+import { countryCodes } from "~/constants/countryCodeConstants";
 
-const config = useRuntimeConfig();
 const toast = useToast();
 const authStore = useAuthStore();
+const api = useApi();
 
 const isSavingProfile = ref(false);
 const isUploadingImage = ref(false);
@@ -49,6 +49,10 @@ function onFileSelected(event: Event) {
 
   if (!file) return;
 
+  if (selectedFile.value && selectedImage.value.startsWith("blob:")) {
+    URL.revokeObjectURL(selectedImage.value);
+  }
+
   selectedFile.value = file;
   selectedImage.value = URL.createObjectURL(file);
 }
@@ -80,14 +84,10 @@ async function uploadProfileImage() {
     const formData = new FormData();
     formData.append("file", selectedFile.value);
 
-    const response = await $fetch<{ imageUrl: string }>(
-      `${config.public.apiBase}/users/profile-image`,
-      {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      },
-    );
+    const response = await api<{ imageUrl: string }>(`/users/profile-image`, {
+      method: "POST",
+      body: formData,
+    });
 
     selectedFile.value = null;
     selectedImage.value = response.imageUrl;
@@ -106,16 +106,15 @@ async function saveProfile() {
   try {
     const uploadedImageUrl = await uploadProfileImage();
 
-    const updatedUser = await $fetch<{
+    const updatedUser = await api<{
       email: string;
       name: string;
       surname: string;
       phoneNumber: string;
       role: string;
       profileImageUrl?: string;
-    }>(`${config.public.apiBase}/users/update`, {
+    }>(`/users/update`, {
       method: "POST",
-      credentials: "include",
       body: {
         name: form.name,
         surname: form.surname,
@@ -130,7 +129,9 @@ async function saveProfile() {
       ...(uploadedImageUrl ? { profileImageUrl: uploadedImageUrl } : {}),
     };
 
-    localStorage.setItem("auth_user", JSON.stringify(authStore.user));
+    if (import.meta.client) {
+      localStorage.setItem("auth_user", JSON.stringify(authStore.user));
+    }
 
     toast.add({
       title: "Success",

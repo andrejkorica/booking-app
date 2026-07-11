@@ -22,12 +22,6 @@ function closeDeleteModal() {
   isDeleteModalOpen.value = false;
 }
 
-const cardUi = {
-  root: "flex h-full flex-col",
-  body: "flex-1",
-  footer: "shrink-0",
-};
-
 const priceLabel = computed(() => {
   if (!props.listing.lowestPrice && !props.listing.highestPrice) {
     return "Price not set";
@@ -47,7 +41,13 @@ function confirmDelete(id: number) {
 </script>
 
 <template>
-  <UCard :ui="cardUi">
+  <UCard
+    :ui="{
+      root: 'flex h-full flex-col',
+      body: 'flex-1',
+      footer: 'shrink-0',
+    }"
+  >
     <template #header>
       <div>
         <h2 class="truncate font-bold text-slate-900" :title="listing.title">

@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import type { DateValue } from "@internationalized/date";
-import { parseDate, today, getLocalTimeZone } from "@internationalized/date";
-import { unitTemplate } from "~/constants/UnitConstants.js";
+import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
+import { unitTemplate } from "~/constants/unitConstants";
+import type { ListingImage } from "~/types/image";
 import type {
   Listing,
   ListingUnit,
   PriceAdjustment,
-} from "~/types/listing.js";
-import type { ListingImage } from "~/types/image";
+} from "~/types/listing";
 
 definePageMeta({
   middleware: "seller-guard",
 });
 
 const route = useRoute();
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 
 const isLoading = ref(false);
@@ -35,12 +35,12 @@ const form = reactive({
 const images = ref<ListingImage[]>([]);
 
 const listingUnits = ref<ListingUnit[]>(
-  unitTemplate.map((unitTemplate) => ({
-    type: unitTemplate.type,
-    label: unitTemplate.label,
+  unitTemplate.map((unit) => ({
+    type: unit.type,
+    label: unit.label,
     quantity: 0,
-    maxGuests: unitTemplate.maxGuests,
-    roomCount: unitTemplate.roomCount,
+    maxGuests: unit.maxGuests,
+    roomCount: unit.roomCount,
     pricePerNight: 0,
   })),
 );
@@ -89,7 +89,7 @@ function openFilePicker() {
 
 function onImagesSelected(event: Event) {
   const target = event.target as HTMLInputElement;
-  const files = Array.from(target.files || []);
+  const files = Array.from(target.files ?? []);
 
   files.forEach((file) => {
     images.value.push({
@@ -124,11 +124,8 @@ async function fetchListing() {
   isLoading.value = true;
 
   try {
-    const listing = await $fetch<Listing>(
-      `${config.public.apiBase}/listings/${route.params.id}`,
-      {
-        credentials: "include",
-      },
+    const listing = await api<Listing>(
+      `/listings/${route.params.id}`,
     );
 
     form.title = listing.title;
@@ -136,7 +133,9 @@ async function fetchListing() {
     form.city = listing.city ?? "";
     form.rating = listing.rating;
     form.description = listing.description;
-    form.amenities = listing.amenities?.length ? [...listing.amenities] : [""];
+    form.amenities = listing.amenities?.length
+      ? [...listing.amenities]
+      : [""];
     form.latitude = listing.latitude;
     form.longitude = listing.longitude;
 
@@ -158,20 +157,22 @@ async function fetchListing() {
           },
         ];
 
-    const savedUnits = listing.units || [];
+    const savedUnits = listing.units ?? [];
 
-    listingUnits.value = unitTemplate.map((unitValue) => {
+    listingUnits.value = unitTemplate.map((unitTemplate) => {
       const savedUnit = savedUnits.find(
-        (unit: ListingUnit) => unit.type === unitValue.type,
+        (unit) => unit.type === unitTemplate.type,
       );
 
       return {
-        type: unitValue.type,
-        label: unitValue.label,
+        type: unitTemplate.type,
+        label: unitTemplate.label,
         quantity: savedUnit ? Number(savedUnit.quantity) : 0,
-        maxGuests: unitValue.maxGuests,
-        roomCount: unitValue.roomCount,
-        pricePerNight: savedUnit ? Number(savedUnit.pricePerNight) : 0,
+        maxGuests: unitTemplate.maxGuests,
+        roomCount: unitTemplate.roomCount,
+        pricePerNight: savedUnit
+          ? Number(savedUnit.pricePerNight)
+          : 0,
       };
     });
 
@@ -180,7 +181,7 @@ async function fetchListing() {
         previewUrl: url,
         existingUrl: url,
         isUploading: false,
-      })) || [];
+      })) ?? [];
   } catch (error) {
     console.error(error);
 
@@ -209,14 +210,10 @@ async function uploadImage(image: ListingImage) {
     const formData = new FormData();
     formData.append("file", image.file);
 
-    const response = await $fetch<{ imageUrl: string }>(
-      `${config.public.apiBase}/images/upload`,
-      {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      },
-    );
+    const response = await api<{ imageUrl: string }>("/images/upload", {
+      method: "POST",
+      body: formData,
+    });
 
     return response.imageUrl;
   } finally {
@@ -232,47 +229,45 @@ async function updateListing() {
       images.value.map((image) => uploadImage(image)),
     );
 
-    await $fetch(
-      `${config.public.apiBase}/seller/listings/${route.params.id}/update`,
-      {
-        method: "POST",
-        credentials: "include",
-        body: {
-          title: form.title,
-          location: form.location,
-          city: form.city,
-          description: form.description,
-          rating: form.rating,
-          lowestPrice: lowestPrice.value,
-          highestPrice: highestPrice.value,
-          images: imageUrls.filter((url): url is string => !!url),
-          amenities: form.amenities.filter((amenity) => amenity.trim() !== ""),
-          availableFrom: availableFrom.value.toString(),
-          units: selectedUnits.value.map((unit) => ({
-            type: unit.type,
-            label: unit.label,
-            quantity: Number(unit.quantity),
-            maxGuests: Number(unit.maxGuests),
-            roomCount: Number(unit.roomCount),
-            pricePerNight: Number(unit.pricePerNight),
+    await api(`/seller/listings/${route.params.id}/update`, {
+      method: "POST",
+      body: {
+        title: form.title,
+        location: form.location,
+        city: form.city,
+        description: form.description,
+        rating: form.rating,
+        lowestPrice: lowestPrice.value,
+        highestPrice: highestPrice.value,
+        images: imageUrls.filter((url): url is string => Boolean(url)),
+        amenities: form.amenities.filter(
+          (amenity) => amenity.trim() !== "",
+        ),
+        availableFrom: availableFrom.value.toString(),
+        units: selectedUnits.value.map((unit) => ({
+          type: unit.type,
+          label: unit.label,
+          quantity: Number(unit.quantity),
+          maxGuests: Number(unit.maxGuests),
+          roomCount: Number(unit.roomCount),
+          pricePerNight: Number(unit.pricePerNight),
+        })),
+        latitude: form.latitude,
+        longitude: form.longitude,
+        priceAdjustments: priceAdjustments.value
+          .filter(
+            (adjustment) =>
+              adjustment.startDate &&
+              adjustment.endDate &&
+              Number(adjustment.percent) > 0,
+          )
+          .map((adjustment) => ({
+            startDate: adjustment.startDate,
+            endDate: adjustment.endDate,
+            percent: Number(adjustment.percent),
           })),
-          latitude: form.latitude,
-          longitude: form.longitude,
-          priceAdjustments: priceAdjustments.value
-            .filter(
-              (adjustment) =>
-                adjustment.startDate &&
-                adjustment.endDate &&
-                Number(adjustment.percent) > 0,
-            )
-            .map((adjustment) => ({
-              startDate: adjustment.startDate,
-              endDate: adjustment.endDate,
-              percent: Number(adjustment.percent),
-            })),
-        },
       },
-    );
+    });
 
     toast.add({
       title: "Listing updated",

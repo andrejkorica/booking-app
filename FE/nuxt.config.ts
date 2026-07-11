@@ -28,8 +28,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: 'http://165.245.216.118:8080/api'
-      // apiBase: 'http://localhost:8080/api'
+      //apiBase: 'http://165.245.216.118:8080/api'
+      apiBase: 'http://localhost:8080/api'
     }
   }
 

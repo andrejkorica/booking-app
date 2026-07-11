@@ -1,12 +1,11 @@
 <script setup lang="ts">
+const amenities = ref<string[]>([]);
+const showAllAmenities = ref(false);
+const api = useApi();
+
 const selectedAmenities = defineModel<string[]>({
   required: true,
 });
-
-const config = useRuntimeConfig();
-
-const amenities = ref<string[]>([]);
-const showAllAmenities = ref(false);
 
 const visibleAmenities = computed(() => {
   if (showAllAmenities.value) {
@@ -18,8 +17,8 @@ const visibleAmenities = computed(() => {
 
 async function fetchAmenities() {
   try {
-    amenities.value = await $fetch<string[]>(
-      `${config.public.apiBase}/listings/amenities`,
+    amenities.value = await api<string[]>(
+      `/listings/amenities`,
     );
   } catch (error) {
     console.error(error);

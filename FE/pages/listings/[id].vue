@@ -5,7 +5,7 @@ import type { Listing, ListingUnit } from "~/types/listing";
 
 const route = useRoute();
 const router = useRouter();
-const config = useRuntimeConfig();
+const api = useApi();
 const authStore = useAuthStore();
 const toast = useToast();
 
@@ -18,16 +18,12 @@ const isSubmittingReview = ref(false);
 const isFavorited = ref(false);
 const isTogglingFavorite = ref(false);
 
-const {
-  data: listingData,
-  pending: isLoading,
-} = await useAsyncData<Listing | null>(
-  `listing-${route.params.id}`,
-  () =>
-    $fetch<Listing>(`${config.public.apiBase}/listings/${route.params.id}`),
-  { default: () => null },
-);
-
+const { data: listingData, pending: isLoading } =
+  await useAsyncData<Listing | null>(
+    `listing-${route.params.id}`,
+    () => api<Listing>(`/listings/${route.params.id}`),
+    { default: () => null },
+  );
 
 const previewImages = computed(() => {
   return (
@@ -55,11 +51,8 @@ async function fetchFavoriteStatus(listingId: number) {
   }
 
   try {
-    const response = await $fetch<{ favorited: boolean }>(
-      `${config.public.apiBase}/favorites/${listingId}`,
-      {
-        credentials: "include",
-      },
+    const response = await api<{ favorited: boolean }>(
+      `/favorites/${listingId}`,
     );
 
     isFavorited.value = response.favorited;
@@ -85,11 +78,10 @@ async function toggleFavorite() {
   isTogglingFavorite.value = true;
 
   try {
-    const response = await $fetch<{ favorited: boolean }>(
-      `${config.public.apiBase}/favorites/${listingData.value.id}/toggle`,
+    const response = await api<{ favorited: boolean }>(
+      `/favorites/${listingData.value.id}/toggle`,
       {
         method: "POST",
-        credentials: "include",
       },
     );
 
@@ -185,9 +177,8 @@ const disabledMessage = computed(() => {
 
 async function fetchReviews(listingId: number) {
   try {
-    reviews.value = await $fetch<ListingReview[]>(
-      `${config.public.apiBase}/listings/${listingId}/reviews`,
-      { credentials: "include" },
+    reviews.value = await api<ListingReview[]>(
+      `/listings/${listingId}/reviews`,
     );
   } catch (error) {
     console.error(error);
@@ -199,8 +190,8 @@ async function fetchAvailableUnits(listingId: number) {
   isLoadingAvailableUnits.value = true;
 
   try {
-    availableUnits.value = await $fetch<ListingUnit[]>(
-      `${config.public.apiBase}/listings/${listingId}/available-units`,
+    availableUnits.value = await api<ListingUnit[]>(
+      `/listings/${listingId}/available-units`,
     );
   } catch (error) {
     console.error(error);
@@ -228,11 +219,10 @@ async function submitReview(review: { rating: number; comment: string }) {
   isSubmittingReview.value = true;
 
   try {
-    const createdReview = await $fetch<ListingReview>(
-      `${config.public.apiBase}/listings/${listingData.value.id}/reviews`,
+    const createdReview = await api<ListingReview>(
+      `/listings/${listingData.value.id}/reviews`,
       {
         method: "POST",
-        credentials: "include",
         body: review,
       },
     );
@@ -263,11 +253,10 @@ async function voteReview(reviewId: number, voteType: "UP" | "DOWN") {
   const listingId = listingData.value.id;
 
   try {
-    const updatedReview = await $fetch<ListingReview>(
-      `${config.public.apiBase}/listings/${listingId}/reviews/${reviewId}/vote`,
+    const updatedReview = await api<ListingReview>(
+      `/listings/${listingId}/reviews/${reviewId}/vote`,
       {
         method: "POST",
-        credentials: "include",
         body: { voteType },
       },
     );
@@ -293,7 +282,6 @@ useHead(() => ({
     ? `${listingData.value.title} | Details`
     : "Listing Details",
 }));
-
 </script>
 
 <template>

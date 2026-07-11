@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ListingReview } from "~/types/review";
+import { reviewSortOptions } from "~/constants/reviewConstants";
 
 const props = defineProps<{
   reviews: ListingReview[];
@@ -14,15 +15,6 @@ const emit = defineEmits<{
 const rating = ref(5);
 const comment = ref("");
 const reviewSort = ref("newest");
-
-const reviewSortOptions = [
-  { label: "Newest", value: "newest" },
-  { label: "Oldest", value: "oldest" },
-  { label: "Highest rating", value: "highest-rating" },
-  { label: "Lowest rating", value: "lowest-rating" },
-  { label: "Most upvoted", value: "most-upvotes" },
-  { label: "Least upvoted", value: "least-upvotes" },
-];
 
 const sortedReviews = computed(() => {
   const list = [...props.reviews];

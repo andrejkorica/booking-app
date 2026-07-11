@@ -5,7 +5,7 @@ definePageMeta({
   middleware: "user-guard",
 });
 
-const config = useRuntimeConfig();
+const api = useApi();
 
 const favorites = ref<Listing[]>([]);
 const isLoading = ref(false);
@@ -14,12 +14,7 @@ async function fetchFavorites() {
   isLoading.value = true;
 
   try {
-    favorites.value = await $fetch<Listing[]>(
-      `${config.public.apiBase}/favorites`,
-      {
-        credentials: "include",
-      },
-    );
+    favorites.value = await api<Listing[]>("/favorites");
   } catch (error) {
     console.error(error);
     favorites.value = [];
@@ -37,9 +32,7 @@ onMounted(fetchFavorites);
       <header class="mb-8">
         <h1 class="text-4xl font-bold tracking-tight">Favorites</h1>
 
-        <p class="mt-2 text-slate-600">
-          Listings you saved for later.
-        </p>
+        <p class="mt-2 text-slate-600">Listings you saved for later.</p>
       </header>
 
       <div v-if="isLoading" class="py-16 text-center text-slate-500">

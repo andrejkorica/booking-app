@@ -2,12 +2,11 @@
 import type { ListingLocation } from "~/types/listing";
 import type { User } from "~/types/user";
 
-
 defineProps<{
   location: ListingLocation | null;
 }>();
 
-const config = useRuntimeConfig();
+const api = useApi();
 
 const guestInfo = defineModel<{
   name: string;
@@ -50,18 +49,13 @@ const canContinue = computed(() => {
     guestInfo.value.travelingFrom &&
     guestInfo.value.travelPurpose &&
     guestInfo.value.arrivalTime &&
-    guestInfo.value.arrivalMethod
+    guestInfo.value.arrivalMethod,
   );
 });
 
 async function fetchCurrentUser() {
   try {
-    const user = await $fetch<User>(
-      `${config.public.apiBase}/users/me`,
-      {
-        credentials: "include",
-      },
-    );
+    const user = await api<User>(`/users/me`);
 
     guestInfo.value.name = user.name ?? "";
     guestInfo.value.surname = user.surname ?? "";
@@ -186,7 +180,7 @@ onMounted(fetchCurrentUser);
     </UCard>
 
     <div
-      class="sticky bottom-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm z-99999"
+      class="sticky bottom-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm z-[99999]"
     >
       <div
         class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"

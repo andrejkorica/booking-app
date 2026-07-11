@@ -7,7 +7,7 @@ import {
 
 import type { DateRangeValue } from "~/types/filter";
 
-const config = useRuntimeConfig();
+const api = useApi();
 const router = useRouter();
 
 const city = ref("");
@@ -42,9 +42,7 @@ async function fetchCities() {
   isLoadingCities.value = true;
 
   try {
-    citySuggestions.value = await $fetch<string[]>(
-      `${config.public.apiBase}/listings/cities`,
-    );
+    citySuggestions.value = await api<string[]>(`/listings/cities`);
   } catch (error) {
     console.error(error);
     citySuggestions.value = [];
@@ -52,8 +50,6 @@ async function fetchCities() {
     isLoadingCities.value = false;
   }
 }
-
-onMounted(fetchCities);
 
 const tz = getLocalTimeZone();
 
@@ -110,6 +106,8 @@ function handleSearch() {
     },
   });
 }
+
+onMounted(fetchCities);
 </script>
 
 <template>

@@ -2,7 +2,7 @@
 import { useAuthStore } from "~/stores/auth";
 
 const authStore = useAuthStore();
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 
 const isSending = ref(false);
@@ -26,9 +26,8 @@ async function sendSellerRequest() {
   isSending.value = true;
 
   try {
-    await $fetch(`${config.public.apiBase}/seller-requests`, {
+    await api(`/seller-requests`, {
       method: "POST",
-      credentials: "include",
       body: form,
     });
 
@@ -56,14 +55,12 @@ async function fetchSellerInfo() {
   }
 
   try {
-    const sellerInfo = await $fetch<{
+    const sellerInfo = await api<{
       businessName: string;
       oib: string;
       iban: string;
       billingAddress: string;
-    }>(`${config.public.apiBase}/seller/me`, {
-      credentials: "include",
-    });
+    }>(`/seller/me`);
 
     form.businessName = sellerInfo.businessName ?? "";
     form.oib = sellerInfo.oib ?? "";
@@ -80,6 +77,7 @@ onMounted(async () => {
   }
 });
 </script>
+
 <template>
   <div class="space-y-6">
     <template v-if="isAdmin">

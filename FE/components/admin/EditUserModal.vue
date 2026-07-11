@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { User } from "~/types/user";
-import { countryCodes } from "~/constants/CountryCodeConstants";
+import { countryCodes } from "~/constants/countryCodeConstants";
 
 const open = defineModel<boolean>("open", {
   default: false,
@@ -14,7 +14,7 @@ const emit = defineEmits<{
   updated: [user: User];
 }>();
 
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 
 const isSaving = ref(false);
@@ -71,20 +71,16 @@ async function saveUserChanges() {
   isSaving.value = true;
 
   try {
-    const updatedUser = await $fetch<User>(
-      `${config.public.apiBase}/admin/users/${props.user.id}`,
-      {
-        method: "POST",
-        credentials: "include",
-        body: {
-          name: form.name,
-          surname: form.surname,
-          email: form.email,
-          phoneNumber: `${form.countryCode}${form.phoneNumber}`,
-          role: form.role,
-        },
+    const updatedUser = await api<User>(`/admin/users/${props.user.id}`, {
+      method: "POST",
+      body: {
+        name: form.name,
+        surname: form.surname,
+        email: form.email,
+        phoneNumber: `${form.countryCode}${form.phoneNumber}`,
+        role: form.role,
       },
-    );
+    });
 
     emit("updated", updatedUser);
 
@@ -194,6 +190,8 @@ async function saveUserChanges() {
                   variant="soft"
                   color="neutral"
                   block
+                  :loading="isSaving"
+                  :disabled="isSaving"
                   class="sm:w-auto"
                   @click="closeModal"
                 />
@@ -201,6 +199,7 @@ async function saveUserChanges() {
                 <UButton
                   label="Save Changes"
                   :loading="isSaving"
+                  :disabled="isSaving"
                   block
                   class="bg-indigo-600 text-white hover:bg-indigo-700 sm:w-auto"
                   @click="saveUserChanges"

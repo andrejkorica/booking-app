@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { Listing } from "~/types/listing";
 
-const config = useRuntimeConfig();
+const api = useApi();
 
 const page = ref(1);
 const itemsPerPage = 8;
 
-const { data: listings, pending: isLoading } = await useFetch<Listing[]>(
-  `${config.public.apiBase}/listings`,
+const { data: listings, pending: isLoading } = await useAsyncData(
+  "home-listings",
+  () => api<Listing[]>("/listings"),
   {
     default: () => [],
   },
@@ -15,6 +16,7 @@ const { data: listings, pending: isLoading } = await useFetch<Listing[]>(
 
 const paginatedListings = computed(() => {
   const start = (page.value - 1) * itemsPerPage;
+
   return listings.value.slice(start, start + itemsPerPage);
 });
 </script>

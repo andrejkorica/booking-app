@@ -4,12 +4,14 @@ import { reactive } from "vue";
 import type { FormSubmitEvent } from "#ui/types";
 import { useAuthStore } from "~/stores/auth";
 
+const api = useApi();
+const auth = useAuthStore();
+const toast = useToast();
+
 definePageMeta({
   layout: "auth",
   middleware: "guest-guard",
 });
-
-const config = useRuntimeConfig();
 
 const schema = v.object({
   email: v.pipe(
@@ -26,17 +28,13 @@ const schema = v.object({
 
 type Schema = v.InferOutput<typeof schema>;
 
-const toast = useToast();
 async function onSubmitLogin(event: FormSubmitEvent<Schema>) {
-  const auth = useAuthStore();
-
   try {
     const { email, password } = event.data;
 
-    await $fetch(`${config.public.apiBase}/users/login`, {
+    await api(`/users/login`, {
       method: "POST",
       body: { email, password },
-      credentials: "include",
     });
 
     await auth.fetchUser();
@@ -67,15 +65,16 @@ const state = reactive({
 });
 </script>
 
-
 <template>
   <div
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-slate-100">
+    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-slate-100"
+  >
     <UCard class="max-w-sm w-full bg-white shadow-2xl border-0">
       <div class="space-y-6">
         <div class="text-center">
           <div
-            class="mx-auto h-16 w-16 bg-indigo-100 rounded-lg mb-4 flex items-center justify-center">
+            class="mx-auto h-16 w-16 bg-indigo-100 rounded-lg mb-4 flex items-center justify-center"
+          >
             <UIcon name="i-lucide-building-2" class="w-8 h-8 text-indigo-600" />
           </div>
 
@@ -89,19 +88,22 @@ const state = reactive({
             aria-label="Apple"
             size="lg"
             variant="outline"
-            class="w-full justify-center text-slate-600 border-slate-300 hover:bg-slate-50" />
+            class="w-full justify-center text-slate-600 border-slate-300 hover:bg-slate-50"
+          />
           <UButton
             icon="i-simple-icons-google"
             aria-label="Google"
             size="lg"
             variant="outline"
-            class="w-full justify-center text-slate-600 border-slate-300 hover:bg-slate-50" />
+            class="w-full justify-center text-slate-600 border-slate-300 hover:bg-slate-50"
+          />
           <UButton
             icon="i-simple-icons-twitter"
             aria-label="Twitter"
             size="lg"
             variant="outline"
-            class="w-full justify-center text-slate-600 border-slate-300 hover:bg-slate-50" />
+            class="w-full justify-center text-slate-600 border-slate-300 hover:bg-slate-50"
+          />
         </div>
 
         <UForm :state="state" @submit="onSubmitLogin" class="space-y-4">
@@ -111,7 +113,8 @@ const state = reactive({
               v-model="state.email"
               placeholder="Enter your email..."
               size="lg"
-              class="w-full" />
+              class="w-full"
+            />
           </UFormField>
 
           <UFormField name="password">
@@ -121,7 +124,8 @@ const state = reactive({
               type="password"
               placeholder="Password"
               size="lg"
-              class="w-full" />
+              class="w-full"
+            />
           </UFormField>
 
           <UButton
@@ -129,14 +133,16 @@ const state = reactive({
             label="Sign in"
             size="lg"
             block
-            class="!mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold" />
+            class="!mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold"
+          />
         </UForm>
 
         <p class="text-sm text-center text-slate-500 -mb-[2px]">
           Don't have an account yet?
           <ULink
             to="/auth/signup"
-            class="font-semibold text-indigo-600 hover:text-indigo-700">
+            class="font-semibold text-indigo-600 hover:text-indigo-700"
+          >
             Sign up
           </ULink>
         </p>
@@ -145,7 +151,8 @@ const state = reactive({
           Want to go back?
           <ULink
             to="/"
-            class="font-semibold text-indigo-600 hover:text-indigo-700">
+            class="font-semibold text-indigo-600 hover:text-indigo-700"
+          >
             Home page
           </ULink>
         </p>
@@ -153,4 +160,3 @@ const state = reactive({
     </UCard>
   </div>
 </template>
-

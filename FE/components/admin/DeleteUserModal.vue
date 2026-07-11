@@ -13,7 +13,7 @@ const emit = defineEmits<{
   deleted: [userId: number]
 }>()
 
-const config = useRuntimeConfig()
+const api = useApi()
 const toast = useToast()
 
 const isDeleting = ref(false)
@@ -24,9 +24,8 @@ async function confirmDeleteUser() {
   isDeleting.value = true
 
   try {
-    await $fetch(`${config.public.apiBase}/admin/users/${props.user.id}`, {
+    await api<void>(`/admin/users/${props.user.id}`, {
       method: 'DELETE',
-      credentials: 'include'
     })
 
     emit('deleted', props.user.id)

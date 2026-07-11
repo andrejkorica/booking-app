@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import type { ListingReview } from "~/types/review";
+const { formatDate } = useDateFormat();
+
 
 defineProps<{
   review: ListingReview;
@@ -20,7 +22,7 @@ const emit = defineEmits<{
         </p>
 
         <p class="mt-1 text-sm text-slate-500">
-          {{ new Date(review.createdAt).toLocaleDateString() }}
+          {{ formatDate(review.createdAt) }}
         </p>
       </div>
 

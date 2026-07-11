@@ -2,21 +2,19 @@
 import type { UserBooking } from "~/types/booking";
 import type { FavoriteListing } from "~/types/listing";
 
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 
 const activeOpen = ref(true);
 const favoritesOpen = ref(true);
 const pastOpen = ref(false);
 
-const headers = useRequestHeaders(["cookie"]);
 const favorites = ref<FavoriteListing[]>([]);
 
 const { data: bookings, refresh: refreshBookings } = await useFetch<
   UserBooking[]
->(`${config.public.apiBase}/bookings/me`, {
-  headers,
-  credentials: "include",
+>(`/bookings/me`, {
+  $fetch: api,
   default: () => [],
   onResponseError() {
     toast.add({
@@ -61,9 +59,8 @@ function reviewRequest(bookingId: number) {
 
 async function cancelBooking(bookingId: number) {
   try {
-    await $fetch(`${config.public.apiBase}/bookings/${bookingId}/cancel`, {
+    await api(`/bookings/${bookingId}/cancel`, {
       method: "POST",
-      credentials: "include",
     });
 
     toast.add({

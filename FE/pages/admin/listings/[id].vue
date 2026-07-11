@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import type { Listing } from "~/types/listing";
 
-definePageMeta({
-  middleware: "admin-guard",
-});
-
 const route = useRoute();
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 
 const listing = ref<Listing | null>(null);
 const isLoading = ref(false);
+
+definePageMeta({
+  middleware: "admin-guard",
+});
 
 const previewImages = computed(() => {
   return (
@@ -57,12 +57,7 @@ async function fetchListing() {
   isLoading.value = true;
 
   try {
-    listing.value = await $fetch<Listing>(
-      `${config.public.apiBase}/listings/${route.params.id}`,
-      {
-        credentials: "include",
-      },
-    );
+    listing.value = await api<Listing>(`/listings/${route.params.id}`);
   } catch (error) {
     console.error(error);
 

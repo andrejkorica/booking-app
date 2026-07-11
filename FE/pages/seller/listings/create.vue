@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import type { DateValue } from "@internationalized/date";
-import { today, getLocalTimeZone } from "@internationalized/date";
-import { unitTemplate } from "~/constants/UnitConstants.js";
-import type { ListingUnit, PriceAdjustment } from "~/types/listing.js";
+import { getLocalTimeZone, today } from "@internationalized/date";
+import { unitTemplate } from "~/constants/unitConstants";
 import type { ListingImage } from "~/types/image";
+import type { ListingUnit, PriceAdjustment } from "~/types/listing";
 
 definePageMeta({
   middleware: "seller-guard",
 });
 
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 const router = useRouter();
 
@@ -76,13 +76,25 @@ const highestPrice = computed(() => {
   );
 });
 
+const canContinue = computed(() => {
+  return (
+    form.title.trim() !== "" &&
+    form.location.trim() !== "" &&
+    form.description.trim() !== "" &&
+    images.value.length > 0 &&
+    form.amenities.length > 0 &&
+    form.amenities.every((amenity) => amenity.trim() !== "") &&
+    selectedUnits.value.length > 0
+  );
+});
+
 function openFilePicker() {
   fileInput.value?.click();
 }
 
 function onImagesSelected(event: Event) {
   const target = event.target as HTMLInputElement;
-  const files = Array.from(target.files || []);
+  const files = Array.from(target.files ?? []);
 
   files.forEach((file) => {
     images.value.push({
@@ -124,14 +136,10 @@ async function uploadImage(image: ListingImage) {
     const formData = new FormData();
     formData.append("file", image.file);
 
-    const response = await $fetch<{ imageUrl: string }>(
-      `${config.public.apiBase}/images/upload`,
-      {
-        method: "POST",
-        credentials: "include",
-        body: formData,
-      },
-    );
+    const response = await api<{ imageUrl: string }>("/images/upload", {
+      method: "POST",
+      body: formData,
+    });
 
     return response.imageUrl;
   } finally {
@@ -147,9 +155,8 @@ async function createListing() {
       images.value.map((image) => uploadImage(image)),
     );
 
-    await $fetch(`${config.public.apiBase}/seller/listings`, {
+    await api("/seller/listings", {
       method: "POST",
-      credentials: "include",
       body: {
         title: form.title,
         location: form.location,
@@ -206,20 +213,10 @@ async function createListing() {
   }
 }
 
-const canContinue = computed(() => {
-  return (
-    form.title.trim() !== "" &&
-    form.location.trim() !== "" &&
-    form.description.trim() !== "" &&
-    images.value.length > 0 &&
-    form.amenities.length > 0 &&
-    form.amenities.every((amenity) => amenity.trim() !== "") &&
-    selectedUnits.value.length > 0
-  );
-});
-
 onUnmounted(() => {
-  images.value.forEach((image) => URL.revokeObjectURL(image.previewUrl));
+  images.value.forEach((image) => {
+    URL.revokeObjectURL(image.previewUrl);
+  });
 });
 </script>
 

@@ -3,7 +3,7 @@ import type { BookingDetails } from "~/types/booking";
 
 const route = useRoute();
 const router = useRouter();
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 const { formatDate } = useDateFormat();
 
@@ -18,13 +18,11 @@ const statusColor = computed(() => {
 
 async function fetchBooking() {
   isLoading.value = true;
+  booking.value = null;
 
   try {
-    booking.value = await $fetch<BookingDetails>(
-      `${config.public.apiBase}/bookings/${route.params.id}`,
-      {
-        credentials: "include",
-      },
+    booking.value = await api<BookingDetails>(
+      `/bookings/${route.params.id}`,
     );
   } catch (error) {
     console.error(error);

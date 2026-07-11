@@ -5,6 +5,7 @@ import type { DropdownMenuItem } from "@nuxt/ui";
 import OptionsModal from "./OptionsModal.vue";
 
 const authStore = useAuthStore();
+const toast = useToast();
 
 const optionsModalOpen = ref(false);
 
@@ -77,6 +78,13 @@ const dropdownItems = computed<DropdownMenuItem[][]>(() => [
       color: "error",
       onSelect: async () => {
         await authStore.logout();
+
+        toast.add({
+          title: "Logged out",
+          description: "You have been signed out successfully.",
+          color: "success",
+        });
+
         await navigateTo("/");
       },
     },

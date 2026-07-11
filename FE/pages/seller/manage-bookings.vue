@@ -5,7 +5,7 @@ definePageMeta({
   middleware: "seller-guard",
 });
 
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 
 const pendingOpen = ref(true);
@@ -47,12 +47,7 @@ async function fetchSellerBookings() {
   isLoading.value = true;
 
   try {
-    bookings.value = await $fetch<UserBooking[]>(
-      `${config.public.apiBase}/bookings/seller/bookings`,
-      {
-        credentials: "include",
-      },
-    );
+    bookings.value = await api<UserBooking[]>("/bookings/seller/bookings");
   } catch (error) {
     console.error(error);
 
@@ -76,9 +71,8 @@ function reviewRequest(bookingId: number) {
 
 async function approveBooking(bookingId: number) {
   try {
-    await $fetch(`${config.public.apiBase}/bookings/seller/${bookingId}/approve`, {
+    await api(`/bookings/seller/${bookingId}/approve`, {
       method: "POST",
-      credentials: "include",
     });
 
     toast.add({
@@ -100,9 +94,8 @@ async function approveBooking(bookingId: number) {
 
 async function rejectBooking(bookingId: number) {
   try {
-    await $fetch(`${config.public.apiBase}/bookings/seller/${bookingId}/reject`, {
+    await api(`/bookings/seller/${bookingId}/reject`, {
       method: "POST",
-      credentials: "include",
     });
 
     toast.add({

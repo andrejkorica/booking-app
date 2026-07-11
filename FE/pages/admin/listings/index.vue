@@ -5,7 +5,7 @@ definePageMeta({
   middleware: "admin-guard",
 });
 
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 
 const listings = ref<Listing[]>([]);
@@ -15,11 +15,8 @@ async function fetchListings() {
   isLoading.value = true;
 
   try {
-    listings.value = await $fetch<Listing[]>(
-      `${config.public.apiBase}/admin/listings`,
-      {
-        credentials: "include",
-      },
+    listings.value = await api<Listing[]>(
+      `/admin/listings`
     );
   } catch (error) {
     console.error(error);
@@ -36,11 +33,10 @@ async function fetchListings() {
 
 async function approveListing(listingId: number) {
   try {
-    const updatedListing = await $fetch<Listing>(
-      `${config.public.apiBase}/admin/listings/${listingId}/approve`,
+    const updatedListing = await api<Listing>(
+      `/admin/listings/${listingId}/approve`,
       {
         method: "POST",
-        credentials: "include",
       },
     );
 
@@ -66,11 +62,10 @@ async function approveListing(listingId: number) {
 
 async function rejectListing(listingId: number) {
   try {
-    const updatedListing = await $fetch<Listing>(
-      `${config.public.apiBase}/admin/listings/${listingId}/reject`,
+    const updatedListing = await api<Listing>(
+      `/admin/listings/${listingId}/reject`,
       {
         method: "POST",
-        credentials: "include",
       },
     );
 

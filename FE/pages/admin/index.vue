@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useAuthStore } from "~/stores/auth";
 
+const authStore = useAuthStore();
+
 definePageMeta({
   middleware: "admin-guard",
 });
 
-const authStore = useAuthStore();
 </script>
 
 <template>

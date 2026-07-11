@@ -2,11 +2,12 @@
 import { reactive } from "vue";
 import type { FormSubmitEvent } from "#ui/types";
 import { useAuthStore } from "~/stores/auth";
-import { countryCodes } from "~/constants/CountryCodeConstants";
+import { countryCodes } from "~/constants/countryCodeConstants";
 
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 const auth = useAuthStore();
+const isSubmitting = ref(false);
 
 definePageMeta({
   layout: "auth",
@@ -88,8 +89,10 @@ async function onSubmit(event: FormSubmitEvent<any>) {
     return;
   }
 
+  isSubmitting.value = true;
+
   try {
-    await $fetch(`${config.public.apiBase}/users/register`, {
+    await api(`/users/register`, {
       method: "POST",
       body: {
         name,
@@ -98,7 +101,6 @@ async function onSubmit(event: FormSubmitEvent<any>) {
         email,
         password: event.data.password,
       },
-      credentials: "include",
     });
 
     await auth.fetchUser();
@@ -236,6 +238,8 @@ async function onSubmit(event: FormSubmitEvent<any>) {
             label="Sign Up"
             size="lg"
             block
+            :loading="isSubmitting"
+            :disabled="isSubmitting"
             class="mt-6 bg-indigo-600 font-bold text-white hover:bg-indigo-700"
           />
         </UForm>

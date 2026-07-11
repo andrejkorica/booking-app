@@ -5,7 +5,7 @@ definePageMeta({
   middleware: "admin-guard",
 });
 
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 
 const requests = ref<SellerRequest[]>([]);
@@ -15,11 +15,8 @@ async function fetchRequests() {
   isLoading.value = true;
 
   try {
-    requests.value = await $fetch<SellerRequest[]>(
-      `${config.public.apiBase}/admin/seller-requests`,
-      {
-        credentials: "include",
-      },
+    requests.value = await api<SellerRequest[]>(
+      `/admin/seller-requests`,
     );
   } catch (error) {
     console.error(error);
@@ -42,11 +39,10 @@ const sortedRequests = computed(() => {
 
 async function approveRequest(requestId: number) {
   try {
-    const updatedRequest = await $fetch<SellerRequest>(
-      `${config.public.apiBase}/admin/seller-requests/${requestId}/approve`,
+    const updatedRequest = await api<SellerRequest>(
+      `/admin/seller-requests/${requestId}/approve`,
       {
         method: "POST",
-        credentials: "include",
       },
     );
 
@@ -72,11 +68,10 @@ async function approveRequest(requestId: number) {
 
 async function rejectRequest(requestId: number) {
   try {
-    const updatedRequest = await $fetch<SellerRequest>(
-      `${config.public.apiBase}/admin/seller-requests/${requestId}/reject`,
+    const updatedRequest = await api<SellerRequest>(
+      `/admin/seller-requests/${requestId}/reject`,
       {
         method: "POST",
-        credentials: "include",
       },
     );
 

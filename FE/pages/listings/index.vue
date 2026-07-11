@@ -3,7 +3,7 @@ import type { Listing } from "~/types/listing";
 
 const sort = ref("top");
 
-const config = useRuntimeConfig();
+const api = useApi();
 const route = useRoute();
 
 const page = ref(1);
@@ -18,8 +18,9 @@ const amenitiesQuery = computed(() =>
 );
 
 const { data: listings, pending: isLoading } = await useFetch<Listing[]>(
-  `${config.public.apiBase}/listings`,
+  `/listings`,
   {
+    $fetch: api,
     query: computed(() => ({
       location: route.query.location,
       checkIn: route.query.checkIn,

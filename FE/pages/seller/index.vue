@@ -7,7 +7,7 @@ definePageMeta({
 });
 
 const authStore = useAuthStore();
-const config = useRuntimeConfig();
+const api = useApi();
 
 const stats = ref<SellerDashboardStats>({
   totalEarnings: 0,
@@ -27,11 +27,8 @@ async function fetchDashboardStats() {
   isLoadingStats.value = true;
 
   try {
-    stats.value = await $fetch<SellerDashboardStats>(
-      `${config.public.apiBase}/seller/dashboard-stats`,
-      {
-        credentials: "include",
-      },
+    stats.value = await api<SellerDashboardStats>(
+      "/seller/dashboard-stats",
     );
   } catch (error) {
     console.error(error);

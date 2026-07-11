@@ -8,7 +8,7 @@ definePageMeta({
 
 const route = useRoute();
 const router = useRouter();
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 
 const bookings = ref<UserBooking[]>([]);
@@ -23,11 +23,8 @@ async function fetchBookings() {
   isLoading.value = true;
 
   try {
-    bookings.value = await $fetch<UserBooking[]>(
-      `${config.public.apiBase}/bookings/seller/listings/${route.params.id}/bookings`,
-      {
-        credentials: "include",
-      },
+    bookings.value = await api<UserBooking[]>(
+      `/bookings/seller/listings/${route.params.id}/bookings`,
     );
   } catch (error) {
     console.error(error);
@@ -46,11 +43,8 @@ async function fetchAvailableUnits() {
   isLoadingAvailableUnits.value = true;
 
   try {
-    availableUnits.value = await $fetch<ListingUnit[]>(
-      `${config.public.apiBase}/listings/${route.params.id}/available-units`,
-      {
-        credentials: "include",
-      },
+    availableUnits.value = await api<ListingUnit[]>(
+      `/listings/${route.params.id}/available-units`,
     );
   } catch (error) {
     console.error(error);
@@ -67,13 +61,9 @@ async function fetchAvailableUnits() {
 
 async function approveBooking(bookingId: number) {
   try {
-    await $fetch(
-      `${config.public.apiBase}/bookings/seller/${bookingId}/approve`,
-      {
-        method: "POST",
-        credentials: "include",
-      },
-    );
+    await api(`/bookings/seller/${bookingId}/approve`, {
+      method: "POST",
+    });
 
     toast.add({
       title: "Booking approved",
@@ -95,13 +85,9 @@ async function approveBooking(bookingId: number) {
 
 async function rejectBooking(bookingId: number) {
   try {
-    await $fetch(
-      `${config.public.apiBase}/bookings/seller/${bookingId}/reject`,
-      {
-        method: "POST",
-        credentials: "include",
-      },
-    );
+    await api(`/bookings/seller/${bookingId}/reject`, {
+      method: "POST",
+    });
 
     toast.add({
       title: "Booking rejected",

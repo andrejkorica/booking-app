@@ -5,7 +5,8 @@ definePageMeta({
   middleware: "admin-guard",
 });
 
-const config = useRuntimeConfig();
+const api = useApi();
+
 const toast = useToast();
 
 const users = ref<User[]>([]);
@@ -20,9 +21,7 @@ async function fetchUsers() {
   isLoading.value = true;
 
   try {
-    users.value = await $fetch<User[]>(`${config.public.apiBase}/admin/users`, {
-      credentials: "include",
-    });
+    users.value = await api<User[]>(`/admin/users`);
   } catch (error) {
     console.error(error);
 

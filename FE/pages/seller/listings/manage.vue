@@ -1,27 +1,21 @@
 <script setup lang="ts">
-import type { Listing } from "~/types/listing.js";
+import type { Listing } from "~/types/listing";
 
 definePageMeta({
   middleware: "seller-guard",
 });
 
-const config = useRuntimeConfig();
+const api = useApi();
 const toast = useToast();
 
 const listings = ref<Listing[]>([]);
 const isLoading = ref(false);
-const router = useRouter();
 
 async function fetchListings() {
   isLoading.value = true;
 
   try {
-    const data = await $fetch<Listing[]>(
-      `${config.public.apiBase}/seller/listings`,
-      {
-        credentials: "include",
-      },
-    );
+    const data = await api<Listing[]>("/seller/listings");
 
     listings.value = data.filter((listing) => listing.status === "APPROVED");
   } catch (error) {
@@ -44,15 +38,15 @@ function previewListing(id: number) {
 function editListing(id: number) {
   navigateTo(`/seller/listings/${id}/edit`);
 }
+
 function availability(id: number) {
   navigateTo(`/seller/listings/${id}/availability`);
 }
 
 async function deleteListing(id: number) {
   try {
-    await $fetch(`${config.public.apiBase}/seller/listings/${id}/delete`, {
+    await api(`/seller/listings/${id}/delete`, {
       method: "POST",
-      credentials: "include",
     });
 
     listings.value = listings.value.filter((listing) => listing.id !== id);

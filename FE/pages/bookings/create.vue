@@ -5,8 +5,8 @@ import type { Listing, ListingUnit, PriceAdjustment } from "~/types/listing";
 import type { DateRangeValue } from "~/types/filter";
 
 const route = useRoute();
-const config = useRuntimeConfig();
 const toast = useToast();
+const api = useApi();
 
 const step = ref(1);
 const listing = ref<Listing | null>(null);
@@ -63,11 +63,8 @@ const listingLocation = computed(() => {
 
 async function fetchBookedRanges(listingId: number) {
   try {
-    bookedRanges.value = await $fetch<BookedRange[]>(
-      `${config.public.apiBase}/bookings/${listingId}/booked-ranges`,
-      {
-        credentials: "include",
-      },
+    bookedRanges.value = await api<BookedRange[]>(
+      `/bookings/${listingId}/booked-ranges`,
     );
   } catch (error) {
     console.error(error);
@@ -230,11 +227,8 @@ async function fetchAvailableUnits(listingId: number) {
   isLoadingAvailableUnits.value = true;
 
   try {
-    availableUnits.value = await $fetch<ListingUnit[]>(
-      `${config.public.apiBase}/listings/${listingId}/available-units`,
-      {
-        credentials: "include",
-      },
+    availableUnits.value = await api<ListingUnit[]>(
+      `/listings/${listingId}/available-units`,
     );
 
     selectedUnits.value = {};
@@ -266,12 +260,7 @@ async function fetchListing() {
   isLoading.value = true;
 
   try {
-    listing.value = await $fetch<Listing>(
-      `${config.public.apiBase}/listings/${listingId}`,
-      {
-        credentials: "include",
-      },
-    );
+    listing.value = await api<Listing>(`/listings/${listingId}`);
 
     await Promise.all([
       fetchAvailableUnits(listing.value.id),
@@ -318,9 +307,8 @@ async function confirmBooking() {
   isSubmittingBooking.value = true;
 
   try {
-    await $fetch(`${config.public.apiBase}/bookings`, {
+    await api(`/bookings`, {
       method: "POST",
-      credentials: "include",
       body: {
         listingId: listing.value.id,
 
